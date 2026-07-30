@@ -1,0 +1,84 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Entity Configuration Schema",
+  "description": "Schema for entity-specific configuration",
+  "type": "object",
+  "properties": {
+    "display_name": {
+      "type": "string",
+      "description": "Human-readable name for the entity"
+    },
+    "banks": {
+      "type": "object",
+      "description": "Bank account configurations",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "display_name": {
+            "type": "string",
+            "description": "Human-readable bank name"
+          },
+          "account_id": {
+            "type": "string",
+            "description": "Bank account identifier"
+          },
+          "col_particulars": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ],
+            "description": "Column name(s) containing transaction particulars"
+          },
+          "col_dr": {
+            "type": "string",
+            "description": "Column name containing debit amounts"
+          },
+          "col_cr": {
+            "type": "string",
+            "description": "Column name containing credit amounts"
+          },
+          "col_date": {
+            "type": "string",
+            "description": "Column name containing transaction dates"
+          },
+          "col_value_date": {
+            "type": "string",
+            "description": "Column name containing value dates"
+          },
+          "col_balance": {
+            "type": "string",
+            "description": "Column name containing account balance"
+          },
+          "col_ref": {
+            "type": "string",
+            "description": "Column name containing transaction references"
+          }
+        },
+        "required": [
+          "display_name",
+          "col_particulars",
+          "col_dr",
+          "col_cr"
+        ]
+      }
+    },
+    "output_sheet_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of sheet names to exclude from processing"
+    }
+  },
+  "required": [
+    "display_name",
+    "banks"
+  ]
+}

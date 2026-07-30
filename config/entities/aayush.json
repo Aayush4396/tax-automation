@@ -1,0 +1,135 @@
+{
+  "entity_id": "aayush",
+  "display_name": "Aayush Gupta",
+  "family_members": ["SUNITA", "AJAY", "AAYUSH", "ARCHIT", "MEGHA", "HUF", "ISHWAR", "PARADISE", "MAINT"],
+  "rent_vpas": ["4897690162095"],
+  "self_upi_refs": {
+    "jupiter": [
+      "409319949339", "409518581802", "409860235500", "410013514219",
+      "410480092425", "410798005765", "413856144623", "413856342655",
+      "413859249444"
+    ],
+    "sbi": [
+      "409308961216", "412101194543", "416418674665", "416418731041"
+    ]
+  },
+  "output_sheet_names": ["For Tally", "Conso", "Bank Summary"],
+  "banks": {
+    "hdfc": {
+      "display_name": "HDFC Bank",
+      "account_id": "HDFC 5413",
+      "meta_signals": [
+        "HDFC BANK", "Withdrawal Amt", "Closing Balance",
+        "Statement of accounts", "Account No :"
+      ],
+      "header_signals": [
+        "Withdrawal Amt.", "Deposit Amt.", "Closing Balance", "Chq./Ref.No."
+      ],
+      "col_date": "Date",
+      "col_particulars": "Narration",
+      "col_narration_h": "Narration",
+      "col_dr": "Withdrawal Amt.",
+      "col_cr": "Deposit Amt.",
+      "col_balance": "Closing Balance",
+      "col_ref": "Chq./Ref.No.",
+      "col_value_date": "Value Dt",
+      "rules_module": "tax_automation.rules.banks.hdfc_base"
+    },
+    "kotak": {
+      "display_name": "Kotak Mahindra Bank",
+      "account_id": "KOTAK 0333",
+      "meta_signals": [
+        "Cust. Reln. No.", "Account Statement", "KKBK", "Account No."
+      ],
+      "header_signals": [
+        "Transaction Date", "Description", "Chq / Ref No.", "Dr / Cr"
+      ],
+      "col_date": "Transaction Date",
+      "col_particulars": "Description",
+      "col_narration_h": "Narration",
+      "col_dr": "DR",
+      "col_cr": "CR",
+      "col_balance": "Balance",
+      "col_ref": "Chq / Ref No.",
+      "col_value_date": "Value Date",
+      "rules_module": "tax_automation.rules.banks.kotak_base"
+    },
+    "axis": {
+      "display_name": "Axis Bank",
+      "account_id": "AXIS",
+      "meta_signals": [
+        "UTIB", "SRL NO", "PARTICULARS", "Statement of Account No"
+      ],
+      "header_signals": [
+        "SRL NO", "PARTICULARS", "CHQNO", "Tran Date"
+      ],
+      "col_date": "Tran Date",
+      "col_particulars": "PARTICULARS",
+      "col_narration_h": "Narration",
+      "col_dr": "DR",
+      "col_cr": "CR",
+      "col_balance": "BAL",
+      "col_ref": "CHQNO",
+      "col_value_date": null,
+      "rules_module": "tax_automation.rules.banks.axis"
+    },
+    "sbi": {
+      "display_name": "State Bank of India",
+      "account_id": "SBI 1227",
+      "meta_signals": [
+        "Drawing Power", "REGULAR SB CHQ", "Interest Rate",
+        "Account Number", "SHIVAJI NAGAR"
+      ],
+      "header_signals": [
+        "Txn Date", "Ref No./Cheque No.", "Debit", "Credit"
+      ],
+      "col_date": ["Txn Date", "Date"],
+      "col_particulars": ["Details", "Description"],
+      "col_narration_h": "Narration",
+      "col_dr": "Debit",
+      "col_cr": "Credit",
+      "col_balance": "Balance",
+      "col_ref": ["Ref No./Cheque No.", "Ref No/Cheque No"],
+      "col_value_date": "Value Date",
+      "rules_module": "tax_automation.rules.banks.sbi_base"
+    },
+    "federal": {
+      "display_name": "Federal Bank (Jupiter)",
+      "account_id": "FEDERAL 0847",
+      "meta_signals": [
+        "FDRL0007777", "77770101840847", "SALARY-7777", "Neo Banking", "Jupiter"
+      ],
+      "header_signals": [
+        "Tran Type", "Tran ID", "Withdrawals", "Deposits"
+      ],
+      "col_date": "Date",
+      "col_particulars": "Particulars",
+      "col_narration_h": "Narration",
+      "col_dr": "Withdrawals",
+      "col_cr": "Deposits",
+      "col_balance": "Balance",
+      "col_ref": "Tran ID",
+      "col_value_date": "Value Date",
+      "rules_module": "tax_automation.rules.banks.federal"
+    },
+    "sbm": {
+      "display_name": "SBM Bank",
+      "account_id": "SBM",
+      "meta_signals": [
+        "STCB", "MICR Code : 110332002", "Savings Account  No.", "R003428697"
+      ],
+      "header_signals": [
+        "Cheque Details", "Withdrawals", "Deposits"
+      ],
+      "col_date": "Date",
+      "col_particulars": "Particulars",
+      "col_narration_h": "Narration",
+      "col_dr": "Withdrawals",
+      "col_cr": "Deposits",
+      "col_balance": "Balance",
+      "col_ref": "Cheque Details",
+      "col_value_date": null,
+      "rules_module": "tax_automation.rules.banks.sbm"
+    }
+  }
+}

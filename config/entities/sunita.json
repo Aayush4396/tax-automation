@@ -1,0 +1,70 @@
+{
+  "entity_id": "sunita",
+  "display_name": "Sunita Gupta",
+  "family_members": ["SUNITA", "AJAY", "AAYUSH", "ARCHIT", "MEGHA", "HUF", "ISHWAR", "PARADISE", "MAINT"],
+  "rent_vpas": [],
+  "self_upi_refs": {},
+  "output_sheet_names": ["For Tally", "Conso", "Bank Summary"],
+  "banks": {
+    "hdfc": {
+      "display_name": "HDFC Bank",
+      "account_id": "HDFC 0094",
+      "meta_signals": ["HDFC BANK", "Withdrawal Amt", "Closing Balance", "Statement of accounts", "Account No :"],
+      "header_signals": ["Withdrawal Amt.", "Deposit Amt.", "Closing Balance", "Chq./Ref.No."],
+      "col_date": "Date",
+      "col_particulars": "Narration",
+      "col_narration_h": "Narration",
+      "col_dr": "Withdrawal Amt.",
+      "col_cr": "Deposit Amt.",
+      "col_balance": "Closing Balance",
+      "col_ref": "Chq./Ref.No.",
+      "col_value_date": "Value Dt",
+      "rules_module": "tax_automation.rules.banks.hdfc_base"
+    },
+    "kotak": {
+      "display_name": "Kotak Mahindra Bank",
+      "account_id": "KOTAK 0333",
+      "meta_signals": ["Cust. Reln. No.", "Account Statement", "KKBK", "Account No."],
+      "header_signals": ["Transaction Date", "Description", "Chq / Ref No.", "Dr / Cr"],
+      "col_date": "Transaction Date",
+      "col_particulars": "Description",
+      "col_narration_h": "Narration",
+      "col_dr": "DR",
+      "col_cr": "CR",
+      "col_balance": "Balance",
+      "col_ref": "Chq / Ref No.",
+      "col_value_date": "Value Date",
+      "rules_module": "tax_automation.rules.banks.kotak_base"
+    },
+    "axis": {
+      "display_name": "Axis Bank",
+      "account_id": "AXIS",
+      "meta_signals": ["UTIB", "SRL NO", "PARTICULARS", "Statement of Account No"],
+      "header_signals": ["SRL NO", "PARTICULARS", "CHQNO", "Tran Date"],
+      "col_date": "Tran Date",
+      "col_particulars": "PARTICULARS",
+      "col_narration_h": "Narration",
+      "col_dr": "DR",
+      "col_cr": "CR",
+      "col_balance": "BAL",
+      "col_ref": "CHQNO",
+      "col_value_date": null,
+      "rules_module": "tax_automation.rules.banks.axis"
+    },
+    "sbi": {
+      "display_name": "State Bank of India",
+      "account_id": "SBI",
+      "meta_signals": ["Drawing Power", "REGULAR SB CHQ", "Interest Rate", "Account Number"],
+      "header_signals": ["Txn Date", "Ref No./Cheque No.", "Debit", "Credit"],
+      "col_date": ["Txn Date", "Date"],
+      "col_particulars": ["Details", "Description"],
+      "col_narration_h": "Narration",
+      "col_dr": "Debit",
+      "col_cr": "Credit",
+      "col_balance": "Balance",
+      "col_ref": ["Ref No./Cheque No.", "Ref No/Cheque No"],
+      "col_value_date": "Value Date",
+      "rules_module": "tax_automation.rules.banks.sbi_base"
+    }
+  }
+}

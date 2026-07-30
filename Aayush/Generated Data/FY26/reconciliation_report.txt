@@ -1,0 +1,393 @@
+========================================================================
+                 INTERBANK TRANSFER RECONCILIATION REPORT               
+========================================================================
+
+Total Debits (Outgoing candidates): 39
+Total Credits (Incoming candidates): 39
+Successfully Reconciled Pairs: 38
+Unmatched Debits (Money leaving): 1
+Unmatched Credits (Money entering): 1
+
+------------------------------------------------------------------------
+1. MATCHED INTERBANK TRANSFERS
+------------------------------------------------------------------------
+Pair #1:
+  Debit : AXIS on 2025-04-02 (Row 23) - Amount: 1.00
+          Particulars: NEFT/MB/AXOMB09202414101/AAYUSH KUMAR GUPTA/STATE BANK OF INDIA/
+          Auto Narration: Contra - SBI
+  Credit: SBI on 2025-04-02 (Row 22) - Amount: 1.00
+          Particulars:  DEP TFR   UPI/CR/765226990925/AAYUSH K/UTIB/9594435
+ 259/UPI   0097735162098 AT 11669 SHIVAJI NAGAR NASIK
+          Auto Narration: Contra - Axis
+  Delay : 0 day(s)
+
+Pair #2:
+  Debit : AXIS on 2025-04-02 (Row 24) - Amount: 1.00
+          Particulars: UPI/P2A/765226990925/AAYUSH KUMAR GUPTA   /UPI/State Bank Of India
+          Auto Narration: Contra - SBI
+  Credit: SBI on 2025-04-02 (Row 25) - Amount: 1.00
+          Particulars:  DEP TFR   NEFT*UTIB0002656*AXOMB09202414101*AAYUSH K
+ UMAR GU   0099509044300 AT 11669 SHIVAJI NAGAR NASIK
+          Auto Narration: Contra - Axis
+  Delay : 0 day(s)
+
+Pair #3:
+  Debit : AXIS on 2025-04-02 (Row 25) - Amount: 40000.00
+          Particulars: UPI/P2A/765382250925/AAYUSH KUMAR GUPTA   /UPI/State Bank Of India
+          Auto Narration: Contra - SBI
+  Credit: SBI on 2025-04-02 (Row 23) - Amount: 40000.00
+          Particulars:  DEP TFR   UPI/CR/765382250925/AAYUSH K/UTIB/9594435
+ 259/UPI   0097735162098 AT 11669 SHIVAJI NAGAR NASIK
+          Auto Narration: Contra - Axis
+  Delay : 0 day(s)
+
+Pair #4:
+  Debit : AXIS on 2025-04-16 (Row 27) - Amount: 25000.00
+          Particulars: NEFT/MB/AXOMB10626155334/AAYUSH KUMAR GUPTA/STATE BANK OF INDIA/FAMILY
+          Auto Narration: Contra - SBI
+  Credit: SBI on 2025-04-16 (Row 39) - Amount: 25000.00
+          Particulars:  DEP TFR   NEFT*UTIB0002656*AXOMB10626155334*AAYUSH K
+ UMAR GU   0099509044300 AT 11669 SHIVAJI NAGAR NASIK
+          Auto Narration: Contra - Axis
+  Delay : 0 day(s)
+
+Pair #5:
+  Debit : KOTAK on 2025-04-26 (Row 56) - Amount: 5000.00
+          Particulars: UPI/9594435259@supe/548257957091/Paid via SuperM
+          Auto Narration: Contra - SBI
+  Credit: SBI on 2025-04-26 (Row 41) - Amount: 5000.00
+          Particulars:  DEP TFR   UPI/CR/548257957091/AAYUSH K/KKBK/95944352
+ 59/Paid   0097738162095 AT 11669 SHIVAJI NAGAR NASIK
+          Auto Narration: Contra - Kotak
+  Delay : 1 day(s)
+
+Pair #6:
+  Debit : AXIS on 2025-05-02 (Row 29) - Amount: 1.00
+          Particulars: UPI/P2A/294187471225/AAYUSH KUMAR GUPTA   /UPI/State Bank Of India
+          Auto Narration: Contra - SBI
+  Credit: SBI on 2025-05-02 (Row 43) - Amount: 1.00
+          Particulars:  DEP TFR   UPI/CR/294187471225/AAYUSH K/UTIB/9594435
+ 259/UPI   0097737162096 AT 11669 SHIVAJI NAGAR NASIK
+          Auto Narration: Contra - Axis
+  Delay : 0 day(s)
+
+Pair #7:
+  Debit : AXIS on 2025-05-02 (Row 30) - Amount: 1.00
+          Particulars: UPI/P2A/294427061225/AAYUSH KUMAR GUPTA   /UPI/Kotak Mahindra Bank
+          Auto Narration: Contra - Kotak
+  Credit: KOTAK on 2025-05-02 (Row 62) - Amount: 1.00
+          Particulars: UPI/AAYUSH KUMAR GU/294427061225/UPI
+          Auto Narration: Contra - Axis
+  Delay : 0 day(s)
+
+Pair #8:
+  Debit : AXIS on 2025-05-02 (Row 31) - Amount: 65000.00
+          Particulars: UPI/P2A/294526291225/AAYUSH KUMAR GUPTA   /UPI/Kotak Mahindra Bank
+          Auto Narration: Contra - Kotak
+  Credit: KOTAK on 2025-05-02 (Row 63) - Amount: 65000.00
+          Particulars: UPI/AAYUSH KUMAR GU/294526291225/UPI
+          Auto Narration: Contra - Axis
+  Delay : 0 day(s)
+
+Pair #9:
+  Debit : AXIS on 2025-05-03 (Row 32) - Amount: 7000.00
+          Particulars: UPI/P2A/415981531235/AAYUSH KUMAR GUPTA   /UPI/Kotak Mahindra Bank
+          Auto Narration: Contra - Kotak
+  Credit: KOTAK on 2025-05-03 (Row 65) - Amount: 7000.00
+          Particulars: UPI/AAYUSH KUMAR GU/415981531235/UPI
+          Auto Narration: Contra - Axis
+  Delay : 0 day(s)
+
+Pair #10:
+  Debit : AXIS on 2025-06-02 (Row 41) - Amount: 5000.00
+          Particulars: UPI/P2A/868844991535/AAYUSH KUMAR GUPTA   /UPI/Kotak Mahindra Bank
+          Auto Narration: Contra - Kotak
+  Credit: KOTAK on 2025-06-02 (Row 109) - Amount: 5000.00
+          Particulars: UPI/AAYUSH KUMAR GU/868844991535/UPI
+          Auto Narration: Contra - Axis
+  Delay : 0 day(s)
+
+Pair #11:
+  Debit : AXIS on 2025-06-02 (Row 42) - Amount: 40000.00
+          Particulars: UPI/P2A/869103531535/AAYUSH KUMAR GUPTA   /UPI/Kotak Mahindra Bank
+          Auto Narration: Contra - Kotak
+  Credit: KOTAK on 2025-06-02 (Row 110) - Amount: 40000.00
+          Particulars: UPI/AAYUSH KUMAR GU/869103531535/UPI
+          Auto Narration: Contra - Axis
+  Delay : 0 day(s)
+
+Pair #12:
+  Debit : AXIS on 2025-06-13 (Row 43) - Amount: 15000.00
+          Particulars: UPI/P2A/264644071645/AAYUSH KUMAR GUPTA   /UPI/Kotak Mahindra Bank
+          Auto Narration: Contra - Kotak
+  Credit: KOTAK on 2025-06-13 (Row 140) - Amount: 15000.00
+          Particulars: UPI/AAYUSH KUMAR GU/264644071645/UPI
+          Auto Narration: Contra - Axis
+  Delay : 0 day(s)
+
+Pair #13:
+  Debit : AXIS on 2025-07-24 (Row 69) - Amount: 15000.00
+          Particulars: UPI/P2A/551107842055/AAYUSH KUMAR GUPTA   /UPI/Kotak Mahindra Bank
+          Auto Narration: Contra - Kotak
+  Credit: KOTAK on 2025-07-24 (Row 200) - Amount: 15000.00
+          Particulars: UPI/AAYUSH KUMAR GU/551107842055/UPI
+          Auto Narration: Contra - Axis
+  Delay : 0 day(s)
+
+Pair #14:
+  Debit : AXIS on 2025-07-26 (Row 71) - Amount: 7000.00
+          Particulars: UPI/P2A/810935882075/AAYUSH KUMAR GUPTA   /UPI/Kotak Mahindra Bank
+          Auto Narration: Contra - Kotak
+  Credit: KOTAK on 2025-07-26 (Row 204) - Amount: 7000.00
+          Particulars: UPI/AAYUSH KUMAR GU/810935882075/UPI
+          Auto Narration: Contra - Axis
+  Delay : 0 day(s)
+
+Pair #15:
+  Debit : AXIS on 2025-08-01 (Row 76) - Amount: 37000.00
+          Particulars: UPI/P2A/728499832135/AAYUSH KUMAR GUPTA   /UPI/Kotak Mahindra Bank
+          Auto Narration: Contra - Kotak
+  Credit: KOTAK on 2025-08-01 (Row 210) - Amount: 37000.00
+          Particulars: UPI/AAYUSH KUMAR GU/728499832135/UPI
+          Auto Narration: Contra - Axis
+  Delay : 0 day(s)
+
+Pair #16:
+  Debit : AXIS on 2025-08-08 (Row 79) - Amount: 10000.00
+          Particulars: UPI/P2A/802551602205/AAYUSH KUMAR GUPTA   /UPI/Kotak Mahindra Bank
+          Auto Narration: Contra - Kotak
+  Credit: KOTAK on 2025-08-08 (Row 216) - Amount: 10000.00
+          Particulars: UPI/AAYUSH KUMAR GU/802551602205/UPI
+          Auto Narration: Contra - Axis
+  Delay : 0 day(s)
+
+Pair #17:
+  Debit : AXIS on 2025-08-09 (Row 80) - Amount: 7000.00
+          Particulars: UPI/P2A/892339792215/AAYUSH KUMAR GUPTA   /UPI/Kotak Mahindra Bank
+          Auto Narration: Contra - Kotak
+  Credit: KOTAK on 2025-08-09 (Row 218) - Amount: 7000.00
+          Particulars: UPI/AAYUSH KUMAR GU/892339792215/UPI
+          Auto Narration: Contra - Axis
+  Delay : 0 day(s)
+
+Pair #18:
+  Debit : AXIS on 2025-09-01 (Row 123) - Amount: 25000.00
+          Particulars: UPI/P2A/160416032445/Mr Aayush Kumar Gupta/UPI/State Bank Of India
+          Auto Narration: Contra - SBI
+  Credit: SBI on 2025-09-01 (Row 59) - Amount: 25000.00
+          Particulars:  DEP TFR   UPI/CR/160416032445/AAYUSH K/UTIB/9594435
+ 259/UPI   0097733162090 AT 11669 SHIVAJI NAGAR NASIK
+          Auto Narration: Contra - Axis
+  Delay : 0 day(s)
+
+Pair #19:
+  Debit : AXIS on 2025-09-01 (Row 125) - Amount: 40000.00
+          Particulars: UPI/P2A/218604962445/Mr Aayush Kumar Gupta/UPI/State Bank Of India
+          Auto Narration: Contra - SBI
+  Credit: SBI on 2025-09-01 (Row 61) - Amount: 40000.00
+          Particulars:  DEP TFR   UPI/CR/218604962445/AAYUSH K/UTIB/9594435
+ 259/UPI   0097733162090 AT 11669 SHIVAJI NAGAR NASIK
+          Auto Narration: Contra - Axis
+  Delay : 0 day(s)
+
+Pair #20:
+  Debit : SBI on 2025-09-16 (Row 67) - Amount: 30000.00
+          Particulars:  WDL TFR   UPI/DR/562516364559/Aayush K/KKBK/95944352
+ 59/Paid   0097692162094 AT 11669 SHIVAJI NAGAR NASIK
+          Auto Narration: Contra - Kotak
+  Credit: KOTAK on 2025-09-16 (Row 238) - Amount: 30000.00
+          Particulars: UPI/AAYUSH KUMAR GU/562516364559/Paid via CRED
+          Auto Narration: Contra - SBI
+  Delay : 0 day(s)
+
+Pair #21:
+  Debit : SBI on 2025-10-09 (Row 71) - Amount: 7000.00
+          Particulars:  WDL TFR   UPI/DR/564874311996/95944352/KKBK/95944352
+ 59/Paid   0097694162092 AT 11669 SHIVAJI NAGAR NASIK
+          Auto Narration: Contra - Kotak
+  Credit: KOTAK on 2025-10-09 (Row 248) - Amount: 7000.00
+          Particulars: UPI/AAYUSH KUMAR GU/564874311996/Paid via SuperM
+          Auto Narration: Contra - SBI
+  Delay : 0 day(s)
+
+Pair #22:
+  Debit : AXIS on 2025-11-07 (Row 240) - Amount: 15000.00
+          Particulars: UPI/P2A/416467133115/AAYUSH KUMAR GUPTA   /Invest/Kotak Mahindra Bank
+          Auto Narration: Contra - Kotak
+  Credit: KOTAK on 2025-11-07 (Row 264) - Amount: 15000.00
+          Particulars: UPI/AAYUSH KUMAR GU/416467133115/Investment
+          Auto Narration: Contra - Axis
+  Delay : 0 day(s)
+
+Pair #23:
+  Debit : AXIS on 2025-11-26 (Row 266) - Amount: 5000.00
+          Particulars: UPI/P2A/408381273305/AAYUSH KUMAR GUPTA   /UPI/Kotak Mahindra Bank
+          Auto Narration: Contra - Kotak
+  Credit: KOTAK on 2025-11-26 (Row 273) - Amount: 5000.00
+          Particulars: UPI/AAYUSH KUMAR GU/408381273305/UPI
+          Auto Narration: Contra - Axis
+  Delay : 0 day(s)
+
+Pair #24:
+  Debit : AXIS on 2025-12-01 (Row 278) - Amount: 8000.00
+          Particulars: UPI/P2A/509940303355/AAYUSH KUMAR GUPTA   /UPI/Kotak Mahindra Bank
+          Auto Narration: Contra - Kotak
+  Credit: KOTAK on 2025-12-01 (Row 275) - Amount: 8000.00
+          Particulars: UPI/AAYUSH KUMAR GU/509940303355/UPI
+          Auto Narration: Contra - Axis
+  Delay : 0 day(s)
+
+Pair #25:
+  Debit : SBI on 2025-12-10 (Row 77) - Amount: 5000.00
+          Particulars:  WDL TFR   UPI/DR/534423871983/AAYUSH K/KKBK/aayush2
+ 0gu/UPI   0097693162093 AT 11669 SHIVAJI NAGAR NASIK
+          Auto Narration: Contra - Kotak
+  Credit: KOTAK on 2025-12-10 (Row 281) - Amount: 5000.00
+          Particulars: UPI/AAYUSH KUMAR GU/534423871983/UPI
+          Auto Narration: Contra - SBI
+  Delay : 0 day(s)
+
+Pair #26:
+  Debit : SBI on 2025-12-30 (Row 88) - Amount: 4000.00
+          Particulars:  WDL TFR   UPI/DR/536479469562/95944352/KKBK/95944352
+ 59/Paid   0097692162094 AT 11669 SHIVAJI NAGAR NASIK
+          Auto Narration: Contra - Kotak
+  Credit: KOTAK on 2025-12-30 (Row 286) - Amount: 4000.00
+          Particulars: UPI/AAYUSH KUMAR GU/536479469562/Paid via SuperM
+          Auto Narration: Contra - SBI
+  Delay : 0 day(s)
+
+Pair #27:
+  Debit : AXIS on 2026-01-12 (Row 394) - Amount: 40000.00
+          Particulars: UPI/P2A/601201260168/AAYUSH KUMAR GUPTA   /Paid v/Kotak Mahindra Bank
+          Auto Narration: Contra - Kotak
+  Credit: KOTAK on 2026-01-12 (Row 300) - Amount: 40000.00
+          Particulars: UPI/AAYUSH KUMAR GU/601201260168/Paid via SuperM
+          Auto Narration: Contra - Axis
+  Delay : 0 day(s)
+
+Pair #28:
+  Debit : KOTAK on 2026-01-15 (Row 302) - Amount: 4217.71
+          Particulars: UPI/9594435259@supe/601569478286/Paid via SuperM
+          Auto Narration: Contra - SBI
+  Credit: SBI on 2026-01-15 (Row 101) - Amount: 4217.71
+          Particulars:  DEP TFR   UPI/CR/601569478286/AAYUSH K/KKBK/95944352
+ 59/Paid   0097735162098 AT 11669 SHIVAJI NAGAR NASIK
+          Auto Narration: Contra - Kotak
+  Delay : 1 day(s)
+
+Pair #29:
+  Debit : KOTAK on 2026-01-15 (Row 303) - Amount: 8000.00
+          Particulars: UPI/9594435259@supe/601569529799/Paid via SuperM
+          Auto Narration: Contra - SBI
+  Credit: SBI on 2026-01-15 (Row 102) - Amount: 8000.00
+          Particulars:  DEP TFR   UPI/CR/601569529799/AAYUSH K/KKBK/95944352
+ 59/Paid   0097735162098 AT 11669 SHIVAJI NAGAR NASIK
+          Auto Narration: Contra - Kotak
+  Delay : 1 day(s)
+
+Pair #30:
+  Debit : AXIS on 2026-01-17 (Row 402) - Amount: 12194.00
+          Particulars: UPI/P2A/638304510676/AAYUSH KUMAR GUPTA   /Paid v/Kotak Mahindra Bank
+          Auto Narration: Contra - Kotak
+  Credit: KOTAK on 2026-01-17 (Row 305) - Amount: 12194.00
+          Particulars: UPI/AAYUSH KUMAR GU/638304510676/Paid via SuperM
+          Auto Narration: Contra - Axis
+  Delay : 0 day(s)
+
+Pair #31:
+  Debit : SBI on 2026-01-29 (Row 105) - Amount: 4000.00
+          Particulars:  WDL TFR   UPI/DR/639588556111/95944352/KKBK/95944352
+ 59/Paid   0097693162093 AT 11669 SHIVAJI NAGAR NASIK
+          Auto Narration: Contra - Kotak
+  Credit: KOTAK on 2026-01-29 (Row 308) - Amount: 4000.00
+          Particulars: UPI/AAYUSH KUMAR GU/639588556111/Paid via SuperM
+          Auto Narration: Contra - SBI
+  Delay : 0 day(s)
+
+Pair #32:
+  Debit : HDFC on 2026-01-30 (Row 578) - Amount: 50000.00
+          Particulars: NEFT DR-SBIN0011669-AAYUSH KUMAR GUPTA-NETBANK, MUM-HDFCH00768841281-FROM AAYUSH TO AAY
+          Auto Narration: Contra - SBI
+  Credit: SBI on 2026-01-30 (Row 106) - Amount: 50000.00
+          Particulars:  DEP TFR   NEFT*HDFC0000001*HDFCH00768841281*AAYUSH K
+ UMAR GU   0099509044300 AT 11669 SHIVAJI NAGAR NASIK
+          Auto Narration: Contra - HDFC
+  Delay : 0 day(s)
+
+Pair #33:
+  Debit : AXIS on 2026-02-02 (Row 424) - Amount: 6469.60
+          Particulars: UPI/P2A/603391938344/AAYUSH KUMAR GUPTA   /Paid v/State Bank Of India
+          Auto Narration: Contra - SBI
+  Credit: SBI on 2026-02-02 (Row 113) - Amount: 6469.60
+          Particulars:  DEP TFR   UPI/CR/603391938344/AAYUSH K/UTIB/95944352
+ 59/Paid   0097732162091 AT 11669 SHIVAJI NAGAR NASIK
+          Auto Narration: Contra - Axis
+  Delay : 0 day(s)
+
+Pair #34:
+  Debit : AXIS on 2026-02-02 (Row 425) - Amount: 9169.37
+          Particulars: UPI/P2A/603391964405/AAYUSH KUMAR GUPTA   /Paid v/Kotak Mahindra Bank
+          Auto Narration: Contra - Kotak
+  Credit: KOTAK on 2026-02-02 (Row 310) - Amount: 9169.37
+          Particulars: UPI/AAYUSH KUMAR GU/603391964405/Paid via SuperM
+          Auto Narration: Contra - Axis
+  Delay : 0 day(s)
+
+Pair #35:
+  Debit : SBI on 2026-02-26 (Row 115) - Amount: 1000.00
+          Particulars:  WDL TFR   UPI/DR/520699040576/AAYUSH K/KKBK/9594435
+ 259/UPI   0097693162093 AT 11669 SHIVAJI NAGAR NASIK
+          Auto Narration: Contra - Kotak
+  Credit: KOTAK on 2026-02-26 (Row 314) - Amount: 1000.00
+          Particulars: UPI/AAYUSH KUMAR GU/520699040576/UPI
+          Auto Narration: Contra - SBI
+  Delay : 0 day(s)
+
+Pair #36:
+  Debit : AXIS on 2026-03-01 (Row 463) - Amount: 5000.00
+          Particulars: UPI/P2A/642663188179/AAYUSH KUMAR GUPTA   /Paid v/Kotak Mahindra Bank
+          Auto Narration: Contra - Kotak
+  Credit: KOTAK on 2026-03-01 (Row 318) - Amount: 5000.00
+          Particulars: UPI/AAYUSH KUMAR GU/642663188179/Paid via SuperM
+          Auto Narration: Contra - Axis
+  Delay : 0 day(s)
+
+Pair #37:
+  Debit : AXIS on 2026-03-09 (Row 471) - Amount: 10000.00
+          Particulars: UPI/P2A/606851380215/AAYUSH KUMAR GUPTA   /Paid v/Kotak Mahindra Bank
+          Auto Narration: Contra - Kotak
+  Credit: KOTAK on 2026-03-09 (Row 322) - Amount: 10000.00
+          Particulars: UPI/AAYUSH KUMAR GU/606851380215/Paid via SuperM
+          Auto Narration: Contra - Axis
+  Delay : 0 day(s)
+
+Pair #38:
+  Debit : SBI on 2026-03-31 (Row 130) - Amount: 5000.00
+          Particulars:  WDL TFR    UPI/DR/645619743149/95944352/KKBK/9594435
+ 259/Paid   0097691162095 AT 11669 SHIVAJI NAGAR NASIK
+          Auto Narration: Contra - Kotak
+  Credit: KOTAK on 2026-03-31 (Row 324) - Amount: 5000.00
+          Particulars: UPI/AAYUSH KUMAR GU/645619743149/Paid via SuperM
+          Auto Narration: Contra - SBI
+  Delay : 0 day(s)
+
+------------------------------------------------------------------------
+2. UNMATCHED DEBITS (Money left bank, no matching receipt found)
+------------------------------------------------------------------------
+Debit in SBI on 2026-01-30 (Row 107) - Amount: 39674.00
+  Particulars:  WDL TFR   UPI/DR/603041682315/ABHINDAN/YESB/q144456
+ 834/UPI   0097694162092 AT 11669 SHIVAJI NAGAR NASIK
+  Auto Narration: Contra - Self
+  Account Head  : Transfer
+  Target Bank   : Unknown
+
+------------------------------------------------------------------------
+3. UNMATCHED CREDITS (Money arrived at bank, no matching source found)
+------------------------------------------------------------------------
+Credit in KOTAK on 2025-08-01 (Row 208) - Amount: 241.00
+  Particulars: NEFT STCB010825236957 AAYUSH KUMAR GUPTA STCB0000
+  Auto Narration: Contra - SBM
+  Account Head  : SBM
+  Source Bank   : SBM
+

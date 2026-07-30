@@ -1,0 +1,10 @@
+{
+  "entity": "sunita",
+  "fy": "FY26",
+  "output_filename": "All Bank Statements Sunita FY26.xlsx",
+  "files": [
+    { "filename": "Sunita Axis Saving account.xls", "sheet_name": "AXIS", "password_env_var": null },
+    { "filename": "Sunita Gupta Acct_Statement_XXXXXXXX0094_14042026.xls", "sheet_name": "HDFC", "password_env_var": null },
+    { "filename": "Sunita Saving account SBI Password AJAY 11111967.xlsx", "sheet_name": "SBI", "password_env_var": "SUNITA_SBI_PASSWORD" }
+  ]
+}

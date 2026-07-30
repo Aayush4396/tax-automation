@@ -1,0 +1,19 @@
+"Account Holder Name :  AJAY KUMAR GUPTA","Account Holder Address :  CO ABHINANDAN NEW MARKET PO RAWATBHATA 323305"
+"CustomerId : 007154451","IFSC :  BKID0000809"
+"Account Number : 662113100016699","Branch Name :  NASIK ROAD"
+"Transaction Date ","From : 01-04-2025 ","To : 31-03-2026"
+"Amount ","From :  ","To : "
+"Cheque No. ","Begin Cheque :  ","End Cheque :  "
+"Transaction Type : All"
+
+"Sr No","Date","Remarks","Debit","Credit","Balance Amount"
+"1","07-05-2025","662113100016699:SBInt.Pd:01-02-2025 to 30-04-2025","","118.00","18281.00"
+"2","30-05-2025","Ac xfr from Sol 66210 to 08090","18281.00","","0.00"
+"3","30-05-2025","Ac xfr from Sol 66210 to 08090","","18281.00","18281.00"
+"4","08-08-2025","662113100016699:SBInt.Pd:01-05-2025 to 31-07-2025","","124.00","18405.00"
+"5","06-11-2025","662113100016699:SBInt.Pd:01-08-2025 to 31-10-2025","","116.00","18521.00"
+"6","07-02-2026","662113100016699:SBInt.Pd:01-11-2025 to 31-01-2026","","117.00","18638.00"
+"7","23-03-2026","NEFT/SBIN526082970433/SBIN/Mr. AJAY KUMAR GUPTA","","3000.00","21638.00"
+"Note : Any discrepancy in the account statement should be notified to the bank within period of 30 days of generation of statement. It will be treated that the entries/contents of
+this statement are checked and found correct by you, if no such complaint is made within the period stated above. Please do not share your ATM, Card details, PIN, OTP
+and Passwords with anyone else. Bank never asks for such details"

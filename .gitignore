@@ -1,0 +1,58 @@
+# Python
+*.py[cod]
+*$py.class
+*~.py
+__pycache__/
+*.pyo
+*.pyc
+*.pyi
+.pyt
+
+# Virtual environment
+.venv/
+venv/
+ENV/
+env/
+
+# Logs
+tmp/
+temp/
+*.log
+*.tmp
+*.swp
+.DS_Store
+
+# IDE specific
+history/
+.idea/
+.vscode/
+*.suo
+*.user
+*.userosscache
+
+# Data files - add here if you have large data files that shouldn't be tracked
+# data/*.xlsx
+# data/*.json
+
+# Local settings
+*.local.yml
+*.local.json
+
+# Jupyter notebooks
+.ipynb_checkpoints/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Test coverage
+.htmlcov/
+.coverage
+
+# Environments
+.env
+.env.local
+.env.development
+.env.test
+.env.production

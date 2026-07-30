@@ -1,0 +1,13 @@
+{
+  "display_name": "Test Entity",
+  "banks": {
+    "hdfc": {
+      "display_name": "HDFC Bank",
+      "account_id": "123456789",
+      "col_particulars": ["Particulars"],
+      "col_dr": "Debit",
+      "col_cr": "Credit"
+    }
+  },
+  "output_sheet_names": [""]
+}

@@ -1,0 +1,12 @@
+{
+  "date_keywords": [
+    "date", "txn date", "tran date", "transaction date", "value date",
+    "value dt", "srl no", "sl. no.", "sl no"
+  ],
+  "amount_keywords": [
+    "debit", "credit", "withdrawal", "deposit", "dr", "cr",
+    "amount", "balance", "withdrawals", "deposits",
+    "withdrawal amt", "withdrawal amt.", "deposit amt", "deposit amt.",
+    "closing balance"
+  ]
+}

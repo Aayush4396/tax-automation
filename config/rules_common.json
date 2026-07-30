@@ -1,0 +1,666 @@
+[
+  {
+    "label": "Transfer - Ajay Kumar Gupta - HUF",
+    "account_head": "Ajay Gupta HUF",
+    "pattern": "\\bHUF\\b|\\bH\\.U\\.F\\.\\b",
+    "direction": "ANY",
+    "confidence": 0.90
+  },
+  {
+    "label": "SIP",
+    "account_head": "SIP",
+    "pattern": "INDIANESIGN",
+    "direction": "ANY",
+    "confidence": 0.95
+  },
+  {
+    "label": "IRCTC Ticket Booking",
+    "account_head": "Travel",
+    "pattern": "IRCTC|I\\.R\\.C\\.T\\.C\\.|CRIS\\s*RAIL|RAIL\\s*CONNECT",
+    "direction": "DR",
+    "confidence": 0.95
+  },
+  {
+    "label": "Dividend Income",
+    "account_head": "Dividend Income",
+    "pattern": "CEMTEX",
+    "direction": "CR",
+    "confidence": 0.95
+  },
+  {
+    "label": "Abhinandan Cloth Merchant",
+    "account_head": "Anil Kumar Gupta",
+    "pattern": "AB[HF]INANDAN\\s*CLOTH",
+    "direction": "ANY",
+    "confidence": 0.95
+  },
+  {
+    "label": "SBI Securities - Charges",
+    "account_head": "SBI Securities",
+    "patterns_all": [
+      "SBICAP|SBI\\s*CAPS?|SBI\\s*CAP\\s*SECURITIES",
+      "Demat\\s*Charges|Charges"
+    ],
+    "direction": "DR",
+    "confidence": 0.95
+  },
+  {
+    "label": "SBI Securities - Buy",
+    "account_head": "SBI Securities",
+    "pattern": "SBICAP|SBI\\s*CAPS?|SBI\\s*CAP\\s*SECURITIES",
+    "direction": "DR",
+    "confidence": 0.92
+  },
+  {
+    "label": "SBI Securities - Sell",
+    "account_head": "SBI Securities",
+    "pattern": "SBICAP|SBI\\s*CAPS?|SBI\\s*CAP\\s*SECURITIES",
+    "direction": "CR",
+    "confidence": 0.92
+  },
+  {
+    "label": "Bank Interest",
+    "account_head": "Bank Interest",
+    "pattern": "\\bTO\\s*INTEREST\\b",
+    "direction": "DR",
+    "confidence": 0.95
+  },
+  {
+    "label": "Sanofi Dividend",
+    "account_head": "Dividend Income",
+    "pattern": "Sanofi",
+    "direction": "CR",
+    "confidence": 0.95
+  },
+  {
+    "label": "Bank Charges",
+    "account_head": "Bank Charges",
+    "pattern": "MANAGED\\s*CUSTOMER\\s*BENEFIT|NCB\\d{10,}",
+    "direction": "ANY",
+    "confidence": 0.92
+  },
+  {
+    "label": "Maruti Insurance",
+    "account_head": "Car Insurance",
+    "pattern": "MARUTI\\s*INSURANCE",
+    "direction": "DR",
+    "confidence": 0.95
+  },
+  {
+    "label": "Jio Postpaid Bill",
+    "account_head": "Personal",
+    "pattern": "Jio\\s*Postpaid|Jio\\s*Bill",
+    "direction": "DR",
+    "confidence": 0.92
+  },
+  {
+    "label": "NSDL Charges",
+    "account_head": "Personal",
+    "pattern": "NSDL",
+    "direction": "DR",
+    "confidence": 0.92
+  },
+  {
+    "label": "Techprocess Transfer",
+    "account_head": "Personal",
+    "pattern": "TECHPROCESS",
+    "direction": "ANY",
+    "confidence": 0.92
+  },
+  {
+    "label": "Salary",
+    "account_head": "Salary",
+    "pattern": "MPHASIS",
+    "direction": "CR",
+    "confidence": 0.97
+  },
+  {
+    "label": "Salary",
+    "account_head": "Salary",
+    "pattern": "SALARY(?:\\b|(?=[A-Z]))|SALARYTRANS|PAYROLL|PAYSLIP",
+    "direction": "CR",
+    "confidence": 0.95
+  },
+  {
+    "label": "Bank Interest",
+    "account_head": "Bank Interest",
+    "pattern": "Int\\.Pd[:.]|INTEREST\\s*PAID|INT\\s*PD\\b|SB\\s*INT:|SBINT:|INTEREST\\s*CAPITALISED",
+    "direction": "CR",
+    "confidence": 0.95
+  },
+  {
+    "label": "SIP",
+    "account_head": "SIP",
+    "pattern": "\\bNACH[- ]MUT[- ]DR\\b|ACH\\s*D[- ]+TP\\s*ACH|INDIANESIGN|BILLDKINDIAN|NACHINDIANCLEARING|ECS\\s*D[- ]",
+    "direction": "DR",
+    "confidence": 0.90
+  },
+  {
+    "label": "Dividend Income",
+    "account_head": "Dividend Income",
+    "pattern": "^ACH\\s*C[- ]|^NACH[- ]ECS[- ]CR|^NACH[- ]10[- ]CR[- ]",
+    "direction": "CR",
+    "confidence": 0.90
+  },
+  {
+    "label": "Dividend Income",
+    "account_head": "Dividend Income",
+    "pattern": "\\bDIV\\d*\\b|\\bDIVIDEND\\b",
+    "direction": "CR",
+    "confidence": 0.85
+  },
+  {
+    "label": "Advance Tax",
+    "account_head": "Advance Tax",
+    "pattern": "ETAX|ADVANCE\\s*TAX|TAX\\s*PAY(?:MENT)?|NSDL\\s*TDS\\b|CBDT",
+    "direction": "DR",
+    "confidence": 0.92
+  },
+  {
+    "label": "Income Tax Refund",
+    "account_head": "Income Tax",
+    "pattern": "\\bITDTAX\\b\\s*REFUND\\b|\\bITD\\b\\s*TAX\\s*REFUND|\\bIT\\b\\s*REFUND|\\bTAX\\s*REFUND\\b|\\bINCOME\\s*TAX\\s*REFUND\\b",
+    "direction": "CR",
+    "confidence": 0.95
+  },
+  {
+    "label": "Transfer - Sunita Gupta",
+    "account_head": "Sunita Gupta",
+    "pattern": "SUNITA\\s*GUPT(A)?|\\bSUNITA\\b",
+    "direction": "ANY",
+    "confidence": 0.88
+  },
+  {
+    "label": "Transfer - Ajay Gupta",
+    "account_head": "Ajay Gupta",
+    "pattern": "AJAY\\s*KUMAR\\s*GUPT(A)?|AJAY\\s*GUPT(A)?|\\bAKG\\b",
+    "direction": "ANY",
+    "confidence": 0.88
+  },
+  {
+    "label": "Transfer - Aayush Gupta",
+    "account_head": "Aayush Gupta",
+    "pattern": "AAYUSH\\s*KUMAR\\s*GUPT(A)?|AAYUSH\\s*GUPT(A)?|\\bAAYUSH\\b",
+    "direction": "ANY",
+    "confidence": 0.88
+  },
+  {
+    "label": "Transfer - Archit Gupta",
+    "account_head": "Archit Gupta",
+    "pattern": "ARCHIT\\s*GUPT(A)?|ARCHIT\\b",
+    "direction": "ANY",
+    "confidence": 0.85
+  },
+  {
+    "label": "Transfer - Megha Gupta",
+    "account_head": "Megha Gupta",
+    "pattern": "MEGHA\\s*GUPT?A?|MEGHA\\b|meghaghati|\\bMiss\\.?\\s*MEG[H]?\\b|\\bMiss\\.?\\s*ME\\b",
+    "direction": "ANY",
+    "confidence": 0.85
+  },
+  {
+    "label": "Transfer - Ajay Gupta HUF",
+    "account_head": "Ajay Gupta HUF",
+    "pattern": "\\bHUF\\b|\\bH\\.U\\.F\\.\\b",
+    "direction": "ANY",
+    "confidence": 0.88
+  },
+  {
+    "label": "Rent",
+    "account_head": "Rent",
+    "pattern": "MOHITH\\s*(S\\s*)?REDDY",
+    "direction": "DR",
+    "exact_dr": 23000.0,
+    "confidence": 0.92
+  },
+  {
+    "label": "Security Deposit",
+    "account_head": "Security Deposit",
+    "pattern": "MOHITH\\s*(S\\s*)?REDDY",
+    "direction": "DR",
+    "exclude_exact_dr": 23000.0,
+    "confidence": 0.90
+  },
+  {
+    "label": "Security Deposit Return",
+    "account_head": "Security Deposit",
+    "pattern": "MOHITH\\s*(S\\s*)?REDDY",
+    "direction": "CR",
+    "confidence": 0.90
+  },
+  {
+    "label": "Rent Payment (via CRED)",
+    "account_head": "Rent",
+    "pattern": "\\bCRED\\b",
+    "direction": "DR",
+    "exact_dr": 23000.0,
+    "confidence": 0.88
+  },
+  {
+    "label": "Cash Withdrawal",
+    "account_head": "Cash",
+    "pattern": "ATW[-/]|ATM\\s*CASH|CWDR|CASH\\s*WITHD|^ATL/|^ATW/",
+    "direction": "DR",
+    "confidence": 0.92
+  },
+  {
+    "label": "Cash Deposit",
+    "account_head": "Cash",
+    "pattern": "CASH\\s*DEP(?:OSIT)?|CDM[-/]",
+    "direction": "CR",
+    "confidence": 0.92
+  },
+  {
+    "label": "MF Redemption",
+    "account_head": "Mutual Funds",
+    "pattern": "INVESCO|PPFAS|PARAG\\s*PARIKH|MIRAE\\s*ASSET|NIPPON|QUANT\\s*SMALL|AXIS\\s*MF|HDFC\\s*MF|SBI\\s*MF|CAMS|KFIN|REDEMPTION|MF\\s*REDEEM|BIRLA|BSLMF|ADITYA\\s*BSLMF",
+    "direction": "CR",
+    "confidence": 0.85
+  },
+  {
+    "label": "Upwork Income",
+    "account_head": "Misc Income",
+    "pattern": "UPWORK",
+    "direction": "CR",
+    "confidence": 0.95
+  },
+  {
+    "label": "UPI Reversal",
+    "account_head": "Personal",
+    "pattern": "^REV[-/]UPI|UPI_CRADJ",
+    "direction": "ANY",
+    "confidence": 0.88
+  },
+  {
+    "label": "Freelance Income",
+    "account_head": "Misc Income",
+    "pattern": "ESCROW",
+    "direction": "CR",
+    "confidence": 0.92
+  },
+  {
+    "label": "Cashback - BHIM",
+    "account_head": "Misc Income",
+    "pattern": "NPCI\\s*BHIM|bhimcashba",
+    "direction": "CR",
+    "confidence": 0.88
+  },
+  {
+    "label": "Cashback - Kiwi",
+    "account_head": "Misc Income",
+    "pattern": "GoKiwi|Kiwi\\s*Tech|KIWI",
+    "direction": "CR",
+    "confidence": 0.88
+  },
+  {
+    "label": "SuperMoney (Rewards)",
+    "account_head": "Misc Income",
+    "pattern": "supermoney|SUPERMONEY",
+    "direction": "CR",
+    "confidence": 0.88
+  },
+  {
+    "label": "MF Redemption",
+    "account_head": "Mutual Funds",
+    "pattern": "NAVI\\s*MUTUA",
+    "direction": "CR",
+    "confidence": 0.88
+  },
+  {
+    "label": "UPI - IRCTC",
+    "account_head": "Travel",
+    "patterns_all": [
+      "IRCTC",
+      "REFUND|REVERSAL|REFU"
+    ],
+    "direction": "CR",
+    "confidence": 0.92
+  },
+  {
+    "label": "UPI - IRCTC",
+    "account_head": "Travel",
+    "pattern": "IRCTC",
+    "direction": "DR",
+    "confidence": 0.88
+  },
+  {
+    "label": "UPI - MakeMyTrip",
+    "account_head": "Travel",
+    "pattern": "MAKEMYTRIP",
+    "direction": "DR",
+    "confidence": 0.88
+  },
+  {
+    "label": "Refund - Wakefit",
+    "account_head": "Shopping",
+    "pattern": "wakefit|WAKEFIT",
+    "direction": "CR",
+    "confidence": 0.90
+  },
+  {
+    "label": "UPI - IRCTC",
+    "account_head": "Travel",
+    "pattern": "AUTOPE",
+    "direction": "ANY",
+    "confidence": 0.88
+  },
+  {
+    "label": "NEFT Transfer",
+    "account_head": "Transfer",
+    "pattern": "\\bNEFT\\b|\\bRTGS\\b|\\bIMPS\\b|\\bMMT\\b|\\bINFT\\b",
+    "direction": "ANY",
+    "confidence": 0.70
+  },
+  {
+    "label": "MOB Transfer",
+    "account_head": "Transfer",
+    "pattern": "\\bMOB/TPFT\\b|\\bMOB/TFR\\b|\\bMOB\\s*TFR\\b",
+    "direction": "ANY",
+    "confidence": 0.70
+  },
+  {
+    "label": "IB Transfer",
+    "account_head": "Transfer",
+    "pattern": "^IB:\\s*",
+    "direction": "ANY",
+    "confidence": 0.72
+  },
+  {
+    "label": "Misc Income",
+    "account_head": "Misc Income",
+    "pattern": "REFUND|REVERSAL|CASHBACK|CREDIT\\s*ADJ|\\bREV\\b",
+    "direction": "CR",
+    "confidence": 0.70
+  },
+  {
+    "label": "Rent",
+    "account_head": "Rent",
+    "patterns_all": [
+      "KANTHAMMA",
+      "Januar|Feb mo|March|month|rent"
+    ],
+    "direction": "DR",
+    "confidence": 0.90
+  },
+  {
+    "label": "Security Deposit",
+    "account_head": "Security Deposit",
+    "patterns_all": [
+      "KANTHAMMA",
+      "secur|balanc|Token|advance|deposit|sendin"
+    ],
+    "direction": "DR",
+    "confidence": 0.90
+  },
+  {
+    "label": "Security Deposit Return",
+    "account_head": "Security Deposit",
+    "pattern": "KANTHAMMA",
+    "direction": "CR",
+    "confidence": 0.88
+  },
+  {
+    "label": "Rent",
+    "account_head": "Rent",
+    "pattern": "KANTHAMMA",
+    "direction": "DR",
+    "confidence": 0.82
+  },
+  {
+    "label": "INDmoney Investment",
+    "account_head": "Investments",
+    "pattern": "INDmoney|INDMoney",
+    "direction": "DR",
+    "confidence": 0.88
+  },
+  {
+    "label": "IPO Application (UPI)",
+    "account_head": "Investments",
+    "pattern": "^UPIM/",
+    "direction": "DR",
+    "confidence": 0.92
+  },
+  {
+    "label": "MF Investment",
+    "account_head": "Investments",
+    "pattern": "iccl|BSE\\s*MF|NSE\\s*MF|INDIAN\\s*CLEARING\\s*CORP",
+    "direction": "DR",
+    "confidence": 0.90
+  },
+  {
+    "label": "Zerodha Broking",
+    "account_head": "Zerodha Broking Limited",
+    "pattern": "zerodha|zerodhab",
+    "direction": "ANY",
+    "confidence": 0.88
+  },
+  {
+    "label": "Health Insurance",
+    "account_head": "Health Insurance",
+    "pattern": "Care\\s*Health\\s*Insur|Max\\s*Bupa|MaxBupa|Niva\\s*Bupa|Religare|Star\\s*Health|Bajaj\\s*Allianz",
+    "direction": "DR",
+    "confidence": 0.92
+  },
+  {
+    "label": "Toll / FASTag",
+    "account_head": "Transport",
+    "pattern": "FASTAG|FASTag|National\\s*Highways\\s*Aut(?:h)?",
+    "direction": "DR",
+    "confidence": 0.88
+  },
+  {
+    "label": "UPI - DMart",
+    "account_head": "Groceries",
+    "pattern": "AVENUE\\s*SUPERMARTS|DMART",
+    "direction": "DR",
+    "confidence": 0.88
+  },
+  {
+    "label": "UPI - Nandini Dairy",
+    "account_head": "Groceries",
+    "pattern": "\\bNandini\\b",
+    "direction": "DR",
+    "max_dr": 500.0,
+    "confidence": 0.82
+  },
+  {
+    "label": "UPI - District (Dining)",
+    "account_head": "Food & Dining",
+    "pattern": "District\\s*Dining|DISTRICT\\s*D\\b|DistrictDining",
+    "direction": "DR",
+    "confidence": 0.85
+  },
+  {
+    "label": "UPI - Fresh Produce",
+    "account_head": "Groceries",
+    "pattern": "fruits|FRUIT\\s*JU|FRUIT\\b|vegetab|VEGET",
+    "direction": "DR",
+    "confidence": 0.82
+  },
+  {
+    "label": "Entertainment",
+    "account_head": "Entertainment",
+    "pattern": "BANNERGHATTA|Biological\\s*Park",
+    "direction": "DR",
+    "confidence": 0.88
+  },
+  {
+    "label": "UPI - Google Play",
+    "account_head": "Subscriptions",
+    "pattern": "Google\\s*Play",
+    "direction": "DR",
+    "confidence": 0.88
+  },
+  {
+    "label": "UPI - OpenAI",
+    "account_head": "Subscriptions",
+    "pattern": "OpenAI",
+    "direction": "ANY",
+    "confidence": 0.88
+  },
+  {
+    "label": "Lounge Access Charge",
+    "account_head": "Bank Charges",
+    "pattern": "DREAMFOLKS|TRAVEL\\s*CLUB\\s*LOUN|LOUNGE\\s*ACCESS",
+    "direction": "DR",
+    "confidence": 0.85
+  },
+  {
+    "label": "Govt / Utility Payment",
+    "account_head": "Utilities",
+    "pattern": "SBIMOPS|MOPSUPITxn",
+    "direction": "DR",
+    "confidence": 0.82
+  },
+  {
+    "label": "UPI Payment",
+    "account_head": "Personal",
+    "pattern": "YASH\\s*GUPTA",
+    "direction": "DR",
+    "confidence": 0.75
+  },
+  {
+    "label": "Contra - Self",
+    "account_head": "Transfer",
+    "pattern": "ABHINDAN",
+    "direction": "DR",
+    "confidence": 0.80
+  },
+  {
+    "label": "Vehicle Service",
+    "account_head": "Transport",
+    "pattern": "BENAKA\\s*ENTERP|TWO\\s*LAXMI\\s*PATIL|KAMADENU\\s*SERVICE",
+    "direction": "DR",
+    "confidence": 0.82
+  },
+  {
+    "label": "Food & Dining / Hotel",
+    "account_head": "Food & Dining",
+    "pattern": "KAKE\\s*DI\\s*HATTI",
+    "direction": "DR",
+    "confidence": 0.82
+  },
+  {
+    "label": "Vehicle Service",
+    "account_head": "Transport",
+    "pattern": "KEERTHANA\\s*MOTORS",
+    "direction": "DR",
+    "confidence": 0.85
+  },
+  {
+    "label": "UPI - Pharmacy",
+    "account_head": "Healthcare",
+    "pattern": "GET\\s*WELL\\s*SOON|PHARMAC",
+    "direction": "DR",
+    "confidence": 0.85
+  },
+  {
+    "label": "Airtel WiFi",
+    "account_head": "Utilities",
+    "pattern": "CRED",
+    "dr_in": [
+      686.82,
+      412.42,
+      410.26,
+      265.06,
+      330.06,
+      414.26
+    ],
+    "confidence": 0.95
+  },
+  {
+    "label": "Shopping - Jewellery",
+    "account_head": "Shopping",
+    "pattern": "ABHUSHAN",
+    "direction": "DR",
+    "confidence": 0.85
+  },
+  {
+    "label": "Contra - Kotak",
+    "account_head": "KOTAK 0333",
+    "patterns_all": [
+      "95944352",
+      "KKBK|KOTAK"
+    ],
+    "direction": "ANY",
+    "confidence": 0.88
+  },
+  {
+    "label": "Contra - SBI",
+    "account_head": "SBI 1227",
+    "patterns_all": [
+      "95944352",
+      "SBIN|STATE\\s*BANK|SBI\\b"
+    ],
+    "direction": "ANY",
+    "confidence": 0.88
+  },
+  {
+    "label": "Contra - Jupiter",
+    "account_head": "FEDERAL 0847",
+    "patterns_all": [
+      "95944352",
+      "FDRL|FEDERAL|JUPITER"
+    ],
+    "direction": "ANY",
+    "confidence": 0.88
+  },
+  {
+    "label": "Contra - Axis",
+    "account_head": "Axis",
+    "patterns_all": [
+      "95944352",
+      "UTIB|AXIS"
+    ],
+    "direction": "ANY",
+    "confidence": 0.88
+  },
+  {
+    "label": "Contra - HDFC",
+    "account_head": "HDFC 5413",
+    "patterns_all": [
+      "95944352",
+      "HDFC"
+    ],
+    "direction": "ANY",
+    "confidence": 0.88
+  },
+  {
+    "label": "Contra - SBM",
+    "account_head": "SBM",
+    "patterns_all": [
+      "95944352",
+      "STCB|SBM\\b"
+    ],
+    "direction": "ANY",
+    "confidence": 0.88
+  },
+  {
+    "label": "Contra - Self (SuperMoney)",
+    "account_head": "Personal",
+    "pattern": "95944352",
+    "direction": "ANY",
+    "confidence": 0.82
+  },
+  {
+    "label": "UPI Payment",
+    "account_head": "Personal",
+    "pattern": "\\bUPI[/ -]|UPIOUT/",
+    "direction": "DR",
+    "confidence": 0.55
+  },
+  {
+    "label": "UPI Receipt",
+    "account_head": "Personal",
+    "pattern": "\\bUPI[/ -]|UPIIN/",
+    "direction": "CR",
+    "confidence": 0.55
+  },
+  {
+    "label": "What is this?",
+    "account_head": "Suspense",
+    "pattern": ".*",
+    "direction": "ANY",
+    "confidence": 0.0
+  }
+]

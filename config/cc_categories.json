@@ -1,0 +1,68 @@
+{
+  "categories": [
+    "DepartmentalStore", "ConsumerDurable", "DirectMarketing", "OtherMerchants",
+    "TravelAgencies", "Entertainment", "Restaurants", "Automotive", "Commercial",
+    "Recreation", "Stationery", "Healthcare", "Railroads", "Education",
+    "Insurance", "Utilities", "Apparels", "Hardware", "Jewelry", "Medical",
+    "Telecom", "Grocery", "Airline", "Computer", "Hotels", "Travel", "Services", "Fuel"
+  ],
+  "narration_map": {
+    "Grocery": ["CC - Groceries", "Groceries"],
+    "Restaurants": ["CC - Restaurants", "Food & Dining"],
+    "Entertainment": ["CC - Entertainment", "Entertainment"],
+    "Telecom": ["CC - Telecom", "Utilities"],
+    "CC - Wifi": ["CC - Wifi", "Utilities"],
+    "DepartmentalStore": ["CC - Shopping", "Shopping"],
+    "Automotive": ["CC - Automotive", "Transport"],
+    "Recreation": ["CC - Recreation", "Entertainment"],
+    "Services": ["CC - Services", "Miscellaneous"],
+    "OtherMerchants": ["CC - Other", "Personal"],
+    "Fuel": ["CC - Fuel", "Transport"],
+    "Insurance": ["CC - Insurance", "Insurance"],
+    "Healthcare": ["CC - Healthcare", "Healthcare"],
+    "Travel": ["CC - Travel", "Travel"],
+    "Education": ["CC - Education", "Education"],
+    "Utilities": ["CC - Utilities", "Utilities"],
+    "Jewelry": ["CC - Shopping", "Shopping"],
+    "Apparels": ["CC - Shopping", "Shopping"],
+    "Stationery": ["CC - Shopping", "Shopping"],
+    "ConsumerDurable": ["CC - Shopping", "Shopping"],
+    "Hardware": ["CC - Shopping", "Shopping"],
+    "Hotels": ["CC - Travel", "Travel"],
+    "Airline": ["CC - Travel", "Travel"],
+    "Railroads": ["CC - Travel", "Travel"],
+    "TravelAgencies": ["CC - Travel", "Travel"],
+    "Medical": ["CC - Healthcare", "Healthcare"],
+    "Computer": ["CC - Other", "Personal"],
+    "Commercial": ["CC - Other", "Personal"],
+    "DirectMarketing": ["CC - Other", "Personal"]
+  },
+  "colour_map": {
+    "CC - Groceries": "D5F5CC",
+    "CC - Restaurants": "FFD5CC",
+    "CC - Entertainment": "F5D0F5",
+    "CC - Telecom": "D0F0E8",
+    "CC - Wifi": "D5F0E8",
+    "CC - Shopping": "F5E6CC",
+    "CC - Automotive": "CCE8FF",
+    "CC - Recreation": "EDD5F5",
+    "CC - Services": "E8E8E8",
+    "CC - Other": "F5F5DC",
+    "CC - Fuel": "FFE8B3",
+    "CC - Insurance": "D5E8F5",
+    "CC - Healthcare": "CCFFE0",
+    "CC - Travel": "D0E8FF",
+    "CC - Education": "FFF0D0",
+    "CC - Utilities": "D5F0E8"
+  },
+  "merchant_overrides": [
+    {
+      "merchant_keyword": "airtel",
+      "amounts": [588.82, 406.71, 513.21],
+      "match_narration": "CC - Wifi",
+      "match_account_head": "Utilities",
+      "default_narration": "CC - Telecom",
+      "default_account_head": "Utilities"
+    }
+  ]
+}

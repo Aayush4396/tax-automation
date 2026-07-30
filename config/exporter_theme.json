@@ -1,0 +1,46 @@
+{
+  "colour_map": {
+    "Broadband & WiFi": "D5F0E8",
+    "Groceries & Household": "D5F5CC",
+    "Food & Dining": "FFD5CC",
+    "Rent": "FDDCB5",
+    "Travel & Commute": "CCE8FF",
+    "Fuel": "FFF5CC",
+    "Transport & Automotive": "CCF0FF",
+    "Healthcare & Medical": "F8D7DA",
+    "Life Insurance": "F5C6CB",
+    "Health Insurance": "FDDCB5",
+    "Subscriptions & Services": "E8D5F5",
+    "Utilities & Mobile": "FFF2CC",
+    "Shopping & Lifestyle": "F5EDD5",
+    "Entertainment & Leisure": "F8D7DA",
+    "Investments & Wealth": "D0ECF8",
+    "Bank & Depository Charges": "F8D7DA",
+    "General/Other Spends": "EDE9F6",
+    "Self-Transfer (Contra)": "FFE8CC",
+    "Credit Card Payment": "F5D5E8",
+    "Salary": "B8F0C4",
+    "Freelance & Business Income": "D0F5C8",
+    "Dividend Income": "C4EBF0",
+    "Bank Interest": "C8F5C8",
+    "Investment Inflows (MF/Stocks)": "C8DCF5",
+    "Refunds & Reversals": "D5F0E8",
+    "Personal Inflows / Transfers": "D6F5D6"
+  },
+  "rename_columns": {
+    "TX_Date": "TX Date",
+    "Value_Date": "Date",
+    "Auto_Narration": "Narration",
+    "Account_Head": "Account Head",
+    "Account_ID": "Account No",
+    "Human_Narration": "Kya Hai?",
+    "Bank_Display": "Bank",
+    "Pivot_Category": "Pivot Category"
+  },
+  "tally_hidden_columns": [
+    "TX Date", "Date", "Beneficiary", "Kya Hai?", "Pivot Category"
+  ],
+  "bank_sheet_hidden_columns": [
+    "Date", "Value_Date", "Ref", "Balance", "Human_Narration", "Beneficiary"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "entity": "ajay",
+  "fy": "FY26",
+  "output_filename": "All Bank Statements Ajay FY26.xlsx",
+  "files": [
+    { "filename": "Ajay Acct_Statement_XXXXXXXX5930_14042026.xls", "sheet_name": "HDFC 5930", "password_env_var": null },
+    { "filename": "Ajay Axis Saving statement.xls", "sheet_name": "AXIS 3167", "password_env_var": null },
+    { "filename": "Ajay Bank of India Kota Statement1777469280115_____ 6699.csv", "sheet_name": "BOI 6699", "password_env_var": null },
+    { "filename": "Ajay Current account account SBI Password AJAY 11111967.xlsx", "sheet_name": "SBI CA", "password_env_var": "AJAY_SBI_PASSWORD" },
+    { "filename": "Ajay Kota Saving account SBI Password AJAY 11111967.xlsx", "sheet_name": "SBI SB Kota", "password_env_var": "AJAY_SBI_PASSWORD" },
+    { "filename": "Ajay Saving account SBI Password AJAY 11111967.xlsx", "sheet_name": "SBI SB Nsk", "password_env_var": "AJAY_SBI_PASSWORD" },
+    { "filename": "Ajay rawatbhata Saving account SBI Password AJAY 11111967.xlsx", "sheet_name": "SBI SB Rawatbhata", "password_env_var": "AJAY_SBI_PASSWORD" },
+    { "filename": "SBI Insurance loan account Nashik Password AJAYK11111967.pdf", "sheet_name": "SBI Insurance Loan", "password_env_var": "AJAY_INSURANCE_LOAN_PASSWORD" }
+  ]
+}
