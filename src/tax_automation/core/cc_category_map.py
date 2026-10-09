@@ -6,6 +6,8 @@ Maps Kotak CC statement SpendsArea categories → (Auto_Narration, Account_Head)
 and hex fill colors, loaded dynamically from config/cc_categories.json.
 """
 
+from __future__ import annotations
+
 from tax_automation.config_loader import get_cc_categories_config
 
 _cfg = get_cc_categories_config()

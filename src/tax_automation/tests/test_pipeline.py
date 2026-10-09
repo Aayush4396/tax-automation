@@ -6,6 +6,7 @@ test_pipeline.py
 Integration tests for the pipeline modules.
 """
 
+from __future__ import annotations
 import tempfile
 import unittest
 from pathlib import Path

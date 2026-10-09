@@ -6,6 +6,8 @@ Scans top N rows of a statement worksheet to dynamically locate the header row.
 Keyword lists are loaded dynamically from config/header_keywords.json.
 """
 
+from __future__ import annotations
+
 from tax_automation.config_loader import get_header_keywords_config
 
 _cfg = get_header_keywords_config()

@@ -5,6 +5,7 @@ config_loader.py
 Dynamic loader for JSON entity configurations, consolidation maps, and .env credentials.
 """
 
+from __future__ import annotations
 import os
 import json
 from pathlib import Path
