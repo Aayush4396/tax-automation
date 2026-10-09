@@ -11,8 +11,11 @@ import re
 EXTRA_RULES: dict[str, list[tuple]] = {
     "common": [
         (
-            "Transfer - Ajay Kumar Gupta - HUF", "Ajay Gupta HUF",
-            lambda p, dr, cr: bool(re.search(r"\bHUF\b|\bH\.U\.F\.\b", p, re.IGNORECASE)),
+            "Transfer - Ajay Kumar Gupta - HUF",
+            "Ajay Gupta HUF",
+            lambda p, dr, cr: bool(
+                re.search(r"\bHUF\b|\bH\.U\.F\.\b", p, re.IGNORECASE)
+            ),
             0.90,
         ),
     ],

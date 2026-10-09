@@ -25,15 +25,23 @@ def _compile_declarative_rule(r_dict: dict) -> tuple:
     min_dr = float(r_dict["min_dr"]) if "min_dr" in r_dict else None
     max_dr = float(r_dict["max_dr"]) if "max_dr" in r_dict else None
     exact_dr = float(r_dict["exact_dr"]) if "exact_dr" in r_dict else None
-    exclude_exact_dr = float(r_dict["exclude_exact_dr"]) if "exclude_exact_dr" in r_dict else None
+    exclude_exact_dr = (
+        float(r_dict["exclude_exact_dr"]) if "exclude_exact_dr" in r_dict else None
+    )
     dr_in = [float(x) for x in r_dict["dr_in"]] if "dr_in" in r_dict else None
-    
+
     exclude_pat_str = r_dict.get("exclude_pattern")
     patterns_all_str = r_dict.get("patterns_all")
-    
+
     pattern = re.compile(pat_str, re.IGNORECASE) if pat_str else None
-    exclude_pattern = re.compile(exclude_pat_str, re.IGNORECASE) if exclude_pat_str else None
-    patterns_all = [re.compile(p, re.IGNORECASE) for p in patterns_all_str] if patterns_all_str else None
+    exclude_pattern = (
+        re.compile(exclude_pat_str, re.IGNORECASE) if exclude_pat_str else None
+    )
+    patterns_all = (
+        [re.compile(p, re.IGNORECASE) for p in patterns_all_str]
+        if patterns_all_str
+        else None
+    )
 
     def match_fn(p: str, dr: float, cr: float) -> bool:
         if direction == "DR" and dr <= 0:
@@ -61,4 +69,6 @@ def _compile_declarative_rule(r_dict: dict) -> tuple:
     return (label, head, match_fn, conf)
 
 
-RULES_COMMON: list[tuple] = [_compile_declarative_rule(r) for r in get_declarative_common_rules()]
+RULES_COMMON: list[tuple] = [
+    _compile_declarative_rule(r) for r in get_declarative_common_rules()
+]

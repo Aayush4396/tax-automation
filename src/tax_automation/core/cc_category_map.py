@@ -20,7 +20,4 @@ CC_COLOUR_MAP: dict[str, str] = _cfg.get("colour_map", {})
 
 def map_category(cc_category: str) -> tuple[str, str]:
     """Return (Auto_Narration, Account_Head) for a CC SpendsArea string."""
-    return CC_NARRATION_MAP.get(
-        cc_category,
-        (f"CC - {cc_category}", "Miscellaneous")
-    )
+    return CC_NARRATION_MAP.get(cc_category, (f"CC - {cc_category}", "Miscellaneous"))

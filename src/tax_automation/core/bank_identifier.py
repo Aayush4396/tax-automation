@@ -16,15 +16,17 @@ Identification threshold: 0.55
 
 from __future__ import annotations
 
-_META_WEIGHT   = 0.60
+_META_WEIGHT = 0.60
 _HEADER_WEIGHT = 0.40
 _MIN_THRESHOLD = 0.55
 
 
-def identify_bank(sheet_rows: list[tuple],
-                  header_row_idx: int,
-                  bank_registry: dict[str, dict],
-                  sheet_name: str = "") -> tuple[str, float]:
+def identify_bank(
+    sheet_rows: list[tuple],
+    header_row_idx: int,
+    bank_registry: dict[str, dict],
+    sheet_name: str = "",
+) -> tuple[str, float]:
     """
     Parameters
     ----------
@@ -44,7 +46,7 @@ def identify_bank(sheet_rows: list[tuple],
         for c in row
         if c is not None and str(c).strip() not in ("", "nan", "none")
     ).lower()
-    
+
     meta_text += " " + sheet_name.lower()
 
     # Build a set of header column names (lowercased, stripped)
@@ -58,7 +60,7 @@ def identify_bank(sheet_rows: list[tuple],
     else:
         header_cols = set()
 
-    best_key   = "unknown"
+    best_key = "unknown"
     best_score = 0.0
 
     for bank_key, cfg in bank_registry.items():
@@ -74,7 +76,8 @@ def identify_bank(sheet_rows: list[tuple],
         hdr_sigs = cfg.get("header_signals", [])
         if hdr_sigs:
             hdr_hits = sum(
-                1 for sig in hdr_sigs
+                1
+                for sig in hdr_sigs
                 if sig.strip().lower() in header_cols
                 or any(sig.strip().lower() in col for col in header_cols)
             )
@@ -86,7 +89,7 @@ def identify_bank(sheet_rows: list[tuple],
 
         if final_score > best_score:
             best_score = final_score
-            best_key   = bank_key
+            best_key = bank_key
 
     if best_score < _MIN_THRESHOLD:
         return "unknown", best_score

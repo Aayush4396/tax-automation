@@ -23,12 +23,19 @@ from tax_automation.core.bank_identifier import identify_bank
 from tax_automation.core.merchants import detect_merchant
 from tax_automation.rules.loader import build_rule_chain
 from tax_automation.exporters import (
-    write_bank_sheet, write_for_tally, write_conso, write_bank_summary,
-    write_monthly_pivot, write_colour_legend, assign_pivot_categories,
+    write_bank_sheet,
+    write_for_tally,
+    write_conso,
+    write_bank_summary,
+    write_monthly_pivot,
+    write_colour_legend,
+    assign_pivot_categories,
 )
 
 # UPI pattern for merchant detection
-_UPI_PAT = re.compile(r"\bUPI[/ -]|UPIOUT/|UPI\s*IN/|UPI/DR/|UPI/CR/|^UPI/", re.IGNORECASE)
+_UPI_PAT = re.compile(
+    r"\bUPI[/ -]|UPIOUT/|UPI\s*IN/|UPI/DR/|UPI/CR/|^UPI/", re.IGNORECASE
+)
 
 
 def safe_float(val: Any) -> float:
@@ -78,9 +85,9 @@ def classify_transaction(
     """
     raw_p = str(particulars)
     # Normalize whitespace and newlines
-    healed = re.sub(r'(?<=[a-zA-Z])\s*\n\s*(?=[a-zA-Z])', '', raw_p)
-    healed = re.sub(r'\s*\n\s*', ' ', healed)
-    p = re.sub(r'\s+', ' ', healed).strip()
+    healed = re.sub(r"(?<=[a-zA-Z])\s*\n\s*(?=[a-zA-Z])", "", raw_p)
+    healed = re.sub(r"\s*\n\s*", " ", healed)
+    p = re.sub(r"\s+", " ", healed).strip()
     dr_val = safe_float(dr)
     cr_val = safe_float(cr)
 
@@ -193,7 +200,9 @@ def process_entity_narration(
     if output_path is None:
         out_dir = REPO_ROOT / "data" / entity_dir_name / "Generated Data" / fy
         out_dir.mkdir(parents=True, exist_ok=True)
-        output_path = out_dir / f"{entity_name.split()[0]}_Consolidated_Bank_Ledger_{fy}.xlsx"
+        output_path = (
+            out_dir / f"{entity_name.split()[0]}_Consolidated_Bank_Ledger_{fy}.xlsx"
+        )
 
     print(f"Processing narration for {entity_name} ({fy})...")
     print(f"  Input: {input_path}")
@@ -222,13 +231,15 @@ def process_entity_narration(
 
         bank_cfg = bank_registry[bank_key]
         header_vals = [
-            str(c).strip() if c is not None else ""
-            for c in sheet_rows[hdr_idx]
+            str(c).strip() if c is not None else "" for c in sheet_rows[hdr_idx]
         ]
 
         # Extract data rows
-        data_rows = sheet_rows[hdr_idx + 1:]
-        df_sheet = pd.DataFrame(data_rows, columns=header_vals[: len(sheet_rows[hdr_idx])])
+        start_row_idx = hdr_idx + 1
+        data_rows = sheet_rows[start_row_idx:]
+        df_sheet = pd.DataFrame(
+            data_rows, columns=header_vals[: len(sheet_rows[hdr_idx])]
+        )
 
         # Apply classification to each row
         records: list[dict[str, Any]] = []
@@ -261,7 +272,9 @@ def process_entity_narration(
             )
 
         df_narrated = pd.DataFrame(records)
-        write_bank_sheet(wb_out, df_narrated, sheet_name, bank_cfg.get("display_name", sheet_name))
+        write_bank_sheet(
+            wb_out, df_narrated, sheet_name, bank_cfg.get("display_name", sheet_name)
+        )
         bank_ledgers.append(df_narrated)
 
     if not bank_ledgers:
@@ -286,7 +299,6 @@ def process_entity_narration(
     for df in bank_ledgers:
         if df.empty:
             continue
-        b_key = df["Bank_Key"].iloc[0]
         acc_id = df["Account_ID"].iloc[0]
         bals = pd.to_numeric(df["Balance"], errors="coerce").dropna()
         open_bal = float(bals.iloc[0]) if not bals.empty else 0.0
@@ -304,8 +316,10 @@ def process_entity_narration(
     wb_out.save(output_path)
     root_out_dir = REPO_ROOT / entity_dir_name / "Generated Data" / fy
     root_out_dir.mkdir(parents=True, exist_ok=True)
-    root_output_path = root_out_dir / f"{entity_name.split()[0]}_Consolidated_Bank_Ledger_{fy}.xlsx"
+    root_output_path = (
+        root_out_dir / f"{entity_name.split()[0]}_Consolidated_Bank_Ledger_{fy}.xlsx"
+    )
     if root_output_path != output_path:
         wb_out.save(root_output_path)
-    print(f"✅ Narration successfully saved to {output_path} and {root_output_path}")
+    print(f"[OK] Narration successfully saved to {output_path} and {root_output_path}")
     return output_path

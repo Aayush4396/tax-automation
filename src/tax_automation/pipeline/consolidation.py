@@ -11,13 +11,13 @@ It is decoupled from the CLI and can be used independently.
 
 from __future__ import annotations
 from pathlib import Path
-from typing import Any, Dict, List
 
-import pandas as pd
-from openpyxl import Workbook
+from tax_automation.config_loader import get_entity_config
+from tax_automation.consolidators.generic_consolidator import (
+    consolidate_entity_statements,
+)
 
-from tax_automation.config_loader import get_entity_config, get_consolidation_map
-from tax_automation.consolidators.generic_consolidator import consolidate_entity_statements
+__all__ = ["consolidate_entity", "consolidate_entity_statements"]
 
 
 def consolidate_entity(
@@ -52,11 +52,11 @@ def consolidate_entity(
         output_dir = Path("data") / entity_dir_name / "Generated Data" / fy
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    # Load consolidation map
-    consolidation_map = get_consolidation_map(entity_id, fy)
-
     # Perform consolidation using existing consolidator
     output_path = consolidate_entity_statements(entity_id, fy)
 
-    print(f"✅ Consolidated statements for {entity_name} ({fy}) saved to {output_path}")
+    print(
+        f"[OK] Consolidated statements for {entity_name} ({fy}) "
+        f"saved to {output_path}"
+    )
     return output_path

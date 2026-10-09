@@ -19,7 +19,7 @@ def load_env_file(env_path: Path | None = None) -> dict[str, str]:
     """Loads key=value pairs from a .env file into environment variables."""
     if env_path is None:
         env_path = REPO_ROOT / ".env"
-    
+
     env_vars = {}
     if env_path.exists():
         with open(env_path, "r", encoding="utf-8") as f:
@@ -39,19 +39,23 @@ def get_entity_config(entity_id: str) -> dict[str, Any]:
     """Loads entity profile configuration JSON from config/entities/<entity>.json."""
     config_file = CONFIG_DIR / "entities" / f"{entity_id.lower()}.json"
     if not config_file.exists():
-        raise FileNotFoundError(f"Entity configuration file not found at: {config_file}")
-    
+        raise FileNotFoundError(
+            f"Entity configuration file not found at: {config_file}"
+        )
+
     with open(config_file, "r", encoding="utf-8") as f:
         config = json.load(f)
     return config
 
 
 def get_consolidation_map(entity_id: str, fy: str) -> dict[str, Any]:
-    """Loads statement consolidation map JSON from config/consolidation/<entity>_<fy>.json."""
+    """Loads statement consolidation map JSON from
+    config/consolidation/<entity>_<fy>.json.
+    """
     map_file = CONFIG_DIR / "consolidation" / f"{entity_id.lower()}_{fy.lower()}.json"
     if not map_file.exists():
         raise FileNotFoundError(f"Consolidation map file not found at: {map_file}")
-    
+
     with open(map_file, "r", encoding="utf-8") as f:
         data = json.load(f)
     return data

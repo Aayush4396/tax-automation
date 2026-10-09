@@ -10,11 +10,9 @@ and automatically reload them when changes are detected.
 """
 
 from __future__ import annotations
-import os
-import time
-import threading
 from pathlib import Path
-from typing import Callable, Dict, List, Optional
+import threading
+from typing import Callable, List, Optional
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
@@ -27,7 +25,9 @@ class RuleChangeHandler(FileSystemEventHandler):
 
     def on_modified(self, event):
         """Called when a file is modified."""
-        if not event.is_directory and event.src_path.endswith((".yaml", ".yml", ".json")):
+        if not event.is_directory and event.src_path.endswith(
+            (".yaml", ".yml", ".json")
+        ):
             self.callback(event.src_path)
 
 
@@ -86,8 +86,7 @@ class RuleWatcher:
 
 
 def create_rule_watcher(
-    config_dirs: List[str],
-    reload_callback: Callable[[str], None]
+    config_dirs: List[str], reload_callback: Callable[[str], None]
 ) -> RuleWatcher:
     """
     Factory function to create a rule watcher instance.
@@ -103,8 +102,7 @@ def create_rule_watcher(
 
 
 def watch_rules_in_background(
-    watch_dirs: List[str],
-    reload_callback: Callable[[str], None]
+    watch_dirs: List[str], reload_callback: Callable[[str], None]
 ) -> RuleWatcher:
     """
     Start watching rules in the background.

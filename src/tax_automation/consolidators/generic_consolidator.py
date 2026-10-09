@@ -7,17 +7,19 @@ and Financial Year into a multi-sheet workbook using JSON consolidation maps.
 """
 
 from __future__ import annotations
-import os
-import io
-import re
 import csv
+import io
 from pathlib import Path
-import pandas as pd
-import pdfplumber
 import msoffcrypto
 from openpyxl import Workbook
+import pandas as pd
+import pdfplumber
 
-from tax_automation.config_loader import get_consolidation_map, resolve_password, REPO_ROOT
+from tax_automation.config_loader import (
+    get_consolidation_map,
+    resolve_password,
+    REPO_ROOT,
+)
 
 
 def decrypt_excel(filepath: Path, password: str) -> io.BytesIO:
@@ -31,8 +33,12 @@ def decrypt_excel(filepath: Path, password: str) -> io.BytesIO:
     return decrypted
 
 
-def load_file_to_df(filepath: Path, password: str | None = None) -> tuple[pd.DataFrame, list[list]]:
-    """Loads CSV, PDF, XLS, or XLSX statements into a DataFrame, decrypting if necessary."""
+def load_file_to_df(
+    filepath: Path, password: str | None = None
+) -> tuple[pd.DataFrame, list[list]]:
+    """Loads CSV, PDF, XLS, or XLSX statements into a DataFrame,
+    decrypting if necessary.
+    """
     ext = filepath.suffix.lower()
 
     if ext == ".csv":
@@ -80,21 +86,29 @@ def load_file_to_df(filepath: Path, password: str | None = None) -> tuple[pd.Dat
         raise ValueError(f"Unsupported file format: {ext}")
 
 
-def consolidate_entity_statements(entity_id: str, fy: str, data_dir: Path | None = None) -> Path:
-    """Consolidates individual bank statements for an entity into a multi-sheet Excel file."""
+def consolidate_entity_statements(
+    entity_id: str, fy: str, data_dir: Path | None = None
+) -> Path:
+    """Consolidates individual bank statements for an entity into a
+    multi-sheet Excel file.
+    """
     cmap = get_consolidation_map(entity_id, fy)
-    
+
     if data_dir is None:
         candidates = [
             REPO_ROOT / "data" / entity_id.title() / "Data" / fy / "Bank_Statements",
             REPO_ROOT / entity_id.title() / "Data" / fy / "Bank_Statements",
             REPO_ROOT / entity_id.title() / "Bank Statements" / fy,
         ]
-        data_dir = next((c for c in candidates if c.exists() and any(c.iterdir())), candidates[0])
-    
-    output_filename = cmap.get("output_filename", f"All Bank Statements {entity_id.title()} {fy}.xlsx")
+        data_dir = next(
+            (c for c in candidates if c.exists() and any(c.iterdir())), candidates[0]
+        )
+
+    output_filename = cmap.get(
+        "output_filename", f"All Bank Statements {entity_id.title()} {fy}.xlsx"
+    )
     output_path = data_dir / output_filename
-    
+
     wb = Workbook()
     # Keep initial sheet and rename or track
     sheets_created = 0
@@ -104,12 +118,12 @@ def consolidate_entity_statements(entity_id: str, fy: str, data_dir: Path | None
         target_sheet = file_spec["sheet_name"]
         pwd_var = file_spec.get("password_env_var")
         password = resolve_password(pwd_var) if pwd_var else None
-        
+
         file_path = data_dir / filename
         if not file_path.exists():
             print(f"Warning: File not found {file_path}")
             continue
-            
+
         df, _ = load_file_to_df(file_path, password)
         ws = wb.create_sheet(title=target_sheet)
         sheets_created += 1

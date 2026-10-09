@@ -14,16 +14,12 @@ from tax_automation.config_loader import get_merchants_config
 _raw_merchants = get_merchants_config()
 
 MERCHANT_MAP: list[tuple[str, tuple[str, str, float]]] = [
-    (
-        item["keyword"],
-        (item["label"], item["account_head"], float(item["confidence"]))
-    )
+    (item["keyword"], (item["label"], item["account_head"], float(item["confidence"])))
     for item in _raw_merchants
 ]
 
 _COMPILED: list[tuple[re.Pattern, tuple[str, str, float]]] = [
-    (re.compile(re.escape(kw), re.IGNORECASE), val)
-    for kw, val in MERCHANT_MAP
+    (re.compile(re.escape(kw), re.IGNORECASE), val) for kw, val in MERCHANT_MAP
 ]
 
 
