@@ -7,7 +7,7 @@ name = "tax_automation"
 version = "2.0.0"
 description = "Centralized, config-driven financial transaction processing & consolidation engine"
 authors = [{ name = "Antigravity Team" }]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
     "pandas>=2.0.0",
     "openpyxl>=3.1.0",
