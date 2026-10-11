@@ -1,205 +1,173 @@
 {
+  "$schema": "../schemas/entity.json",
   "entity_id": "ajay",
   "display_name": "Ajay Gupta",
-  "family_members": ["SUNITA", "AJAY", "AAYUSH", "ARCHIT", "MEGHA", "HUF", "ISHWAR", "PARADISE", "MAINT"],
-  "rent_vpas": [],
-  "self_upi_refs": {},
-  "output_sheet_names": [
-    "For Tally", "Conso", "Bank Summary", "Salary", "Leave Encashment",
-    "Contra Summary", "EquityRelated"
+  "self_patterns": [
+    "AJAY\\s*KUMAR\\s*GUPT(A)?",
+    "AJAY\\s*GUPT(A)?",
+    "\\bAKG\\b"
   ],
-  "banks": {
-    "hdfc": {
-      "display_name": "HDFC Bank",
+  "self_vpas": [],
+  "family_members": [
+    {
+      "name": "Sunita Gupta",
+      "relationship": "Spouse",
+      "account_head": "Sunita Gupta",
+      "patterns": ["SUNITA\\s*GUPT(A)?", "\\bSUNITA\\b"]
+    },
+    {
+      "name": "Aayush Gupta",
+      "relationship": "Son",
+      "account_head": "Aayush Gupta",
+      "patterns": ["AAYUSH\\s*GUPT(A)?", "\\bAAYUSH\\b"]
+    },
+    {
+      "name": "Archit Gupta",
+      "relationship": "Son",
+      "account_head": "Archit Gupta",
+      "patterns": ["ARCHIT\\s*GUPT(A)?", "\\bARCHIT\\b"]
+    },
+    {
+      "name": "Megha Gupta",
+      "relationship": "Daughter-in-law",
+      "account_head": "Megha Gupta",
+      "patterns": ["MEGHA\\s*GUPT?A?", "\\bMEGHA\\b", "meghaghati"]
+    },
+    {
+      "name": "Ajay Gupta HUF",
+      "relationship": "HUF",
+      "account_head": "Ajay Gupta HUF",
+      "patterns": ["\\bHUF\\b|\\bH\\.U\\.F\\.\\b|AJAY\\s*GUPTA\\s*HUF"]
+    }
+  ],
+  "rent": {
+    "landlords": [],
+    "vpas": [],
+    "keywords": []
+  },
+  "custom_rules": [
+    {
+      "label": "Society Maintenance",
+      "account_head": "Society Maintenance",
+      "pattern": "PARADISE|MAINT",
+      "direction": "DR",
+      "confidence": 0.90
+    },
+    {
+      "label": "Ishwar",
+      "account_head": "Ishwar",
+      "pattern": "ISHWAR",
+      "direction": "ANY",
+      "confidence": 0.85
+    }
+  ],
+  "output_sheet_names": [
+    "For Tally",
+    "Conso",
+    "Bank Summary",
+    "Salary",
+    "Leave Encashment",
+    "Contra Summary",
+    "EquityRelated",
+    "Monthly Pivot",
+    "Guidelines"
+  ],
+  "accounts": [
+    {
+      "account_key": "hdfc",
+      "bank": "hdfc",
       "account_id": "HDFC 5930",
       "sheet_name": "HDFC 5930",
-      "meta_signals": ["HDFC", "5930", "HDFC BANK", "Withdrawal Amt", "Closing Balance", "Statement of accounts"],
-      "header_signals": ["Withdrawal Amt.", "Deposit Amt.", "Closing Balance"],
-      "col_date": "Date",
-      "col_particulars": "Narration",
-      "col_narration_h": "Narration",
-      "col_dr": "Withdrawal Amt.",
-      "col_cr": "Deposit Amt.",
-      "col_balance": "Closing Balance",
-      "col_ref": "Chq./Ref.No.",
-      "col_value_date": "Value Dt",
-      "rules_module": "tax_automation.rules.banks.hdfc_base"
+      "display_name": "HDFC Bank",
+      "meta_signals_extra": ["5930"]
     },
-    "axis": {
-      "display_name": "Axis Bank",
+    {
+      "account_key": "axis",
+      "bank": "axis",
       "account_id": "AXIS 3167",
       "sheet_name": "AXIS 3167",
-      "meta_signals": ["UTIB", "AXIS", "PARTICULARS", "3167"],
-      "header_signals": ["SRL NO", "PARTICULARS", "CHQNO", "Tran Date"],
-      "col_date": "Tran Date",
-      "col_particulars": "PARTICULARS",
-      "col_narration_h": "Narration",
-      "col_dr": "DR",
-      "col_cr": "CR",
-      "col_balance": "BAL",
-      "col_ref": "CHQNO",
-      "col_value_date": null,
-      "rules_module": "tax_automation.rules.banks.axis"
+      "display_name": "Axis Bank",
+      "meta_signals_extra": ["3167"]
     },
-    "boi": {
-      "display_name": "Bank of India",
+    {
+      "account_key": "boi",
+      "bank": "boi",
       "account_id": "BOI 6699",
       "sheet_name": "BOI 6699",
-      "meta_signals": ["BKID", "662113100016699", "BOI", "6699", "Bank of India"],
-      "header_signals": ["Debit", "Credit", "Cr/Dr", "Amount(INR)"],
-      "col_date": ["Date", "Txn Date"],
-      "col_particulars": ["Remarks", "Description"],
-      "col_narration_h": "Narration",
-      "col_dr": "Debit",
-      "col_cr": "Credit",
-      "col_balance": ["Balance Amount", "Balance(INR)", "Balance"],
-      "col_ref": ["Cheque No.", "Ref No./Cheque No.", "Ref No/Cheque No"],
-      "col_value_date": null,
-      "rules_module": "tax_automation.rules.banks.boi"
+      "display_name": "Bank of India",
+      "meta_signals_extra": ["BKID", "662113100016699", "6699"]
     },
-    "sbi_ca": {
-      "display_name": "SBI Current Account",
+    {
+      "account_key": "sbi_ca",
+      "bank": "sbi",
       "account_id": "SBI Current Account",
       "sheet_name": "SBI CA",
-      "meta_signals": ["State Bank of India", "Current Account", "Drawing Power", "Account Number"],
-      "header_signals": ["Txn Date", "Description", "Debit", "Credit", "Balance"],
-      "col_date": ["Txn Date", "Date"],
-      "col_particulars": ["Details", "Description"],
-      "col_narration_h": "Narration",
-      "col_dr": "Debit",
-      "col_cr": "Credit",
-      "col_balance": "Balance",
-      "col_ref": ["Ref No./Cheque No.", "Ref No/Cheque No"],
-      "col_value_date": "Value Date",
-      "rules_module": "tax_automation.rules.banks.sbi_base"
+      "display_name": "SBI Current Account",
+      "meta_signals_extra": ["Current Account", "Drawing Power"]
     },
-    "sbi_od": {
-      "display_name": "SBI OD 5441",
+    {
+      "account_key": "sbi_od",
+      "bank": "sbi",
       "account_id": "SBI OD 5441",
       "sheet_name": "SBI OD 5441",
-      "meta_signals": ["State Bank of India", "5441", "OD", "OVERDRAFT"],
-      "header_signals": ["Txn Date", "Description", "Debit", "Credit", "Balance"],
-      "col_date": ["Txn Date", "Date"],
-      "col_particulars": ["Details", "Description"],
-      "col_narration_h": "Narration",
-      "col_dr": "Debit",
-      "col_cr": "Credit",
-      "col_balance": "Balance",
-      "col_ref": ["Ref No./Cheque No.", "Ref No/Cheque No"],
-      "col_value_date": "Value Date",
-      "rules_module": "tax_automation.rules.banks.sbi_base"
+      "display_name": "SBI OD 5441",
+      "meta_signals_extra": ["5441", "OD", "OVERDRAFT"]
     },
-    "sbi_nsk": {
-      "display_name": "SBI Saving Nashik",
+    {
+      "account_key": "sbi_nsk",
+      "bank": "sbi",
       "account_id": "SBI SB Nsk",
       "sheet_name": "SBI SB Nsk",
-      "meta_signals": ["State Bank of India", "Nashik", "Nsk"],
-      "header_signals": ["Txn Date", "Description", "Debit", "Credit", "Balance"],
-      "col_date": ["Txn Date", "Date"],
-      "col_particulars": ["Details", "Description"],
-      "col_narration_h": "Narration",
-      "col_dr": "Debit",
-      "col_cr": "Credit",
-      "col_balance": "Balance",
-      "col_ref": ["Ref No./Cheque No.", "Ref No/Cheque No"],
-      "col_value_date": "Value Date",
-      "rules_module": "tax_automation.rules.banks.sbi_base"
+      "display_name": "SBI Saving Nashik",
+      "meta_signals_extra": ["Nashik", "Nsk"]
     },
-    "sbi_kota": {
-      "display_name": "SBI Saving Kota",
+    {
+      "account_key": "sbi_kota",
+      "bank": "sbi",
       "account_id": "SBI SB Kota",
       "sheet_name": "SBI SB Kota",
-      "meta_signals": ["State Bank of India", "Kota"],
-      "header_signals": ["Txn Date", "Description", "Debit", "Credit", "Balance"],
-      "col_date": ["Txn Date", "Date"],
-      "col_particulars": ["Details", "Description"],
-      "col_narration_h": "Narration",
-      "col_dr": "Debit",
-      "col_cr": "Credit",
-      "col_balance": "Balance",
-      "col_ref": ["Ref No./Cheque No.", "Ref No/Cheque No"],
-      "col_value_date": "Value Date",
-      "rules_module": "tax_automation.rules.banks.sbi_base"
+      "display_name": "SBI Saving Kota",
+      "meta_signals_extra": ["Kota"]
     },
-    "sbi_rawatbhata": {
-      "display_name": "SBI Saving Rawatbhata",
+    {
+      "account_key": "sbi_rawatbhata",
+      "bank": "sbi",
       "account_id": "SBI SB Rawatbhata",
       "sheet_name": "SBI SB Rawatbhata",
-      "meta_signals": ["State Bank of India", "rawatbhata"],
-      "header_signals": ["Txn Date", "Description", "Debit", "Credit", "Balance"],
-      "col_date": ["Txn Date", "Date"],
-      "col_particulars": ["Details", "Description"],
-      "col_narration_h": "Narration",
-      "col_dr": "Debit",
-      "col_cr": "Credit",
-      "col_balance": "Balance",
-      "col_ref": ["Ref No./Cheque No.", "Ref No/Cheque No"],
-      "col_value_date": "Value Date",
-      "rules_module": "tax_automation.rules.banks.sbi_base"
+      "display_name": "SBI Saving Rawatbhata",
+      "meta_signals_extra": ["rawatbhata"]
     },
-    "sbi_ins_loan": {
-      "display_name": "SBI Insurance Loan Nashik",
+    {
+      "account_key": "sbi_ins_loan",
+      "bank": "sbi",
       "account_id": "SBI Insurance Loan",
       "sheet_name": "SBI Insurance Loan",
-      "meta_signals": ["State Bank of India", "Insurance loan"],
-      "header_signals": ["Txn Date", "Description", "Debit", "Credit", "Balance"],
-      "col_date": ["Txn Date", "Date"],
-      "col_particulars": ["Details", "Description"],
-      "col_narration_h": "Narration",
-      "col_dr": "Debit",
-      "col_cr": "Credit",
-      "col_balance": "Balance",
-      "col_ref": ["Ref No./Cheque No.", "Ref No/Cheque No"],
-      "col_value_date": "Value Date",
-      "rules_module": "tax_automation.rules.banks.sbi_base"
+      "display_name": "SBI Insurance Loan Nashik",
+      "meta_signals_extra": ["Insurance loan"]
     },
-    "sbi_flat_ins": {
-      "display_name": "SBI Flat Insurance Account",
+    {
+      "account_key": "sbi_flat_ins",
+      "bank": "sbi",
       "account_id": "Ajay SBI Flat Insurance",
       "sheet_name": "SBI Flat Insurance Account",
-      "meta_signals": ["Flat Insurance"],
-      "header_signals": ["Txn Date", "Description", "Debit", "Credit", "Balance"],
-      "col_date": ["Txn Date", "Date"],
-      "col_particulars": ["Details", "Description"],
-      "col_narration_h": "Narration",
-      "col_dr": "Debit",
-      "col_cr": "Credit",
-      "col_balance": "Balance",
-      "col_ref": ["Ref No./Cheque No.", "Ref No/Cheque No"],
-      "col_value_date": "Value Date",
-      "rules_module": "tax_automation.rules.banks.sbi_base"
+      "display_name": "SBI Flat Insurance Account",
+      "meta_signals_extra": ["Flat Insurance"]
     },
-    "sbi_bank_3479": {
-      "display_name": "SBI Bank 3479",
+    {
+      "account_key": "sbi_bank_3479",
+      "bank": "sbi",
       "account_id": "SBI Bank 3479",
       "sheet_name": "SBI Bank 3479",
-      "meta_signals": ["3479"],
-      "header_signals": ["Txn Date", "Description", "Debit", "Credit", "Balance"],
-      "col_date": ["Txn Date", "Date"],
-      "col_particulars": ["Details", "Description"],
-      "col_narration_h": "Narration",
-      "col_dr": "Debit",
-      "col_cr": "Credit",
-      "col_balance": "Balance",
-      "col_ref": ["Ref No./Cheque No.", "Ref No/Cheque No"],
-      "col_value_date": "Value Date",
-      "rules_module": "tax_automation.rules.banks.sbi_base"
+      "display_name": "SBI Bank 3479",
+      "meta_signals_extra": ["3479"]
     },
-    "huf_ca": {
-      "display_name": "Ajay HUF Current Account",
+    {
+      "account_key": "huf_ca",
+      "bank": "huf",
       "account_id": "HUF Current Account",
       "sheet_name": "HUF Current",
-      "meta_signals": ["HUF", "OpTransactionHistory"],
-      "header_signals": ["Date", "Particulars", "Withdrawals", "Deposits", "Balance"],
-      "col_date": "Date",
-      "col_particulars": ["Remarks", "Particulars"],
-      "col_narration_h": "Narration",
-      "col_dr": "Withdrawals",
-      "col_cr": "Deposits",
-      "col_balance": "Balance",
-      "col_ref": "Tran ID",
-      "col_value_date": "Value Date",
-      "rules_module": "tax_automation.rules.banks.huf"
+      "display_name": "Ajay HUF Current Account",
+      "meta_signals_extra": ["HUF", "OpTransactionHistory"]
     }
-  }
+  ]
 }

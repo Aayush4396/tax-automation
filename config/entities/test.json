@@ -1,13 +1,24 @@
 {
+  "$schema": "../schemas/entity.json",
+  "entity_id": "test",
   "display_name": "Test Entity",
-  "banks": {
-    "hdfc": {
-      "display_name": "HDFC Bank",
-      "account_id": "123456789",
-      "col_particulars": ["Particulars"],
-      "col_dr": "Debit",
-      "col_cr": "Credit"
-    }
+  "self_patterns": ["TEST\\s*ENTITY"],
+  "self_vpas": [],
+  "family_members": [],
+  "rent": {
+    "landlords": [],
+    "vpas": [],
+    "keywords": []
   },
-  "output_sheet_names": [""]
+  "custom_rules": [],
+  "output_sheet_names": ["For Tally", "Conso", "Bank Summary"],
+  "accounts": [
+    {
+      "account_key": "hdfc",
+      "bank": "hdfc",
+      "account_id": "123456789",
+      "sheet_name": "HDFC",
+      "display_name": "HDFC Bank"
+    }
+  ]
 }

@@ -1,84 +1,99 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Entity Configuration Schema",
-  "description": "Schema for entity-specific configuration",
+  "title": "EntityProfileConfig",
+  "description": "Declarative configuration schema for an entity / taxpayer profile",
   "type": "object",
+  "required": [
+    "entity_id",
+    "display_name"
+  ],
   "properties": {
+    "entity_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$",
+      "description": "Lowercase alphanumeric identifier for the entity"
+    },
     "display_name": {
       "type": "string",
-      "description": "Human-readable name for the entity"
+      "description": "Full legal name or display name of the taxpayer"
     },
-    "banks": {
-      "type": "object",
-      "description": "Bank account configurations",
-      "additionalProperties": {
+    "pan": {
+      "type": "string",
+      "description": "Permanent Account Number (optional)"
+    },
+    "self_patterns": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Regex patterns matching the entity's own name on transfers and UPI"
+    },
+    "self_vpas": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Personal UPI VPAs or mobile numbers"
+    },
+    "family_members": {
+      "type": "array",
+      "description": "Declared family members for automatic transfer classification",
+      "items": {
         "type": "object",
+        "required": ["name", "patterns", "account_head"],
         "properties": {
-          "display_name": {
-            "type": "string",
-            "description": "Human-readable bank name"
-          },
-          "account_id": {
-            "type": "string",
-            "description": "Bank account identifier"
-          },
-          "col_particulars": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              }
-            ],
-            "description": "Column name(s) containing transaction particulars"
-          },
-          "col_dr": {
-            "type": "string",
-            "description": "Column name containing debit amounts"
-          },
-          "col_cr": {
-            "type": "string",
-            "description": "Column name containing credit amounts"
-          },
-          "col_date": {
-            "type": "string",
-            "description": "Column name containing transaction dates"
-          },
-          "col_value_date": {
-            "type": "string",
-            "description": "Column name containing value dates"
-          },
-          "col_balance": {
-            "type": "string",
-            "description": "Column name containing account balance"
-          },
-          "col_ref": {
-            "type": "string",
-            "description": "Column name containing transaction references"
-          }
-        },
-        "required": [
-          "display_name",
-          "col_particulars",
-          "col_dr",
-          "col_cr"
-        ]
+          "name": { "type": "string" },
+          "relationship": { "type": "string" },
+          "patterns": { "type": "array", "items": { "type": "string" } },
+          "account_head": { "type": "string" }
+        }
+      }
+    },
+    "rent": {
+      "type": "object",
+      "description": "Rent and landlord classification configuration",
+      "properties": {
+        "landlords": { "type": "array", "items": { "type": "string" } },
+        "vpas": { "type": "array", "items": { "type": "string" } },
+        "keywords": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "custom_rules": {
+      "type": "array",
+      "description": "Declarative custom classification rules specific to this entity",
+      "items": {
+        "type": "object",
+        "required": ["label", "account_head"],
+        "properties": {
+          "label": { "type": "string" },
+          "account_head": { "type": "string" },
+          "pattern": { "type": "string" },
+          "exact_amount": { "type": "number" },
+          "direction": { "type": "string", "enum": ["DR", "CR", "dr", "cr", "ANY", "any", "both"] },
+          "confidence": { "type": "number" }
+        }
       }
     },
     "output_sheet_names": {
       "type": "array",
+      "items": { "type": "string" },
+      "description": "List of sheet names to exclude from statement ingestion"
+    },
+    "accounts": {
+      "type": "array",
+      "description": "List of bank and financial accounts belonging to this entity",
       "items": {
-        "type": "string"
-      },
-      "description": "List of sheet names to exclude from processing"
+        "type": "object",
+        "required": ["account_key", "bank", "account_id", "sheet_name"],
+        "properties": {
+          "account_key": { "type": "string" },
+          "bank": { "type": "string" },
+          "account_id": { "type": "string" },
+          "sheet_name": { "type": "string" },
+          "display_name": { "type": "string" },
+          "meta_signals_extra": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "banks": {
+      "type": "object",
+      "description": "Legacy bank mapping dictionary for backward compatibility"
     }
-  },
-  "required": [
-    "display_name",
-    "banks"
-  ]
+  }
 }

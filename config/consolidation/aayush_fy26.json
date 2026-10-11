@@ -1,0 +1,17 @@
+{
+  "entity": "aayush",
+  "fy": "FY26",
+  "output_filename": "All Bank Statements Aayush FY26.xlsx",
+  "files": [
+    {
+      "filename": "Aayush Acct_Statement_XXXXXXXX5413_14042026.xls",
+      "sheet_name": "HDFC 5413",
+      "password_env_var": null
+    },
+    {
+      "filename": "SBM_fy26.pdf",
+      "sheet_name": "SBM",
+      "password_env_var": null
+    }
+  ]
+}
