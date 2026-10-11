@@ -56,15 +56,26 @@ def get_col_value(row: pd.Series, col_spec: str | list[str] | None) -> Any:
     """Extract column value from a pandas Series.
 
     Supports single column name or list of column names (first non-null value).
+    Safely handles duplicate column names where row[c] is a pd.Series.
     """
     if not col_spec:
         return None
+
+    def _extract_scalar(v: Any) -> Any:
+        if isinstance(v, pd.Series):
+            v_clean = v.dropna()
+            return v_clean.iloc[0] if not v_clean.empty else None
+        return v
+
     if isinstance(col_spec, list):
         for c in col_spec:
-            if c in row.index and pd.notna(row[c]):
-                return row[c]
+            if c in row.index:
+                val = _extract_scalar(row[c])
+                if pd.notna(val):
+                    return val
         return None
-    return row.get(col_spec)
+    val = row.get(col_spec)
+    return _extract_scalar(val)
 
 
 def classify_transaction(

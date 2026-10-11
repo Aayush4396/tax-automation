@@ -30,9 +30,15 @@ history/
 *.user
 *.userosscache
 
-# Data files - add here if you have large data files that shouldn't be tracked
-# data/*.xlsx
-# data/*.json
+# Data files - preserve folder structure and docs, but ignore actual sensitive contents
+data/**/*.xlsx
+data/**/*.xls
+data/**/*.pdf
+data/**/*.csv
+data/**/*.log
+data/**/~$*
+!data/**/.gitkeep
+!data/**/*.md
 
 # Local settings
 *.local.yml
