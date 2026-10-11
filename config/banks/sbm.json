@@ -1,0 +1,23 @@
+{
+  "bank_key": "sbm",
+  "display_name": "SBM Bank",
+  "rules_module": "tax_automation.rules.banks.sbm",
+  "meta_signals": [
+    "STCB",
+    "SBM",
+    "Savings Account  No."
+  ],
+  "header_signals": [
+    "Cheque Details",
+    "Withdrawals",
+    "Deposits"
+  ],
+  "col_date": "Date",
+  "col_particulars": "Particulars",
+  "col_narration_h": "Narration",
+  "col_dr": "Withdrawals",
+  "col_cr": "Deposits",
+  "col_balance": "Balance",
+  "col_ref": "Cheque Details",
+  "col_value_date": null
+}

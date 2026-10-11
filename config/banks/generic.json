@@ -1,0 +1,21 @@
+{
+  "bank_key": "generic",
+  "display_name": "Generic Bank Statement",
+  "rules_module": null,
+  "meta_signals": [],
+  "header_signals": [
+    "Date",
+    "Description",
+    "Debit",
+    "Credit",
+    "Balance"
+  ],
+  "col_date": ["Date", "Txn Date", "Transaction Date", "Tran Date"],
+  "col_particulars": ["Narration", "Description", "Particulars", "Details", "Remarks"],
+  "col_narration_h": "Narration",
+  "col_dr": ["Debit", "Withdrawal", "Withdrawal Amt", "Withdrawal Amt.", "Withdrawals", "DR"],
+  "col_cr": ["Credit", "Deposit", "Deposit Amt", "Deposit Amt.", "Deposits", "CR"],
+  "col_balance": ["Balance", "Closing Balance", "BAL"],
+  "col_ref": ["Ref No", "Cheque No", "Chq / Ref No.", "Chq./Ref.No.", "Ref No./Cheque No.", "Tran ID"],
+  "col_value_date": ["Value Date", "Value Dt"]
+}

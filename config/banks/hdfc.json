@@ -1,0 +1,26 @@
+{
+  "bank_key": "hdfc",
+  "display_name": "HDFC Bank",
+  "rules_module": "tax_automation.rules.banks.hdfc_base",
+  "meta_signals": [
+    "HDFC BANK",
+    "Withdrawal Amt",
+    "Closing Balance",
+    "Statement of accounts",
+    "Account No :"
+  ],
+  "header_signals": [
+    "Withdrawal Amt.",
+    "Deposit Amt.",
+    "Closing Balance",
+    "Chq./Ref.No."
+  ],
+  "col_date": "Date",
+  "col_particulars": "Narration",
+  "col_narration_h": "Narration",
+  "col_dr": "Withdrawal Amt.",
+  "col_cr": "Deposit Amt.",
+  "col_balance": "Closing Balance",
+  "col_ref": "Chq./Ref.No.",
+  "col_value_date": "Value Dt"
+}

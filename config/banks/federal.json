@@ -1,0 +1,25 @@
+{
+  "bank_key": "federal",
+  "display_name": "Federal Bank (Jupiter)",
+  "rules_module": "tax_automation.rules.banks.federal",
+  "meta_signals": [
+    "FDRL",
+    "Federal Bank",
+    "Neo Banking",
+    "Jupiter"
+  ],
+  "header_signals": [
+    "Tran Type",
+    "Tran ID",
+    "Withdrawals",
+    "Deposits"
+  ],
+  "col_date": "Date",
+  "col_particulars": "Particulars",
+  "col_narration_h": "Narration",
+  "col_dr": "Withdrawals",
+  "col_cr": "Deposits",
+  "col_balance": "Balance",
+  "col_ref": "Tran ID",
+  "col_value_date": "Value Date"
+}

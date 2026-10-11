@@ -1,0 +1,25 @@
+{
+  "bank_key": "kotak",
+  "display_name": "Kotak Mahindra Bank",
+  "rules_module": "tax_automation.rules.banks.kotak_base",
+  "meta_signals": [
+    "Cust. Reln. No.",
+    "Account Statement",
+    "KKBK",
+    "Account No."
+  ],
+  "header_signals": [
+    "Transaction Date",
+    "Description",
+    "Chq / Ref No.",
+    "Dr / Cr"
+  ],
+  "col_date": "Transaction Date",
+  "col_particulars": "Description",
+  "col_narration_h": "Narration",
+  "col_dr": "DR",
+  "col_cr": "CR",
+  "col_balance": "Balance",
+  "col_ref": "Chq / Ref No.",
+  "col_value_date": "Value Date"
+}

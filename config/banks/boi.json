@@ -1,0 +1,24 @@
+{
+  "bank_key": "boi",
+  "display_name": "Bank of India",
+  "rules_module": "tax_automation.rules.banks.boi",
+  "meta_signals": [
+    "BKID",
+    "BOI",
+    "Bank of India"
+  ],
+  "header_signals": [
+    "Debit",
+    "Credit",
+    "Cr/Dr",
+    "Amount(INR)"
+  ],
+  "col_date": ["Date", "Txn Date"],
+  "col_particulars": ["Remarks", "Description"],
+  "col_narration_h": "Narration",
+  "col_dr": "Debit",
+  "col_cr": "Credit",
+  "col_balance": ["Balance Amount", "Balance(INR)", "Balance"],
+  "col_ref": ["Cheque No.", "Ref No./Cheque No.", "Ref No/Cheque No"],
+  "col_value_date": null
+}

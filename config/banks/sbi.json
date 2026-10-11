@@ -1,0 +1,27 @@
+{
+  "bank_key": "sbi",
+  "display_name": "State Bank of India",
+  "rules_module": "tax_automation.rules.banks.sbi_base",
+  "meta_signals": [
+    "State Bank of India",
+    "Drawing Power",
+    "REGULAR SB CHQ",
+    "Interest Rate",
+    "Account Number",
+    "SBIN"
+  ],
+  "header_signals": [
+    "Txn Date",
+    "Ref No./Cheque No.",
+    "Debit",
+    "Credit"
+  ],
+  "col_date": ["Txn Date", "Date"],
+  "col_particulars": ["Details", "Description"],
+  "col_narration_h": "Narration",
+  "col_dr": "Debit",
+  "col_cr": "Credit",
+  "col_balance": "Balance",
+  "col_ref": ["Ref No./Cheque No.", "Ref No/Cheque No"],
+  "col_value_date": "Value Date"
+}

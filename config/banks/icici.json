@@ -1,0 +1,25 @@
+{
+  "bank_key": "icici",
+  "display_name": "ICICI Bank",
+  "rules_module": null,
+  "meta_signals": [
+    "ICICI BANK",
+    "ICIC",
+    "Account Statement"
+  ],
+  "header_signals": [
+    "Transaction Date",
+    "Cheque Number",
+    "Withdrawal Amount",
+    "Deposit Amount",
+    "Balance"
+  ],
+  "col_date": ["Transaction Date", "Value Date", "Date"],
+  "col_particulars": ["Transaction Remarks", "Description", "Particulars"],
+  "col_narration_h": "Narration",
+  "col_dr": ["Withdrawal Amount (INR )", "Withdrawal Amount", "Debit"],
+  "col_cr": ["Deposit Amount (INR )", "Deposit Amount", "Credit"],
+  "col_balance": ["Balance (INR )", "Balance"],
+  "col_ref": ["Cheque Number", "Ref No./Cheque No."],
+  "col_value_date": "Value Date"
+}

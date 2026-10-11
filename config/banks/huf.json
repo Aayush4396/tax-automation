@@ -1,0 +1,24 @@
+{
+  "bank_key": "huf",
+  "display_name": "HUF Bank Account",
+  "rules_module": "tax_automation.rules.banks.huf",
+  "meta_signals": [
+    "HUF",
+    "OpTransactionHistory"
+  ],
+  "header_signals": [
+    "Date",
+    "Particulars",
+    "Withdrawals",
+    "Deposits",
+    "Balance"
+  ],
+  "col_date": "Date",
+  "col_particulars": ["Remarks", "Particulars"],
+  "col_narration_h": "Narration",
+  "col_dr": "Withdrawals",
+  "col_cr": "Deposits",
+  "col_balance": "Balance",
+  "col_ref": "Tran ID",
+  "col_value_date": "Value Date"
+}

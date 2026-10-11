@@ -1,0 +1,26 @@
+{
+  "bank_key": "axis",
+  "display_name": "Axis Bank",
+  "rules_module": "tax_automation.rules.banks.axis",
+  "meta_signals": [
+    "UTIB",
+    "SRL NO",
+    "PARTICULARS",
+    "Statement of Account No",
+    "AXIS"
+  ],
+  "header_signals": [
+    "SRL NO",
+    "PARTICULARS",
+    "CHQNO",
+    "Tran Date"
+  ],
+  "col_date": "Tran Date",
+  "col_particulars": "PARTICULARS",
+  "col_narration_h": "Narration",
+  "col_dr": "DR",
+  "col_cr": "CR",
+  "col_balance": "BAL",
+  "col_ref": "CHQNO",
+  "col_value_date": null
+}
