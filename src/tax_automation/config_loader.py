@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
-"""
-config_loader.py
-================
-Dynamic loader for JSON entity configurations, consolidation maps, and .env credentials.
+"""config_loader.py.
+
+Dynamic loader for JSON configurations, bank schemas, entity profiles,
+and canonical directory path resolution.
 """
 
 from __future__ import annotations
-import os
 import json
+import os
 from pathlib import Path
 from typing import Any
 
@@ -68,6 +68,87 @@ def resolve_password(password_env_var: str | None) -> str | None:
         return None
     load_env_file()
     return os.environ.get(password_env_var)
+
+
+def get_bank_schema(bank_key: str) -> dict[str, Any]:
+    """Loads base bank column schema and signals from config/banks/<bank_key>.json."""
+    schema_file = CONFIG_DIR / "banks" / f"{bank_key.lower()}.json"
+    if not schema_file.exists():
+        # Fallback to generic schema if available
+        generic_file = CONFIG_DIR / "banks" / "generic.json"
+        if generic_file.exists():
+            with open(generic_file, "r", encoding="utf-8") as f:
+                return json.load(f)
+        return {}
+
+    with open(schema_file, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def resolve_entity_bank_registry(entity_id: str) -> dict[str, dict[str, Any]]:
+    """Constructs the complete runtime bank registry for an entity.
+
+    Merges each account declared in the entity profile with its base bank schema.
+    Supports both the new declarative 'accounts' list and legacy 'banks' dictionary.
+    """
+    config = get_entity_config(entity_id)
+    registry: dict[str, dict[str, Any]] = {}
+
+    # Case 1: Declarative accounts list (Target Architecture)
+    if "accounts" in config and isinstance(config["accounts"], list):
+        for acc in config["accounts"]:
+            acc_key = acc.get("account_key", "").lower()
+            if not acc_key:
+                continue
+            bank_type = acc.get("bank", acc_key).lower()
+            base_schema = get_bank_schema(bank_type)
+
+            merged = dict(base_schema)
+            # Overlay account-specific configuration
+            merged["account_id"] = acc.get("account_id", acc_key.upper())
+            merged["display_name"] = acc.get(
+                "display_name", base_schema.get("display_name", acc_key.title())
+            )
+            merged["sheet_name"] = acc.get("sheet_name", acc_key.title())
+            merged["bank_type"] = bank_type
+
+            # Extend metadata signals with account-specific branch/id signals
+            extra_signals = acc.get("meta_signals_extra", [])
+            if extra_signals:
+                existing_sigs = list(merged.get("meta_signals", []))
+                merged["meta_signals"] = existing_sigs + [
+                    s for s in extra_signals if s not in existing_sigs
+                ]
+
+            registry[acc_key] = merged
+        return registry
+
+    # Case 2: Legacy banks dictionary (Backward compatibility during transition)
+    if "banks" in config and isinstance(config["banks"], dict):
+        for b_key, b_cfg in config["banks"].items():
+            base_schema = get_bank_schema(b_key)
+            merged = dict(base_schema)
+            merged.update(b_cfg)
+            registry[b_key.lower()] = merged
+        return registry
+
+    return registry
+
+
+def resolve_input_dir(
+    entity_id: str, fy: str, subfolder: str = "bank_statements"
+) -> Path:
+    """Returns canonical input directory path: data/<entity>/<FY>/input/<subfolder>/."""
+    path = REPO_ROOT / "data" / entity_id.lower() / fy.upper() / "input" / subfolder
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
+def resolve_output_dir(entity_id: str, fy: str) -> Path:
+    """Returns canonical output directory path: data/<entity>/<FY>/output/."""
+    path = REPO_ROOT / "data" / entity_id.lower() / fy.upper() / "output"
+    path.mkdir(parents=True, exist_ok=True)
+    return path
 
 
 def get_merchants_config() -> list[dict[str, Any]]:
