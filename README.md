@@ -203,6 +203,9 @@ Statements are decrypted in-memory during extraction. Credentials and decrypted 
 
 ## Technical Specifications & Architecture
 
+For a comprehensive deep-dive into internal pipeline stages, data flow transformations, DataFrame contracts, and Mermaid architecture diagrams, see:
+👉 **[Technical Architecture & Pipeline Documentation](docs/TECHNICAL_DOCUMENTATION.md)**
+
 ```text
 tax-automation/
 ├── src/tax_automation/
