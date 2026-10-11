@@ -57,9 +57,7 @@ def load_entity_extensions(entity_id: str) -> dict[str, list[tuple]]:
     return ext
 
 
-def load_bank_rules(
-    bank_key: str, rules_module: str | None = None
-) -> list[tuple]:
+def load_bank_rules(bank_key: str, rules_module: str | None = None) -> list[tuple]:
     """Loads bank base classification rules dynamically without hardcoded maps.
 
     If rules_module is not specified, resolves it directly from the bank's schema JSON.
@@ -234,9 +232,7 @@ def build_dynamic_custom_rules(entity_config: dict[str, Any]) -> list[tuple]:
     return rules
 
 
-def build_rule_chain(
-    entity_id: str, bank_key: str
-) -> tuple[list[tuple], list[tuple]]:
+def build_rule_chain(entity_id: str, bank_key: str) -> tuple[list[tuple], list[tuple]]:
     """Builds the full runtime rule chain for an entity and bank account.
 
     Layer 1: Entity custom rules (exact amounts, specific overrides)
@@ -269,12 +265,7 @@ def build_rule_chain(
 
     # Assemble bank-level rules (evaluated before common rules)
     full_bank_rules = (
-        custom_rules
-        + rent_rules
-        + contra_rules
-        + family_rules
-        + bank_ext
-        + bank_base
+        custom_rules + rent_rules + contra_rules + family_rules + bank_ext + bank_base
     )
 
     # Universal common rules

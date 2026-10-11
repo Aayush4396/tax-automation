@@ -231,9 +231,7 @@ def process_entity_narration(
             continue
 
         hdr_idx = find_header_row(sheet_rows)
-        bank_key, _ = identify_bank(
-            sheet_rows, hdr_idx, bank_registry, sheet_name
-        )
+        bank_key, _ = identify_bank(sheet_rows, hdr_idx, bank_registry, sheet_name)
         if bank_key == "unknown":
             continue
 
@@ -252,9 +250,7 @@ def process_entity_narration(
         # Apply classification to each row
         records: list[dict[str, Any]] = []
         for _, row in df_sheet.iterrows():
-            particulars = str(
-                get_col_value(row, bank_cfg.get("col_particulars")) or ""
-            )
+            particulars = str(get_col_value(row, bank_cfg.get("col_particulars")) or "")
             dr_val = get_col_value(row, bank_cfg.get("col_dr"))
             cr_val = get_col_value(row, bank_cfg.get("col_cr"))
             if not particulars and not dr_val and not cr_val:
@@ -302,9 +298,7 @@ def process_entity_narration(
 
     # Detect duplicates
     dup_key = all_df[["TX_Date", "DR", "CR", "Auto_Narration", "Bank_Key"]].copy()
-    dup_key["TX_Date"] = pd.to_datetime(
-        dup_key["TX_Date"], errors="coerce"
-    ).dt.date
+    dup_key["TX_Date"] = pd.to_datetime(dup_key["TX_Date"], errors="coerce").dt.date
     all_df["Duplicate"] = dup_key.duplicated(keep=False).map(
         {True: "⚠ Possible Duplicate", False: ""}
     )
@@ -323,9 +317,7 @@ def process_entity_narration(
     # Generate all output sheets
     write_for_tally(wb_out, all_df)
     write_conso(wb_out, all_df, fy, account_holder=entity_name)
-    write_bank_summary(
-        wb_out, all_df, bank_balances, fy, account_holder=entity_name
-    )
+    write_bank_summary(wb_out, all_df, bank_balances, fy, account_holder=entity_name)
     write_monthly_pivot(wb_out, all_df)
     write_colour_legend(wb_out)
 

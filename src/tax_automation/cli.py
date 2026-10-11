@@ -78,9 +78,7 @@ def main():
         _init_entity(args.entity, args.name, args.pan, args.fy)
 
 
-def _init_entity(
-    entity_id: str, display_name: str, pan: str | None, fy: str
-) -> None:
+def _init_entity(entity_id: str, display_name: str, pan: str | None, fy: str) -> None:
     """Scaffolds configuration and directories for a new entity."""
     import json
     import re
@@ -114,20 +112,16 @@ def _init_entity(
             "self_patterns": [norm_name],
             "self_vpas": [],
             "family_members": [],
-            "rent": {
-                "landlords": [],
-                "vpas": [],
-                "keywords": []
-            },
+            "rent": {"landlords": [], "vpas": [], "keywords": []},
             "custom_rules": [],
             "output_sheet_names": [
                 "For Tally",
                 "Conso",
                 "Bank Summary",
                 "Monthly Pivot",
-                "Guidelines"
+                "Guidelines",
             ],
-            "accounts": []
+            "accounts": [],
         }
         with open(cfg_path, "w", encoding="utf-8") as f:
             json.dump(profile_data, f, indent=2)

@@ -37,9 +37,7 @@ def get_narration_stats(filepath: Path, fy: str):
     if "Confidence" in full_df.columns:
         high = len(full_df[full_df["Confidence"] >= 0.85])
         med = len(
-            full_df[
-                (full_df["Confidence"] >= 0.60) & (full_df["Confidence"] < 0.85)
-            ]
+            full_df[(full_df["Confidence"] >= 0.60) & (full_df["Confidence"] < 0.85)]
         )
         low = len(full_df[full_df["Confidence"] < 0.60])
         print(f"\nNarration Stats for {fy} (Total Transactions: {total}):")
