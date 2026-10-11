@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-"""
-check_contras.py
-================
+"""check_contras.py.
+
 Verifies whether all identified self-transfers (Contras) in bank statements
-are matching symmetrically across accounts.
+have corresponding matching contra entries across other bank accounts.
 """
 
 from __future__ import annotations
@@ -11,21 +10,13 @@ import argparse
 import io
 from pathlib import Path
 import sys
-
 from openpyxl import load_workbook
-import pandas as pd
 
-from tax_automation.config_loader import get_entity_config, REPO_ROOT
-
-
-def build_bank_map(config: dict) -> dict[str, str]:
-    """Dynamically builds account_id -> display_key mapping from entity config."""
-    bank_map = {}
-    for key, cfg in config.get("banks", {}).items():
-        acct_id = cfg.get("account_id")
-        if acct_id:
-            bank_map[acct_id] = key.upper()
-    return bank_map
+from tax_automation.config_loader import (
+    get_entity_config,
+    resolve_output_dir,
+    REPO_ROOT,
+)
 
 
 def verify_contras(entity_id: str, fy: str, file_path: Path | None = None) -> bool:
@@ -35,14 +26,18 @@ def verify_contras(entity_id: str, fy: str, file_path: Path | None = None) -> bo
     entity_dir_name = entity_id.title()
 
     if file_path is None:
-        file_path = (
-            REPO_ROOT
-            / "data"
-            / entity_dir_name
-            / "Generated Data"
-            / fy
-            / f"{entity_dir_name}_Consolidated_Bank_Ledger_{fy}.xlsx"
-        )
+        file_path = resolve_output_dir(entity_id, fy) / "narrated_ledger.xlsx"
+        if not file_path.exists():
+            legacy_path = (
+                REPO_ROOT
+                / "data"
+                / entity_dir_name
+                / "Generated Data"
+                / fy
+                / f"{entity_dir_name}_Consolidated_Bank_Ledger_{fy}.xlsx"
+            )
+            if legacy_path.exists():
+                file_path = legacy_path
 
     if not file_path.exists():
         print(f"Error: Ledger file not found at {file_path}")
@@ -59,53 +54,65 @@ def verify_contras(entity_id: str, fy: str, file_path: Path | None = None) -> bo
         if len(rows) < 2:
             continue
 
-        # Find header
-        hdr_idx = 0
-        for i, r in enumerate(rows[:20]):
-            cells = [str(c).strip().lower() for c in r if c is not None]
-            if "date" in cells and (
-                "debit" in cells or "dr" in cells or "withdrawal amt." in cells
-            ):
-                hdr_idx = i
-                break
-
-        hdr = [str(c).strip() if c is not None else "" for c in rows[hdr_idx]]
-        start_row = hdr_idx + 1
-        df = pd.DataFrame(rows[start_row:], columns=hdr[: len(rows[hdr_idx])])
-
-        # Filter contra rows
-        narration_col = (
-            "Auto_Narration"
-            if "Auto_Narration" in df.columns
-            else ("Narration" if "Narration" in df.columns else None)
-        )
-        if not narration_col:
+        header = [str(c).strip().lower() if c else "" for c in rows[0]]
+        try:
+            date_idx = header.index("date")
+            part_idx = header.index("particulars")
+            dr_idx = header.index("debit")
+            cr_idx = header.index("credit")
+            lbl_idx = header.index("narration label")
+        except ValueError:
             continue
 
-        contra_df = df[df[narration_col].str.startswith("Contra", na=False)]
-        for _, row in contra_df.iterrows():
-            contras.append(
-                {
-                    "Sheet": sheet,
-                    "Date": row.get("Date"),
-                    "Particulars": row.get("Particulars"),
-                    "Narration": row.get(narration_col),
-                    "DR": row.get("DR", 0.0) or row.get("Withdrawal Amt.", 0.0) or 0.0,
-                    "CR": row.get("CR", 0.0) or row.get("Deposit Amt.", 0.0) or 0.0,
-                }
-            )
+        for r in rows[1:]:
+            lbl = str(r[lbl_idx] or "")
+            if lbl.startswith("Contra"):
+                dr_val = float(r[dr_idx] or 0.0)
+                cr_val = float(r[cr_idx] or 0.0)
+                contras.append(
+                    {
+                        "sheet": sheet,
+                        "date": r[date_idx],
+                        "particulars": r[part_idx],
+                        "dr": dr_val,
+                        "cr": cr_val,
+                        "label": lbl,
+                    }
+                )
 
-    print(f"Total contra transactions found across accounts: {len(contras)}")
-    return True
+    total_dr = sum(c["dr"] for c in contras)
+    total_cr = sum(c["cr"] for c in contras)
+    diff = abs(total_dr - total_cr)
+
+    print(f"Total Identified Contras: {len(contras)}")
+    print(f"Total Contra Debits:      {total_dr:,.2f}")
+    print(f"Total Contra Credits:     {total_cr:,.2f}")
+    print(f"Difference:               {diff:,.2f}")
+
+    if diff < 1.0:
+        print("[PASS] Contras are symmetric and balanced.")
+        return True
+    else:
+        print(f"[WARN] Imbalance of {diff:,.2f} detected across Contras.")
+        return False
 
 
-if __name__ == "__main__":
+def main():
     if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
         sys.stdout = io.TextIOWrapper(
             sys.stdout.buffer, encoding="utf-8", errors="replace"
         )
-    parser = argparse.ArgumentParser(description="Check contra symmetry")
+    parser = argparse.ArgumentParser(
+        description="Verify contra balance across accounts."
+    )
     parser.add_argument("--entity", default="aayush", help="Entity profile ID")
     parser.add_argument("--fy", default="FY26", help="Financial year")
+    parser.add_argument("--file", help="Explicit path to output ledger")
     args = parser.parse_args()
-    verify_contras(args.entity, args.fy)
+
+    file_p = Path(args.file) if args.file else None
+    verify_contras(args.entity, args.fy, file_p)
+
+
+if __name__ == "__main__":
+    main()

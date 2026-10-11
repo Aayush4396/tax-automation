@@ -544,7 +544,7 @@ def write_conso(
     wb: Workbook,
     all_df: pd.DataFrame,
     fy_label: str,
-    account_holder: str = "Aayush Kumar Gupta",
+    account_holder: str = "Account Holder",
 ):
     ws = wb.create_sheet(title="Conso")
 
@@ -624,7 +624,7 @@ def write_bank_summary(
     all_df: pd.DataFrame,
     bank_balances: dict[str, tuple[float, float]],
     fy_label: str,
-    account_holder: str = "Aayush Gupta",
+    account_holder: str = "Account Holder",
 ):
     """
     bank_balances: { account_id: (opening_balance, closing_balance) }
@@ -1426,23 +1426,20 @@ def write_colour_legend(wb: Workbook):
         (
             "Family Transfers",
             [
-                ("Transfer - Sunita Gupta", "Transfers to/from Sunita Gupta"),
-                ("Transfer - Ajay Gupta", "Transfers to/from Ajay Gupta"),
-                ("Transfer - Archit Gupta", "Transfers to/from Archit Gupta"),
-                ("Transfer - Megha Gupta", "Transfers to/from Megha Gupta"),
+                (
+                    "Transfer - <Family Member>",
+                    "Transfers to/from declared family members",
+                ),
             ],
         ),
         (
             "Self Transfers (Contra)",
             [
-                ("Contra - SBI", "Self-transfer to/from State Bank of India"),
-                ("Contra - Kotak", "Self-transfer to/from Kotak Mahindra Bank"),
-                ("Contra - Jupiter", "Self-transfer to/from Jupiter account"),
-                ("Contra - HDFC", "Self-transfer to/from HDFC Bank"),
-                ("Contra - Axis", "Self-transfer to/from Axis Bank"),
-                ("Contra - SBM", "Self-transfer to/from SBM Bank"),
-                ("Contra - Self", "Self-transfer between own accounts"),
-                ("Contra - Self (SuperMoney)", "Self-transfer via SuperMoney VPA"),
+                (
+                    "Contra - <Account>",
+                    "Self-transfers between own declared bank accounts",
+                ),
+                ("Contra - Self", "Self-transfers between own accounts"),
             ],
         ),
         (

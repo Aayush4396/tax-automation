@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
-"""
-consolidation.py
-==================
+"""consolidation.py.
 
 Bank statement consolidation module.
-
-This module handles the consolidation of raw bank statements into a unified format.
-It is decoupled from the CLI and can be used independently.
+Handles consolidation of raw bank statements into a canonical multi-sheet Excel file.
 """
 
 from __future__ import annotations
 from pathlib import Path
 
-from tax_automation.config_loader import get_entity_config
+from tax_automation.config_loader import (
+    get_entity_config,
+    resolve_input_dir,
+    resolve_output_dir,
+)
 from tax_automation.consolidators.generic_consolidator import (
     consolidate_entity_statements,
 )
@@ -37,23 +37,18 @@ def consolidate_entity(
     Returns:
         Path to the consolidated output file
     """
-    # Load entity configuration
     config = get_entity_config(entity_id)
     entity_name = config.get("display_name", entity_id.title())
-    entity_dir_name = entity_id.title()
 
-    # Default input directory
     if input_dir is None:
-        input_dir = Path("data") / entity_dir_name / "Bank Statements" / fy
-    input_dir.mkdir(parents=True, exist_ok=True)
+        input_dir = resolve_input_dir(entity_id, fy, "bank_statements")
 
-    # Default output directory
     if output_dir is None:
-        output_dir = Path("data") / entity_dir_name / "Generated Data" / fy
-    output_dir.mkdir(parents=True, exist_ok=True)
+        output_dir = resolve_output_dir(entity_id, fy)
 
-    # Perform consolidation using existing consolidator
-    output_path = consolidate_entity_statements(entity_id, fy)
+    output_path = consolidate_entity_statements(
+        entity_id, fy, data_dir=input_dir, output_dir=output_dir
+    )
 
     print(
         f"[OK] Consolidated statements for {entity_name} ({fy}) "

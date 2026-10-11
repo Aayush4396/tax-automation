@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
-"""
-narration.py
-=============
+"""narration.py.
 
 Core narration pipeline implementation for transaction classification and processing.
-
-This module contains the business logic previously located in cli.py, now separated
-into a dedicated module for better testability and maintainability.
+Loads consolidated statements, fingerprints bank sheets via bank registry,
+applies dynamic & bank rule chains, and generates the master Excel ledger.
 """
 
 from __future__ import annotations
@@ -17,7 +14,13 @@ from typing import Any, Tuple
 import pandas as pd
 from openpyxl import load_workbook, Workbook
 
-from tax_automation.config_loader import get_entity_config, REPO_ROOT
+from tax_automation.config_loader import (
+    get_entity_config,
+    resolve_entity_bank_registry,
+    resolve_input_dir,
+    resolve_output_dir,
+    REPO_ROOT,
+)
 from tax_automation.core.auto_header import find_header_row
 from tax_automation.core.bank_identifier import identify_bank
 from tax_automation.core.merchants import detect_merchant
@@ -40,7 +43,7 @@ _UPI_PAT = re.compile(
 
 def safe_float(val: Any) -> float:
     """Convert value to float safely, returning 0.0 for invalid values."""
-    if pd.isna(val):
+    if pd.isna(val) or val is None:
         return 0.0
     try:
         val_str = str(val).replace(",", "").strip()
@@ -69,12 +72,12 @@ def classify_transaction(
     dr: float,
     cr: float,
     entity_id: str,
-    bank_key: str = "unknown",
-) -> Tuple[str, str, float]:
-    """Classify a transaction using the entity's dynamic rule chain.
+    bank_key: str,
+) -> tuple[str, str, float]:
+    """Classifies a transaction by running the dynamic rule chain.
 
     Args:
-        particulars: Transaction description text
+        particulars: Raw narration string
         dr: Debit amount
         cr: Credit amount
         entity_id: Entity profile identifier
@@ -91,17 +94,10 @@ def classify_transaction(
     dr_val = safe_float(dr)
     cr_val = safe_float(cr)
 
-    # Load rules for this entity and bank
+    # Load assembled rules for this entity and bank
     bank_rules, common_rules = build_rule_chain(entity_id, bank_key)
 
-    # Filter out self-family transfer rules
-    filtered_common = [
-        r
-        for r in common_rules
-        if not (r[0].startswith("Transfer - ") and entity_id.lower() in r[1].lower())
-    ]
-
-    # 1. Apply bank-specific rules
+    # 1. Apply bank & dynamic entity rules (high priority)
     for rule in bank_rules:
         try:
             label, head, fn, conf = rule
@@ -110,8 +106,9 @@ def classify_transaction(
         except Exception:
             continue
 
-    # 2. Apply common rules (excluding fallback rules)
-    for rule in filtered_common[:-3]:
+    # 2. Apply common rules (excluding generic UPI fallback rules)
+    fallback_cutoff = max(0, len(common_rules) - 3)
+    for rule in common_rules[:fallback_cutoff]:
         try:
             label, head, fn, conf = rule
             if fn(p, dr_val, cr_val):
@@ -126,7 +123,7 @@ def classify_transaction(
             return result
 
     # 4. Generic UPI rules
-    for rule in filtered_common[-3:-1]:
+    for rule in common_rules[fallback_cutoff:]:
         try:
             label, head, fn, conf = rule
             if fn(p, dr_val, cr_val):
@@ -156,53 +153,58 @@ def process_entity_narration(
         Path to the generated output file
     """
     config = get_entity_config(entity_id)
-    bank_registry = config.get("banks", {})
+    bank_registry = resolve_entity_bank_registry(entity_id)
     output_sheet_names = set(config.get("output_sheet_names", []))
 
     entity_name = config.get("display_name", entity_id.title())
     entity_dir_name = entity_id.title()
 
-    # Find input file if not provided
+    # Find input file if not provided: check canonical step 1 output first
     if input_path is None:
-        search_dirs = [
-            REPO_ROOT / "data" / entity_dir_name / "Generated Data" / fy,
-            REPO_ROOT / "data" / entity_dir_name / "Data" / fy / "Bank_Statements",
-            REPO_ROOT / "data" / entity_dir_name / "Bank Statements" / fy,
-            REPO_ROOT / entity_dir_name / "Bank Statements" / fy,
-            REPO_ROOT / entity_dir_name / "Data" / fy / "Bank_Statements",
-            REPO_ROOT / entity_dir_name / "Generated Data" / fy,
-        ]
-        for s_dir in search_dirs:
-            if not s_dir.exists():
-                continue
-            matches = (
-                list(s_dir.glob("All Bank Statements*.xlsx"))
-                + list(s_dir.glob("All_Bank_Statements*.xlsx"))
-                + list(s_dir.glob("*.xlsx"))
-                + list(s_dir.glob("*.xls"))
-            )
-            valid_matches = [
-                m
-                for m in matches
-                if "Consolidated_Bank_Ledger" not in m.name
-                and not m.name.startswith("~$")
-                and m.stat().st_size > 1000
+        canonical_step1 = (
+            resolve_output_dir(entity_id, fy) / "consolidated_statements.xlsx"
+        )
+        if canonical_step1.exists():
+            input_path = canonical_step1
+        else:
+            search_dirs = [
+                resolve_input_dir(entity_id, fy, "bank_statements"),
+                REPO_ROOT / "data" / entity_dir_name / "Generated Data" / fy,
+                REPO_ROOT / "data" / entity_dir_name / "Data" / fy / "Bank_Statements",
+                REPO_ROOT / "data" / entity_dir_name / "Bank Statements" / fy,
+                REPO_ROOT / entity_dir_name / "Bank Statements" / fy,
+                REPO_ROOT / entity_dir_name / "Data" / fy / "Bank_Statements",
+                REPO_ROOT / entity_dir_name / "Generated Data" / fy,
             ]
-            if valid_matches:
-                input_path = valid_matches[0]
-                break
+            for s_dir in search_dirs:
+                if not s_dir.exists():
+                    continue
+                matches = (
+                    list(s_dir.glob("All Bank Statements*.xlsx"))
+                    + list(s_dir.glob("All_Bank_Statements*.xlsx"))
+                    + list(s_dir.glob("*.xlsx"))
+                    + list(s_dir.glob("*.xls"))
+                )
+                valid_matches = [
+                    m
+                    for m in matches
+                    if "Consolidated_Bank_Ledger" not in m.name
+                    and "narrated_ledger" not in m.name
+                    and not m.name.startswith("~$")
+                    and m.stat().st_size > 1000
+                ]
+                if valid_matches:
+                    input_path = valid_matches[0]
+                    break
         if input_path is None:
             raise FileNotFoundError(
                 f"Input bank statement file not found for {entity_id} {fy}"
             )
 
-    # Set default output path
+    # Set deterministic output path: data/<entity>/<FY>/output/narrated_ledger.xlsx
     if output_path is None:
-        out_dir = REPO_ROOT / "data" / entity_dir_name / "Generated Data" / fy
-        out_dir.mkdir(parents=True, exist_ok=True)
-        output_path = (
-            out_dir / f"{entity_name.split()[0]}_Consolidated_Bank_Ledger_{fy}.xlsx"
-        )
+        out_dir = resolve_output_dir(entity_id, fy)
+        output_path = out_dir / "narrated_ledger.xlsx"
 
     print(f"Processing narration for {entity_name} ({fy})...")
     print(f"  Input: {input_path}")
@@ -225,11 +227,13 @@ def process_entity_narration(
             continue
 
         hdr_idx = find_header_row(sheet_rows)
-        bank_key, _ = identify_bank(sheet_rows, hdr_idx, bank_registry, sheet_name)
+        bank_key, _ = identify_bank(
+            sheet_rows, hdr_idx, bank_registry, sheet_name
+        )
         if bank_key == "unknown":
             continue
 
-        bank_cfg = bank_registry[bank_key]
+        bank_cfg = bank_registry.get(bank_key, {})
         header_vals = [
             str(c).strip() if c is not None else "" for c in sheet_rows[hdr_idx]
         ]
@@ -244,7 +248,9 @@ def process_entity_narration(
         # Apply classification to each row
         records: list[dict[str, Any]] = []
         for _, row in df_sheet.iterrows():
-            particulars = str(get_col_value(row, bank_cfg.get("col_particulars")) or "")
+            particulars = str(
+                get_col_value(row, bank_cfg.get("col_particulars")) or ""
+            )
             dr_val = get_col_value(row, bank_cfg.get("col_dr"))
             cr_val = get_col_value(row, bank_cfg.get("col_cr"))
             if not particulars and not dr_val and not cr_val:
@@ -273,7 +279,10 @@ def process_entity_narration(
 
         df_narrated = pd.DataFrame(records)
         write_bank_sheet(
-            wb_out, df_narrated, sheet_name, bank_cfg.get("display_name", sheet_name)
+            wb_out,
+            df_narrated,
+            sheet_name,
+            bank_cfg.get("display_name", sheet_name),
         )
         bank_ledgers.append(df_narrated)
 
@@ -289,7 +298,9 @@ def process_entity_narration(
 
     # Detect duplicates
     dup_key = all_df[["TX_Date", "DR", "CR", "Auto_Narration", "Bank_Key"]].copy()
-    dup_key["TX_Date"] = pd.to_datetime(dup_key["TX_Date"], errors="coerce").dt.date
+    dup_key["TX_Date"] = pd.to_datetime(
+        dup_key["TX_Date"], errors="coerce"
+    ).dt.date
     all_df["Duplicate"] = dup_key.duplicated(keep=False).map(
         {True: "⚠ Possible Duplicate", False: ""}
     )
@@ -308,18 +319,14 @@ def process_entity_narration(
     # Generate all output sheets
     write_for_tally(wb_out, all_df)
     write_conso(wb_out, all_df, fy, account_holder=entity_name)
-    write_bank_summary(wb_out, all_df, bank_balances, fy, account_holder=entity_name)
+    write_bank_summary(
+        wb_out, all_df, bank_balances, fy, account_holder=entity_name
+    )
     write_monthly_pivot(wb_out, all_df)
     write_colour_legend(wb_out)
 
-    # Save output
+    # Save output to single deterministic destination
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     wb_out.save(output_path)
-    root_out_dir = REPO_ROOT / entity_dir_name / "Generated Data" / fy
-    root_out_dir.mkdir(parents=True, exist_ok=True)
-    root_output_path = (
-        root_out_dir / f"{entity_name.split()[0]}_Consolidated_Bank_Ledger_{fy}.xlsx"
-    )
-    if root_output_path != output_path:
-        wb_out.save(root_output_path)
-    print(f"[OK] Narration successfully saved to {output_path} and {root_output_path}")
+    print(f"[OK] Narration successfully saved to {output_path}")
     return output_path

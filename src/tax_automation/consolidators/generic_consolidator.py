@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-"""
-generic_consolidator.py
-========================
+"""generic_consolidator.py.
+
 Consolidates individual bank statement files (XLS, XLSX, CSV, PDF) for an entity
 and Financial Year into a multi-sheet workbook using JSON consolidation maps.
 """
@@ -18,6 +17,8 @@ import pdfplumber
 from tax_automation.config_loader import (
     get_consolidation_map,
     resolve_password,
+    resolve_input_dir,
+    resolve_output_dir,
     REPO_ROOT,
 )
 
@@ -59,12 +60,18 @@ def load_file_to_df(
             if not tables:
                 raise ValueError("No tabular data found in PDF")
             df_table = pd.DataFrame(tables[0])
-            metadata = [
-                ["State Bank of India", "", "", "", "", "", ""],
-                ["STATEMENT OF ACCOUNT", "", "", "", "", "", ""],
-                ["", "", "", "", "", "", ""],
-            ]
-            final_rows = metadata + df_table.values.tolist()
+            # Dynamically extract first page header text lines instead of hardcoding
+            first_page_text = page.extract_text() or ""
+            metadata_rows = []
+            for line in first_page_text.splitlines()[:5]:
+                if line.strip():
+                    pad = [""] * max(0, len(df_table.columns) - 1)
+                    metadata_rows.append([line.strip()] + pad)
+            final_rows = (
+                metadata_rows + df_table.values.tolist()
+                if metadata_rows
+                else df_table.values.tolist()
+            )
             return pd.DataFrame(final_rows), final_rows
 
     elif ext in (".xls", ".xlsx"):
@@ -87,30 +94,37 @@ def load_file_to_df(
 
 
 def consolidate_entity_statements(
-    entity_id: str, fy: str, data_dir: Path | None = None
+    entity_id: str,
+    fy: str,
+    data_dir: Path | None = None,
+    output_dir: Path | None = None,
 ) -> Path:
     """Consolidates individual bank statements for an entity into a
-    multi-sheet Excel file.
+    multi-sheet Excel file at canonical output path.
     """
     cmap = get_consolidation_map(entity_id, fy)
 
     if data_dir is None:
-        candidates = [
-            REPO_ROOT / "data" / entity_id.title() / "Data" / fy / "Bank_Statements",
-            REPO_ROOT / entity_id.title() / "Data" / fy / "Bank_Statements",
-            REPO_ROOT / entity_id.title() / "Bank Statements" / fy,
-        ]
-        data_dir = next(
-            (c for c in candidates if c.exists() and any(c.iterdir())), candidates[0]
-        )
+        data_dir = resolve_input_dir(entity_id, fy, "bank_statements")
+        # Check if statements are in canonical input or fallback legacy
+        if not any(data_dir.iterdir()):
+            t_name = entity_id.title()
+            candidates = [
+                REPO_ROOT / "data" / t_name / "Data" / fy / "Bank_Statements",
+                REPO_ROOT / t_name / "Data" / fy / "Bank_Statements",
+                REPO_ROOT / t_name / "Bank Statements" / fy,
+            ]
+            for c in candidates:
+                if c.exists() and any(c.iterdir()):
+                    data_dir = c
+                    break
 
-    output_filename = cmap.get(
-        "output_filename", f"All Bank Statements {entity_id.title()} {fy}.xlsx"
-    )
-    output_path = data_dir / output_filename
+    if output_dir is None:
+        output_dir = resolve_output_dir(entity_id, fy)
+
+    output_path = output_dir / "consolidated_statements.xlsx"
 
     wb = Workbook()
-    # Keep initial sheet and rename or track
     sheets_created = 0
 
     for file_spec in cmap.get("files", []):
@@ -121,19 +135,30 @@ def consolidate_entity_statements(
 
         file_path = data_dir / filename
         if not file_path.exists():
-            print(f"Warning: File not found {file_path}")
-            continue
+            # Check canonical input if data_dir was legacy
+            canonical_file = (
+                resolve_input_dir(entity_id, fy, "bank_statements") / filename
+            )
+            if canonical_file.exists():
+                file_path = canonical_file
+            else:
+                print(f"Warning: File not found {file_path}")
+                continue
 
         df, _ = load_file_to_df(file_path, password)
         ws = wb.create_sheet(title=target_sheet)
         sheets_created += 1
         for r_idx, row in enumerate(df.values.tolist(), 1):
             for c_idx, val in enumerate(row, 1):
-                ws.cell(row=r_idx, column=c_idx, value=val if pd.notna(val) else "")
+                ws.cell(
+                    row=r_idx,
+                    column=c_idx,
+                    value=val if pd.notna(val) else "",
+                )
 
     if "Sheet" in wb.sheetnames:
         wb.remove(wb["Sheet"])
 
-    data_dir.mkdir(parents=True, exist_ok=True)
+    output_dir.mkdir(parents=True, exist_ok=True)
     wb.save(output_path)
     return output_path

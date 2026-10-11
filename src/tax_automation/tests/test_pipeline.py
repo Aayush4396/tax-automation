@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-test_pipeline.py
-=================
+"""test_pipeline.py.
 
 Integration tests for the pipeline modules.
 """
@@ -13,6 +11,7 @@ from pathlib import Path
 from unittest.mock import patch
 from openpyxl import Workbook
 
+from tax_automation.pipeline.consolidation import consolidate_entity
 from tax_automation.pipeline.narration import process_entity_narration
 
 
@@ -40,25 +39,25 @@ class TestNarrationPipeline(unittest.TestCase):
 
     def test_process_entity_narration(self):
         """Test the narration pipeline with sample data."""
-        # Mock external dependencies
         with (
             patch("tax_automation.config_loader.get_entity_config") as mock_config,
             patch("tax_automation.pipeline.narration.identify_bank") as mock_identify,
             patch(
                 "tax_automation.pipeline.narration.find_header_row"
             ) as mock_find_header,
-            patch("tax_automation.pipeline.narration.REPO_ROOT", self.test_data_dir),
         ):
-
             # Setup mocks
             mock_config.return_value = {
                 "display_name": "Test Entity",
                 "banks": {
                     "hdfc": {
                         "display_name": "HDFC Bank",
+                        "account_id": "HDFC 5413",
+                        "col_date": "Date",
                         "col_particulars": "Particulars",
                         "col_dr": "Debit",
                         "col_cr": "Credit",
+                        "col_balance": "Balance",
                     }
                 },
             }
@@ -66,15 +65,17 @@ class TestNarrationPipeline(unittest.TestCase):
             mock_find_header.return_value = 0
 
             # Run the narration pipeline
+            output_file = self.test_data_dir / "test_output.xlsx"
             result = process_entity_narration(
                 entity_id="test",
                 fy="FY26",
                 input_path=self.input_file,
-                output_path=self.test_data_dir / "test_output.xlsx",
+                output_path=output_file,
             )
 
             # Verify results
-            self.assertEqual(result, self.test_data_dir / "test_output.xlsx")
+            self.assertEqual(result, output_file)
+            self.assertTrue(output_file.exists())
 
 
 class TestConsolidationPipeline(unittest.TestCase):
@@ -89,28 +90,24 @@ class TestConsolidationPipeline(unittest.TestCase):
 
     def test_consolidate_entity(self):
         """Test the consolidation pipeline with sample data."""
-        # Mock external dependencies
         with (
             patch("tax_automation.config_loader.get_entity_config") as mock_config,
-            patch("tax_automation.config_loader.get_consolidation_map") as mock_map,
             patch(
                 "tax_automation.pipeline.consolidation.consolidate_entity_statements"
             ) as mock_consolidate,
         ):
-
-            # Setup mocks
             mock_config.return_value = {"display_name": "Test Entity"}
-            mock_map.return_value = {"mapping": {}, "output_sheet": "Consolidated"}
-            # Return a mock path
-            mock_consolidate.return_value = (
-                self.test_data_dir / "test_consolidated.xlsx"
+            expected_out = self.test_data_dir / "consolidated_statements.xlsx"
+            mock_consolidate.return_value = expected_out
+
+            result = consolidate_entity(
+                entity_id="test",
+                fy="FY26",
+                input_dir=self.test_data_dir,
+                output_dir=self.test_data_dir,
             )
 
-            # Run the consolidation
-            result = mock_consolidate(entity_id="test", fy="FY26")
-
-            # Verify results
-            self.assertEqual(result, self.test_data_dir / "test_consolidated.xlsx")
+            self.assertEqual(result, expected_out)
 
 
 if __name__ == "__main__":
