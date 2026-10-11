@@ -19,7 +19,6 @@ from tax_automation.config_loader import (
     resolve_password,
     resolve_input_dir,
     resolve_output_dir,
-    REPO_ROOT,
 )
 
 
@@ -106,18 +105,6 @@ def consolidate_entity_statements(
 
     if data_dir is None:
         data_dir = resolve_input_dir(entity_id, fy, "bank_statements")
-        # Check if statements are in canonical input or fallback legacy
-        if not any(data_dir.iterdir()):
-            t_name = entity_id.title()
-            candidates = [
-                REPO_ROOT / "data" / t_name / "Data" / fy / "Bank_Statements",
-                REPO_ROOT / t_name / "Data" / fy / "Bank_Statements",
-                REPO_ROOT / t_name / "Bank Statements" / fy,
-            ]
-            for c in candidates:
-                if c.exists() and any(c.iterdir()):
-                    data_dir = c
-                    break
 
     if output_dir is None:
         output_dir = resolve_output_dir(entity_id, fy)

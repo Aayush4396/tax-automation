@@ -19,7 +19,6 @@ from tax_automation.config_loader import (
     resolve_entity_bank_registry,
     resolve_input_dir,
     resolve_output_dir,
-    REPO_ROOT,
 )
 from tax_automation.core.auto_header import find_header_row
 from tax_automation.core.bank_identifier import identify_bank
@@ -168,7 +167,6 @@ def process_entity_narration(
     output_sheet_names = set(config.get("output_sheet_names", []))
 
     entity_name = config.get("display_name", entity_id.title())
-    entity_dir_name = entity_id.title()
 
     # Find input file if not provided: check canonical step 1 output first
     if input_path is None:
@@ -180,12 +178,7 @@ def process_entity_narration(
         else:
             search_dirs = [
                 resolve_input_dir(entity_id, fy, "bank_statements"),
-                REPO_ROOT / "data" / entity_dir_name / "Generated Data" / fy,
-                REPO_ROOT / "data" / entity_dir_name / "Data" / fy / "Bank_Statements",
-                REPO_ROOT / "data" / entity_dir_name / "Bank Statements" / fy,
-                REPO_ROOT / entity_dir_name / "Bank Statements" / fy,
-                REPO_ROOT / entity_dir_name / "Data" / fy / "Bank_Statements",
-                REPO_ROOT / entity_dir_name / "Generated Data" / fy,
+                resolve_output_dir(entity_id, fy),
             ]
             for s_dir in search_dirs:
                 if not s_dir.exists():
