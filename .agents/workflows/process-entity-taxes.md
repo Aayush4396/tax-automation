@@ -10,7 +10,7 @@ Automates end-to-end tax statement consolidation, narration classification, Exce
 
 ## Overview
 
-Processes raw or consolidated bank statements for an entity (`aayush`, `ajay`, `sunita`, etc.), applies the config-driven classification pipeline, generates formatted Excel workbooks, and runs validation diagnostics.
+Processes raw or consolidated bank statements for an entity (e.g., `demo_entity`), applies the config-driven classification pipeline, generates formatted Excel workbooks, and runs validation diagnostics.
 
 **Command**: `/process-entity-taxes`
 
@@ -19,7 +19,7 @@ Processes raw or consolidated bank statements for an entity (`aayush`, `ajay`, `
 ## Execution Steps
 
 ### Step 1: Parameters & Profile Verification
-1. Identify target **Entity Profile** (`aayush`, `ajay`, `sunita`, etc.) and **Financial Year** (`FY24`, `FY25`, `FY26`).
+1. Identify target **Entity Profile** (e.g., `<entity_id>`) and **Financial Year** (`FY24`, `FY25`, `FY26`).
 2. Verify profile configuration in `config/entities/<entity>.json`.
 
 ### Step 2: Statement Consolidation

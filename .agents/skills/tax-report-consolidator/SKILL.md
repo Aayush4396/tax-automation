@@ -23,7 +23,7 @@ Consolidate individual bank statement files (XLS, XLSX, CSV, PDF) for an entity 
 3. Parse tabular data into unified Pandas DataFrames with standardized schema.
 
 ### Step 3: Multi-Sheet Workbook Generation
-1. Write each bank's statement data to its designated worksheet (`HDFC 5930`, `AXIS 3167`, `BOI 6699`, `SBI CA`, etc.).
+1. Write each bank's statement data to its designated worksheet (e.g., `HDFC 1001`, `SBI 2002`, `AXIS 3003`, etc.).
 2. Apply header formatting and auto-column width calculations.
 3. Save output workbook to `data/<entity>/<FY>/output/consolidated_statements.xlsx`:
    ```bash

@@ -6,7 +6,7 @@ description: Config-driven processor for bank and credit card statements. Loads 
 # Tax Statement Processor Skill
 
 ## Objective
-Process bank statements and credit card statements for a designated entity profile (`aayush`, `ajay`, `sunita`, etc.) and Financial Year (`FY24`, `FY25`, `FY26`).
+Process bank statements and credit card statements for a designated entity profile (e.g., `<entity_id>`) and Financial Year (`FY24`, `FY25`, `FY26`).
 
 ---
 

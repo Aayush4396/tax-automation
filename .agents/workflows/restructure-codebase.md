@@ -37,7 +37,7 @@ Transforms duplicated scripts across legacy entity roots into a single modular P
 
 ### Phase 5: Declarative Entity Profiles & Onboarding CLI
 - Update `src/tax_automation/config/schemas/entity.json` schema.
-- Migrate all entity JSON profiles (`aayush.json`, `ajay.json`, `sunita.json`, `test.json`) to the declarative schema.
+- Migrate entity JSON profiles (`config/entities/*.json`) to the declarative schema.
 - Add `init-entity` command to `src/tax_automation/cli.py`.
 
 ### Phase 6: Lossless Data Migration & Privacy Protection
@@ -45,7 +45,7 @@ Transforms duplicated scripts across legacy entity roots into a single modular P
 - Update `.gitignore` so real financial statements are never tracked in Git, while `.gitkeep` files preserve directory structure.
 
 ### Phase 7: Purge Legacy Scripts
-- Safely delete legacy root directories (`Aayush/`, `Ajay/`, `Sunita/`, `Test/`, `__tests__/`).
+- Safely delete legacy un-modular entity directories and deprecated scripts.
 - Verify zero regression with test suite and flake8.
 
 ### Phase 8: Documentation & Workflow Sync
