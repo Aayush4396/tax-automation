@@ -10,7 +10,7 @@ Automates end-to-end tax statement consolidation, narration classification, Exce
 
 ## Overview
 
-Processes raw or multi-sheet bank statements for an entity (`aayush`, `ajay`, `sunita`, `archit`), applies the config-driven classification pipeline, generates formatted Excel workbooks, and runs validation diagnostics.
+Processes raw or consolidated bank statements for an entity (`aayush`, `ajay`, `sunita`, etc.), applies the config-driven classification pipeline, generates formatted Excel workbooks, and runs validation diagnostics.
 
 **Command**: `/process-entity-taxes`
 
@@ -18,24 +18,36 @@ Processes raw or multi-sheet bank statements for an entity (`aayush`, `ajay`, `s
 
 ## Execution Steps
 
-### Step 1: Parameters Prompt & Context Setup
-1. Prompt for target **Entity Profile** (`aayush`, `ajay`, `sunita`, `archit`).
-2. Prompt for target **Financial Year** (`FY24`, `FY25`, `FY26`).
-3. Load profile configuration from `config/entities/<entity>.json`.
+### Step 1: Parameters & Profile Verification
+1. Identify target **Entity Profile** (`aayush`, `ajay`, `sunita`, etc.) and **Financial Year** (`FY24`, `FY25`, `FY26`).
+2. Verify profile configuration in `config/entities/<entity>.json`.
 
 ### Step 2: Statement Consolidation
-1. Check if individual bank statement files exist in `data/<entity>/Data/<FY>/Bank_Statements/`.
-2. If raw statements exist, execute `/tax-report-consolidator` skill using `config/consolidation/<entity>_<fy>.json`.
-3. Output consolidated workbook: `All Bank Statements <Entity> <FY>.xlsx`.
+1. Check if raw individual bank statements exist in `data/<entity>/<FY>/input/bank_statements/`.
+2. If raw statements exist, consolidate via:
+   ```bash
+   python -m tax_automation consolidate --entity <entity> --fy <FY>
+   ```
+3. Output consolidated workbook: `data/<entity>/<FY>/output/consolidated_statements.xlsx`.
 
-### Step 3: Narration Classification & Export
-1. Execute `/tax-statement-processor` skill with selected entity profile and FY.
-2. Build runtime classification rule chain (`entity_extensions + bank_base + common_base`).
-3. Write per-bank worksheets, Tally sheet, Conso ledger, Bank Summary, and Monthly Pivot.
-4. Output finalized Excel workbook: `<Entity>_Consolidated_Bank_Ledger_<FY>.xlsx`.
+### Step 3: Narration Classification & Master Ledger Generation
+1. Execute the narration pipeline:
+   ```bash
+   python -m tax_automation process --entity <entity> --fy <FY>
+   ```
+2. The pipeline:
+   - Dynamic compiler synthesizes personal Contras, Family transfers, Rent rules, and custom rules.
+   - Bank-specific rules evaluate bank transactions.
+   - Universal Indian merchant & banking rules classify retail/utility spends.
+   - Master Excel ledger written to `data/<entity>/<FY>/output/narrated_ledger.xlsx`.
 
 ### Step 4: Diagnostics & Parity Verification
-1. Execute `/tax-diagnostics` skill:
-   - Run `check_contras.py` to verify self-transfer symmetry across accounts.
-   - Run `check_narration_results.py` to verify confidence scores and match rates.
-2. Display summary dashboard report for human review.
+1. Run contra symmetry verification:
+   ```bash
+   python -m tax_automation.tools.check_contras --entity <entity> --fy <FY>
+   ```
+2. Run narration score inspection:
+   ```bash
+   python -m tax_automation.tools.check_narration_results --entity <entity> --fy <FY>
+   ```
+3. Verify that all debit/credit contras match and inspect transactions flagged with confidence `< 0.70`.

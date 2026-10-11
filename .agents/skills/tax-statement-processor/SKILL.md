@@ -14,24 +14,29 @@ Process bank statements and credit card statements for a designated entity profi
 
 ### Step 1: Configuration & Profile Loading
 1. Read profile JSON configuration from `config/entities/<entity>.json`.
-2. Retrieve bank registry mappings, account IDs, family member regex lists, self-transfer UPI references, and landlord VPAs.
+2. Retrieve declared `accounts`, `family_members`, `rent`, and `custom_rules`.
 3. Check for statement decryption keys in `.env` if files are password protected.
 
 ### Step 2: Dynamic Rule Chain Construction
-1. Load common base classification rules from `src/tax_automation/rules/common_base.py`.
-2. Load bank base rules from `src/tax_automation/rules/banks/<bank>_base.py`.
-3. Load entity-specific rule extensions from `src/tax_automation/rules/entity_extensions/<entity>_rules.py`.
-4. Construct rule evaluation order: `entity_extensions` (highest) → `bank_base` → `common_base` → `fallback`.
+1. Dynamic compiler in `src/tax_automation/rules/loader.py` dynamically synthesizes:
+   - Self Contra transfer rules for all declared accounts
+   - Family member transfer rules
+   - Rent and landlord rules
+   - Entity-specific declarative custom rules
+2. Bank base rules loaded from `src/tax_automation/rules/banks/<bank>_base.py`.
+3. Universal Indian merchant & banking rules loaded from `config/rules_common.json`.
 
 ### Step 3: Statement Processing & Classification
-1. Detect input multi-sheet workbook at `data/<entity>/Generated Data/<FY>/All Bank Statements*.xlsx`.
+1. Detect input multi-sheet workbook at `data/<entity>/<FY>/output/consolidated_statements.xlsx` or `data/<entity>/<FY>/input/bank_statements/`.
 2. Run header offset detection (`auto_header.py`) and bank fingerprint identifier (`bank_identifier.py`).
 3. Classify transactions using the rule chain, assigning confidence scores (0.0 to 1.0) and human narration tags.
-4. Process credit card statements if present in `data/<entity>/credit_card_statements/`.
 
 ### Step 4: Ledger Formatting & Export
 1. Write per-bank worksheets with custom column styling and auto-filters.
 2. Write Tally-ready output worksheet (`For Tally`).
 3. Write consolidated ledger (`Conso`) and Bank Summary.
-4. Generate Monthly Pivot analysis and append legend.
-5. Save final workbook to `data/<entity>/Generated Data/<FY>/<Entity>_Consolidated_Bank_Ledger_<FY>.xlsx`.
+4. Generate Monthly Pivot analysis and append colour legend.
+5. Save final master workbook to `data/<entity>/<FY>/output/narrated_ledger.xlsx`:
+   ```bash
+   python -m tax_automation process --entity <entity> --fy <FY>
+   ```

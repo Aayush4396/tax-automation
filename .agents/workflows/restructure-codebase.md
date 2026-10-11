@@ -4,43 +4,49 @@ description: Orchestrates the migration of legacy duplicated entity scripts into
 
 # Workflow: Restructure Tax Codebase
 
-Orchestrates the migration of legacy duplicated entity scripts into a centralized, config-driven Python package (`tax_automation`).
+Orchestrates the architecture migration of legacy duplicated entity scripts into a centralized, plug-and-play Python package (`tax_automation`).
 
 ---
 
 ## Overview
 
-This workflow transforms duplicated scripts across `Aayush/`, `Ajay/`, and `Sunita/` into a single, modular Python package. It externalizes account IDs, display names, UPI refs, landlord VPAs, family member names, passwords, and sheet skip lists into JSON configuration files and `.env` credentials.
+Transforms duplicated scripts across legacy entity roots into a single modular Python package. Externalizes all entity specifics (family members, UPI VPAs, rent landlords, phone numbers, FnF amounts) into declarative JSON configurations (`config/entities/<entity>.json`). Eliminates all hardcodings, `sys.path` hacks, and enforces standardized imports and directory layouts.
 
 **Command**: `/restructure-codebase`
 
 ---
 
-## Execution Steps
+## Execution Phases
 
-### Step 1: Externalize Configurations & Secrets
-1. Create `config/entities/aayush.json`, `config/entities/ajay.json`, and `config/entities/sunita.json`.
-2. Move account IDs, display names, signals, self-transfer UPI refs, rent VPAs, family member lists, and sheet skip lists into entity JSON files.
-3. Create `config/consolidation/<entity>_<fy>.json` files for statement consolidation mappings.
-4. Create `.env.example` and move PDF/Excel passwords to `.env`.
+### Phase 1: Package Structure & Reusable Bank Schemas
+- Initialize package `__init__.py` files across all subpackages.
+- Extract 10 reusable bank schemas into `config/banks/` (`hdfc.json`, `sbi.json`, `kotak.json`, `axis.json`, `boi.json`, `federal.json`, `sbm.json`, `huf.json`, `icici.json`, `generic.json`).
 
-### Step 2: Establish Package Architecture
-1. Create `src/tax_automation/` package structure with `__init__.py` files.
-2. Build `config_loader.py` to parse JSON configurations and `.env` credentials dynamically.
-3. Move identical engine files (`auto_header.py`, `classifier.py`, `merchants.py`, `parse_cc.py`, `cc_category_map.py`) into `src/tax_automation/core/`.
-4. Merge `exporter.py` (using Aayush version as superset with `assign_pivot_categories`) into `src/tax_automation/exporters/`.
+### Phase 2: Purge Hardcodings from Rules & Bank Base Modules
+- Cleanse `config/rules_common.json` of family members, landlord names, phone numbers, and contra rules. Retain purely universal Indian banking/merchant rules.
+- Cleanse `src/tax_automation/rules/banks/` of entity-specific rules.
 
-### Step 3: Modularize Classification Rules
-1. Diff `rules_common.py` across folders: move base rules to `src/tax_automation/rules/common_base.py`, move Ajay deltas (~15KB) to `rules/entity_extensions/ajay_rules.py`.
-2. Diff bank rule files (`rules_hdfc.py`, `rules_sbi.py`, `rules_kotak.py`): extract base rules to `rules/banks/` and entity-specific additions to `rules/entity_extensions/`.
-3. Create `rules/loader.py` to assemble runtime rule chains (`entity_extensions + bank_base + common_base`).
+### Phase 3: Core Plumbing & Dynamic Rule Compiler
+- Implement dynamic rule compiler in `src/tax_automation/rules/loader.py` that dynamically synthesizes Contras, Family transfers, Rent rules, and custom rules from entity JSON configs.
+- Update `config_loader.py` with `get_bank_schema()` and `resolve_entity_bank_registry()`.
 
-### Step 4: Generalize CLI & Diagnostic Tools
-1. Convert `run_narration.py` into unified CLI `src/tax_automation/cli.py`.
-2. Move diagnostic scripts (`check_contras.py`, `check_narration_results.py`, `parse_narration_stats.py`, `parse_all_stats.py`) to `src/tax_automation/tools/` and update to use `config_loader`.
-3. Move pipeline runners (`run_and_verify.ps1`, `run_and_verify.sh`) to `scripts/` and parameterize with `--entity`.
+### Phase 4: Pipelines, Exporters & Diagnostic Tools
+- Standardize all file resolution on `resolve_input_dir()` and `resolve_output_dir()`.
+- Eliminate legacy output file paths and duplicated writes.
+- Update `exporter.py` and diagnostic tools.
 
-### Step 5: Validate Output Parity & Human Gate
-1. Run narration engine for Aayush, Ajay, and Sunita on existing datasets using both legacy and refactored packages.
-2. Diff generated Excel ledgers to verify 100% row count, confidence score, and narration text parity.
-3. **Approval Gate**: Present parity report to user before removing legacy script directories.
+### Phase 5: Declarative Entity Profiles & Onboarding CLI
+- Update `src/tax_automation/config/schemas/entity.json` schema.
+- Migrate all entity JSON profiles (`aayush.json`, `ajay.json`, `sunita.json`, `test.json`) to the declarative schema.
+- Add `init-entity` command to `src/tax_automation/cli.py`.
+
+### Phase 6: Lossless Data Migration & Privacy Protection
+- Migrate historical statements losslessly into `data/<entity>/<FY>/input/`.
+- Update `.gitignore` so real financial statements are never tracked in Git, while `.gitkeep` files preserve directory structure.
+
+### Phase 7: Purge Legacy Scripts
+- Safely delete legacy root directories (`Aayush/`, `Ajay/`, `Sunita/`, `Test/`, `__tests__/`).
+- Verify zero regression with test suite and flake8.
+
+### Phase 8: Documentation & Workflow Sync
+- Update workflows, skills, and root `README.md` to reflect unified architecture.

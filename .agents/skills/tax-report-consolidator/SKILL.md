@@ -18,11 +18,14 @@ Consolidate individual bank statement files (XLS, XLSX, CSV, PDF) for an entity 
 3. Load credentials from `.env` file for encrypted statement files.
 
 ### Step 2: File Ingestion & Decryption
-1. Scan source directory `data/<entity>/Data/<FY>/Bank_Statements/` (or equivalent).
+1. Scan source directory `data/<entity>/<FY>/input/bank_statements/`.
 2. Decrypt password-protected Excel/PDF files in-memory using `msoffcrypto-tool` and `pdfplumber`.
 3. Parse tabular data into unified Pandas DataFrames with standardized schema.
 
 ### Step 3: Multi-Sheet Workbook Generation
 1. Write each bank's statement data to its designated worksheet (`HDFC 5930`, `AXIS 3167`, `BOI 6699`, `SBI CA`, etc.).
 2. Apply header formatting and auto-column width calculations.
-3. Save output workbook to `data/<entity>/Data/<FY>/Bank_Statements/All Bank Statements <Entity> <FY>.xlsx`.
+3. Save output workbook to `data/<entity>/<FY>/output/consolidated_statements.xlsx`:
+   ```bash
+   python -m tax_automation consolidate --entity <entity> --fy <FY>
+   ```
