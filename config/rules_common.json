@@ -1,12 +1,5 @@
 [
   {
-    "label": "Transfer - Ajay Kumar Gupta - HUF",
-    "account_head": "Ajay Gupta HUF",
-    "pattern": "\\bHUF\\b|\\bH\\.U\\.F\\.\\b",
-    "direction": "ANY",
-    "confidence": 0.90
-  },
-  {
     "label": "SIP",
     "account_head": "SIP",
     "pattern": "INDIANESIGN",
@@ -25,13 +18,6 @@
     "account_head": "Dividend Income",
     "pattern": "CEMTEX",
     "direction": "CR",
-    "confidence": 0.95
-  },
-  {
-    "label": "Abhinandan Cloth Merchant",
-    "account_head": "Anil Kumar Gupta",
-    "pattern": "AB[HF]INANDAN\\s*CLOTH",
-    "direction": "ANY",
     "confidence": 0.95
   },
   {
@@ -133,14 +119,14 @@
     "account_head": "SIP",
     "pattern": "\\bNACH[- ]MUT[- ]DR\\b|ACH\\s*D[- ]+TP\\s*ACH|INDIANESIGN|BILLDKINDIAN|NACHINDIANCLEARING|ECS\\s*D[- ]",
     "direction": "DR",
-    "confidence": 0.90
+    "confidence": 0.9
   },
   {
     "label": "Dividend Income",
     "account_head": "Dividend Income",
     "pattern": "^ACH\\s*C[- ]|^NACH[- ]ECS[- ]CR|^NACH[- ]10[- ]CR[- ]",
     "direction": "CR",
-    "confidence": 0.90
+    "confidence": 0.9
   },
   {
     "label": "Dividend Income",
@@ -162,71 +148,6 @@
     "pattern": "\\bITDTAX\\b\\s*REFUND\\b|\\bITD\\b\\s*TAX\\s*REFUND|\\bIT\\b\\s*REFUND|\\bTAX\\s*REFUND\\b|\\bINCOME\\s*TAX\\s*REFUND\\b",
     "direction": "CR",
     "confidence": 0.95
-  },
-  {
-    "label": "Transfer - Sunita Gupta",
-    "account_head": "Sunita Gupta",
-    "pattern": "SUNITA\\s*GUPT(A)?|\\bSUNITA\\b",
-    "direction": "ANY",
-    "confidence": 0.88
-  },
-  {
-    "label": "Transfer - Ajay Gupta",
-    "account_head": "Ajay Gupta",
-    "pattern": "AJAY\\s*KUMAR\\s*GUPT(A)?|AJAY\\s*GUPT(A)?|\\bAKG\\b",
-    "direction": "ANY",
-    "confidence": 0.88
-  },
-  {
-    "label": "Transfer - Aayush Gupta",
-    "account_head": "Aayush Gupta",
-    "pattern": "AAYUSH\\s*KUMAR\\s*GUPT(A)?|AAYUSH\\s*GUPT(A)?|\\bAAYUSH\\b",
-    "direction": "ANY",
-    "confidence": 0.88
-  },
-  {
-    "label": "Transfer - Archit Gupta",
-    "account_head": "Archit Gupta",
-    "pattern": "ARCHIT\\s*GUPT(A)?|ARCHIT\\b",
-    "direction": "ANY",
-    "confidence": 0.85
-  },
-  {
-    "label": "Transfer - Megha Gupta",
-    "account_head": "Megha Gupta",
-    "pattern": "MEGHA\\s*GUPT?A?|MEGHA\\b|meghaghati|\\bMiss\\.?\\s*MEG[H]?\\b|\\bMiss\\.?\\s*ME\\b",
-    "direction": "ANY",
-    "confidence": 0.85
-  },
-  {
-    "label": "Transfer - Ajay Gupta HUF",
-    "account_head": "Ajay Gupta HUF",
-    "pattern": "\\bHUF\\b|\\bH\\.U\\.F\\.\\b",
-    "direction": "ANY",
-    "confidence": 0.88
-  },
-  {
-    "label": "Rent",
-    "account_head": "Rent",
-    "pattern": "MOHITH\\s*(S\\s*)?REDDY",
-    "direction": "DR",
-    "exact_dr": 23000.0,
-    "confidence": 0.92
-  },
-  {
-    "label": "Security Deposit",
-    "account_head": "Security Deposit",
-    "pattern": "MOHITH\\s*(S\\s*)?REDDY",
-    "direction": "DR",
-    "exclude_exact_dr": 23000.0,
-    "confidence": 0.90
-  },
-  {
-    "label": "Security Deposit Return",
-    "account_head": "Security Deposit",
-    "pattern": "MOHITH\\s*(S\\s*)?REDDY",
-    "direction": "CR",
-    "confidence": 0.90
   },
   {
     "label": "Rent Payment (via CRED)",
@@ -335,7 +256,7 @@
     "account_head": "Shopping",
     "pattern": "wakefit|WAKEFIT",
     "direction": "CR",
-    "confidence": 0.90
+    "confidence": 0.9
   },
   {
     "label": "UPI - IRCTC",
@@ -349,14 +270,14 @@
     "account_head": "Transfer",
     "pattern": "\\bNEFT\\b|\\bRTGS\\b|\\bIMPS\\b|\\bMMT\\b|\\bINFT\\b",
     "direction": "ANY",
-    "confidence": 0.70
+    "confidence": 0.7
   },
   {
     "label": "MOB Transfer",
     "account_head": "Transfer",
     "pattern": "\\bMOB/TPFT\\b|\\bMOB/TFR\\b|\\bMOB\\s*TFR\\b",
     "direction": "ANY",
-    "confidence": 0.70
+    "confidence": 0.7
   },
   {
     "label": "IB Transfer",
@@ -370,7 +291,7 @@
     "account_head": "Misc Income",
     "pattern": "REFUND|REVERSAL|CASHBACK|CREDIT\\s*ADJ|\\bREV\\b",
     "direction": "CR",
-    "confidence": 0.70
+    "confidence": 0.7
   },
   {
     "label": "Rent",
@@ -380,7 +301,7 @@
       "Januar|Feb mo|March|month|rent"
     ],
     "direction": "DR",
-    "confidence": 0.90
+    "confidence": 0.9
   },
   {
     "label": "Security Deposit",
@@ -390,7 +311,7 @@
       "secur|balanc|Token|advance|deposit|sendin"
     ],
     "direction": "DR",
-    "confidence": 0.90
+    "confidence": 0.9
   },
   {
     "label": "Security Deposit Return",
@@ -425,7 +346,7 @@
     "account_head": "Investments",
     "pattern": "iccl|BSE\\s*MF|NSE\\s*MF|INDIAN\\s*CLEARING\\s*CORP",
     "direction": "DR",
-    "confidence": 0.90
+    "confidence": 0.9
   },
   {
     "label": "Zerodha Broking",
@@ -513,20 +434,6 @@
     "confidence": 0.82
   },
   {
-    "label": "UPI Payment",
-    "account_head": "Personal",
-    "pattern": "YASH\\s*GUPTA",
-    "direction": "DR",
-    "confidence": 0.75
-  },
-  {
-    "label": "Contra - Self",
-    "account_head": "Transfer",
-    "pattern": "ABHINDAN",
-    "direction": "DR",
-    "confidence": 0.80
-  },
-  {
     "label": "Vehicle Service",
     "account_head": "Transport",
     "pattern": "BENAKA\\s*ENTERP|TWO\\s*LAXMI\\s*PATIL|KAMADENU\\s*SERVICE",
@@ -574,73 +481,6 @@
     "pattern": "ABHUSHAN",
     "direction": "DR",
     "confidence": 0.85
-  },
-  {
-    "label": "Contra - Kotak",
-    "account_head": "KOTAK 0333",
-    "patterns_all": [
-      "95944352",
-      "KKBK|KOTAK"
-    ],
-    "direction": "ANY",
-    "confidence": 0.88
-  },
-  {
-    "label": "Contra - SBI",
-    "account_head": "SBI 1227",
-    "patterns_all": [
-      "95944352",
-      "SBIN|STATE\\s*BANK|SBI\\b"
-    ],
-    "direction": "ANY",
-    "confidence": 0.88
-  },
-  {
-    "label": "Contra - Jupiter",
-    "account_head": "FEDERAL 0847",
-    "patterns_all": [
-      "95944352",
-      "FDRL|FEDERAL|JUPITER"
-    ],
-    "direction": "ANY",
-    "confidence": 0.88
-  },
-  {
-    "label": "Contra - Axis",
-    "account_head": "Axis",
-    "patterns_all": [
-      "95944352",
-      "UTIB|AXIS"
-    ],
-    "direction": "ANY",
-    "confidence": 0.88
-  },
-  {
-    "label": "Contra - HDFC",
-    "account_head": "HDFC 5413",
-    "patterns_all": [
-      "95944352",
-      "HDFC"
-    ],
-    "direction": "ANY",
-    "confidence": 0.88
-  },
-  {
-    "label": "Contra - SBM",
-    "account_head": "SBM",
-    "patterns_all": [
-      "95944352",
-      "STCB|SBM\\b"
-    ],
-    "direction": "ANY",
-    "confidence": 0.88
-  },
-  {
-    "label": "Contra - Self (SuperMoney)",
-    "account_head": "Personal",
-    "pattern": "95944352",
-    "direction": "ANY",
-    "confidence": 0.82
   },
   {
     "label": "UPI Payment",

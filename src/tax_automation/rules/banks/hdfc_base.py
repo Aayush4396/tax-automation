@@ -193,16 +193,7 @@ RULES_HDFC: list[tuple] = [
     (
         "Internal Transfer",
         "Transfer",
-        lambda p, dr, cr: (
-            bool(re.search(r"-TPT-", p, re.IGNORECASE))
-            and not bool(
-                re.search(
-                    r"SUNITA|AJAY|AAYUSH|ARCHIT|MEGHA|HUF|ISHWAR|PARADISE|MAINT",
-                    p,
-                    re.IGNORECASE,
-                )
-            )
-        ),
+        lambda p, dr, cr: bool(re.search(r"-TPT-", p, re.IGNORECASE)),
         0.80,
     ),
     # ── NSE Clearing / MFSS Settlement (MF redemption credits) ────────────────

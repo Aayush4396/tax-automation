@@ -1,16 +1,8 @@
 # -*- coding: utf-8 -*-
-"""
-rules_kotak.py
-==============
-Kotak Mahindra Bank-specific narration rules. Applied BEFORE common rules.
-"""
+"""kotak_base.py — Kotak Mahindra Bank generic statement narration rules."""
 
 from __future__ import annotations
 import re
-from narration_engine.bank_registry import (
-    SELF_UPI_REFS_JUPITER,
-    SELF_UPI_REFS_SBI,
-)
 
 RULES_KOTAK: list[tuple] = [
     # ── Bank Interest ─────────────────────────────────────────────────────
@@ -19,12 +11,10 @@ RULES_KOTAK: list[tuple] = [
         "Bank Interest",
         lambda p, dr, cr: bool(
             re.search(r"Int\.Pd[:.]|INTEREST\s*PAID|INT\s*PD\b", p, re.IGNORECASE)
-        ),  # Kotak Int.Pd: is always a credit; don't require cr>0
+        ),
         0.95,
     ),
     # ── Bank Charges — Kotak Chrg: format ────────────────────────────────
-    # ECS Return for HDFC Life (insufficient funds) — NOT a bank charge;
-    # it's a return charge because the premium debit bounced.
     (
         "Premium Payment (ECS Return Charge)",
         "Life Insurance",
@@ -50,21 +40,11 @@ RULES_KOTAK: list[tuple] = [
         ),
         0.88,
     ),
-    # ── Tibil F&F — Tibil Computers Ltd one-time FnF ─────────────────────
-    # Specific amount: 91056 credit
-    (
-        "Salary",
-        "Salary",
-        lambda p, dr, cr: bool(re.search(r"^TRANS$", p.strip(), re.IGNORECASE))
-        and cr == 91056,
-        0.85,
-    ),
     # ── Internal TRANS / sweep ────────────────────────────────────────────
     (
         "Auto Sweep FD",
         "Auto Sweep FD",
-        lambda p, dr, cr: bool(re.search(r"^TRANS$", p.strip(), re.IGNORECASE))
-        and not (cr == 91056),
+        lambda p, dr, cr: bool(re.search(r"^TRANS$", p.strip(), re.IGNORECASE)),
         0.75,
     ),
     # ── Zerodha Coin (Mutual Fund investment via ICCL) ──────────────────────
@@ -131,65 +111,8 @@ RULES_KOTAK: list[tuple] = [
                 p,
                 re.IGNORECASE,
             )
-        ),  # Kotak Amount+Dr/Cr format: cr may be 0 in raw parse
+        ),
         0.85,
-    ),
-    # ── Self Transfer → Jupiter (Federal) — known UPI refs ───────────────
-    (
-        "Contra - Jupiter",
-        "FEDERAL 0847",
-        lambda p, dr, cr: (
-            bool(re.search(r"AAYUSH\s*KUMAR\s*GU", p, re.IGNORECASE))
-            and any(ref in p for ref in SELF_UPI_REFS_JUPITER)
-            and dr > 0
-        ),
-        0.90,
-    ),
-    (
-        "Contra - Jupiter (Inward)",
-        "FEDERAL 0847",
-        lambda p, dr, cr: (
-            bool(re.search(r"AAYUSH\s*KUMAR\s*GU", p, re.IGNORECASE))
-            and any(ref in p for ref in SELF_UPI_REFS_JUPITER)
-            and cr > 0
-        ),
-        0.90,
-    ),
-    # ── Self Transfer → SBI — known UPI refs ─────────────────────────────
-    (
-        "Contra - SBI",
-        "SBI 1227",
-        lambda p, dr, cr: (
-            bool(re.search(r"AAYUSH\s*KUMAR\s*GU", p, re.IGNORECASE))
-            and any(ref in p for ref in SELF_UPI_REFS_SBI)
-        ),
-        0.90,
-    ),
-    # ── Self Transfer inward from Federal (FDRL NEFT) ────────────────────
-    (
-        "Contra - Jupiter",
-        "FEDERAL 0847",
-        lambda p, dr, cr: bool(
-            re.search(
-                r"FDRL[A-Z0-9]+\s+CURRENT\s+ACCOUNT|FEDERAL\s+BANK", p, re.IGNORECASE
-            )
-        )
-        and cr > 0,
-        0.85,
-    ),
-    # ── Rent — Nagaraj / Nelaballi / landlord names ───────────────────────
-    (
-        "Rent",
-        "Rent",
-        lambda p, dr, cr: bool(
-            re.search(
-                r"NELABALLI|NAGARAJ\s*A|PG\s*FEE[S]?\b|PG\s*RENT|\bRENT\b",
-                p,
-                re.IGNORECASE,
-            )
-        )
-        and dr > 0,
-        0.88,
     ),
     # ── ATM / Cash Withdrawal (ATL/ ATW/ format) ─────────────────────────
     (
@@ -243,17 +166,15 @@ RULES_KOTAK: list[tuple] = [
         and cr > 0,
         0.72,
     ),
-    # ── IPO — Billion Garages (Groww / Billionbrains Garage Ventures) ─────────
-    # Groww's legal entity is Billionbrains Garage Ventures Pvt Ltd.
-    # UPI ASBA mandate shows 'UPIM/Billionbrains Garage/<ref>'
+    # ── IPO / Primary Market Application ─────────────────────────────────
     (
-        "IPO - Billion Garages",
+        "IPO Application",
         "Equities",
         lambda p, dr, cr: bool(
             re.search(r"Billionbrains\s*Garage|BILLIONBRAINS", p, re.IGNORECASE)
         )
         and dr > 0,
-        0.97,
+        0.95,
     ),
     # ── UPI Reversal ─────────────────────────────────────────────────────
     (
