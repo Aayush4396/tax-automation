@@ -59,6 +59,20 @@ _CC_CATEGORIES = sorted(_CC_CATEGORIES, key=len, reverse=True)
 _CAT_PAT = "|".join(re.escape(c) for c in _CC_CATEGORIES)
 _MERCHANT_OVERRIDES = _cc_cfg.get("merchant_overrides", [])
 
+CC_TRANSACTION_COLUMNS: list[str] = [
+    "TX_Date",
+    "Particulars",
+    "Merchant",
+    "CC_Category",
+    "Auto_Narration",
+    "Account_Head",
+    "DR",
+    "CR",
+    "Statement_Period",
+    "Pay_By",
+    "Source",
+]
+
 _TX_RE = re.compile(
     rf"^(\d{{2}}/\d{{2}}/\d{{4}})\s+(.+?)\s+({_CAT_PAT})\s+([\d,]+\.\d{{2}})\s*(Cr)?$",
     re.IGNORECASE,
@@ -176,7 +190,7 @@ def _parse_statement(pdf_path: pathlib.Path) -> tuple[dict | None, pd.DataFrame 
         if _PMT_RE.match(line):
             continue
 
-    df = pd.DataFrame(rows) if rows else pd.DataFrame()
+    df = pd.DataFrame(rows, columns=CC_TRANSACTION_COLUMNS)
     return meta, df
 
 
@@ -225,7 +239,7 @@ def parse_all_statements(
             all_dfs.append(df)
 
     if not all_dfs:
-        return pd.DataFrame(), metas
+        return pd.DataFrame(columns=CC_TRANSACTION_COLUMNS), metas
 
     cc_df = pd.concat(all_dfs, ignore_index=True)
     cc_df["TX_Date"] = pd.to_datetime(cc_df["TX_Date"])
@@ -239,7 +253,7 @@ def parse_all_statements_from_cache(
     cache_path = pathlib.Path(cache_path)
 
     if not cache_path.exists():
-        return pd.DataFrame(), []
+        return pd.DataFrame(columns=CC_TRANSACTION_COLUMNS), []
 
     try:
         cc_df = pd.read_excel(cache_path, sheet_name="Transactions")
@@ -247,7 +261,7 @@ def parse_all_statements_from_cache(
         cc_df["Pay_By"] = pd.to_datetime(cc_df["Pay_By"], errors="coerce")
     except Exception as e:
         warnings.warn(f"Could not load transactions from cache: {e}")
-        cc_df = pd.DataFrame()
+        cc_df = pd.DataFrame(columns=CC_TRANSACTION_COLUMNS)
 
     try:
         metas_df = pd.read_excel(cache_path, sheet_name="Metadata")

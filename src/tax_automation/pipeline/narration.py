@@ -34,6 +34,23 @@ from tax_automation.exporters import (
     assign_pivot_categories,
 )
 
+# Canonical columns for narrated bank statements
+NARRATED_COLUMNS: list[str] = [
+    "TX_Date",
+    "Value_Date",
+    "Particulars",
+    "Auto_Narration",
+    "Account_Head",
+    "Confidence",
+    "DR",
+    "CR",
+    "Balance",
+    "Ref",
+    "Bank_Key",
+    "Bank_Display",
+    "Account_ID",
+]
+
 # UPI pattern for merchant detection
 _UPI_PAT = re.compile(
     r"\bUPI[/ -]|UPIOUT/|UPI\s*IN/|UPI/DR/|UPI/CR/|^UPI/", re.IGNORECASE
@@ -277,24 +294,7 @@ def process_entity_narration(
                 }
             )
 
-        df_narrated = pd.DataFrame(
-            records,
-            columns=[
-                "TX_Date",
-                "Value_Date",
-                "Particulars",
-                "Auto_Narration",
-                "Account_Head",
-                "Confidence",
-                "DR",
-                "CR",
-                "Balance",
-                "Ref",
-                "Bank_Key",
-                "Bank_Display",
-                "Account_ID",
-            ],
-        )
+        df_narrated = pd.DataFrame(records, columns=NARRATED_COLUMNS)
         write_bank_sheet(
             wb_out,
             df_narrated,
