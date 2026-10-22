@@ -60,6 +60,14 @@ def identify_bank(
     else:
         header_cols = set()
 
+    # Check if there are non-empty metadata rows above the header
+    has_preamble = any(
+        c
+        for row in sheet_rows[:header_row_idx]
+        for c in row
+        if c is not None and str(c).strip() not in ("", "nan", "none")
+    )
+
     best_key = "unknown"
     best_score = 0.0
 
@@ -85,7 +93,15 @@ def identify_bank(
         else:
             header_score = 0.0
 
-        final_score = _META_WEIGHT * meta_score + _HEADER_WEIGHT * header_score
+        if not has_preamble:
+            # Statements starting directly at header (CSVs, clean Excel)
+            # rely on header score
+            final_score = header_score if header_score > 0 else meta_score
+        else:
+            final_score = _META_WEIGHT * meta_score + _HEADER_WEIGHT * header_score
+            # If headers are a strong match (>= 80%), ensure high confidence
+            if header_score >= 0.80 and meta_score >= 0.20:
+                final_score = max(final_score, 0.70)
 
         if final_score > best_score:
             best_score = final_score

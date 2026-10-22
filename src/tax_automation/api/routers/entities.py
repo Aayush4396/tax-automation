@@ -67,7 +67,7 @@ def list_entities() -> list[str]:
 def get_entity(entity_id: str) -> EntityResponse:
     """Returns the full JSON configuration for a single entity."""
     cfg = _load_entity(entity_id.lower())
-    return EntityResponse(**cfg)
+    return EntityResponse(**{k: v for k, v in cfg.items() if k != "$schema"})
 
 
 # ---------------------------------------------------------------------------

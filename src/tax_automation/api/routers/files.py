@@ -99,7 +99,8 @@ def upload_statement(
         )
 
     dest_dir = resolve_input_dir(eid, f, "bank_statements")
-    dest_path = dest_dir / file.filename
+    safe_name = Path(file.filename).name
+    dest_path = dest_dir / safe_name
 
     try:
         with open(dest_path, "wb") as out:

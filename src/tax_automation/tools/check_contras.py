@@ -10,6 +10,7 @@ from pathlib import Path
 from openpyxl import load_workbook
 
 from tax_automation.config_loader import get_entity_config, resolve_output_dir
+from tax_automation.core.utils import safe_float
 
 
 def verify_contras(entity_id: str, fy: str, file_path: Path | None = None) -> bool:
@@ -62,8 +63,8 @@ def verify_contras(entity_id: str, fy: str, file_path: Path | None = None) -> bo
         for r in rows[h_idx + 1 :]:
             lbl = str(r[lbl_idx] or "")
             if lbl.startswith("Contra"):
-                dr_val = float(r[dr_idx] or 0.0)
-                cr_val = float(r[cr_idx] or 0.0)
+                dr_val = safe_float(r[dr_idx])
+                cr_val = safe_float(r[cr_idx])
                 contras.append(
                     {
                         "sheet": sheet,

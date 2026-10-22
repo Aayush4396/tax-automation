@@ -17,6 +17,7 @@ from tax_automation.api.schemas.diagnostics import (
     ConfidenceBand,
 )
 from tax_automation.config_loader import get_entity_config
+from tax_automation.core.utils import safe_float
 from tax_automation.tools.check_narration_results import check_results
 from tax_automation.tools.parse_all_stats import parse_bank_summary
 from tax_automation.tools.parse_narration_stats import get_narration_stats
@@ -87,8 +88,8 @@ def check_contras(entity_id: str, fy: str) -> ContraResult:
                 if lbl.startswith("Contra"):
                     contras.append(
                         {
-                            "dr": float(r[dr_idx] or 0.0),
-                            "cr": float(r[cr_idx] or 0.0),
+                            "dr": safe_float(r[dr_idx]),
+                            "cr": safe_float(r[cr_idx]),
                         }
                     )
 

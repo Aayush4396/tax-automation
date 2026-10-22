@@ -136,7 +136,7 @@ def consolidate_entity_statements(
                     value=val if pd.notna(val) else "",
                 )
 
-    if "Sheet" in wb.sheetnames:
+    if sheets_created > 0 and "Sheet" in wb.sheetnames:
         wb.remove(wb["Sheet"])
 
     output_dir.mkdir(parents=True, exist_ok=True)

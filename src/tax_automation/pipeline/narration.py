@@ -23,6 +23,7 @@ from tax_automation.config_loader import (
 from tax_automation.core.auto_header import find_header_row
 from tax_automation.core.bank_identifier import identify_bank
 from tax_automation.core.merchants import detect_merchant
+from tax_automation.core.utils import safe_float
 from tax_automation.rules.loader import build_rule_chain
 from tax_automation.exporters import (
     write_bank_sheet,
@@ -55,17 +56,6 @@ NARRATED_COLUMNS: list[str] = [
 _UPI_PAT = re.compile(
     r"\bUPI[/ -]|UPIOUT/|UPI\s*IN/|UPI/DR/|UPI/CR/|^UPI/", re.IGNORECASE
 )
-
-
-def safe_float(val: Any) -> float:
-    """Convert value to float safely, returning 0.0 for invalid values."""
-    if pd.isna(val) or val is None:
-        return 0.0
-    try:
-        val_str = str(val).replace(",", "").strip()
-        return float(val_str)
-    except (ValueError, TypeError):
-        return 0.0
 
 
 def get_col_value(row: pd.Series, col_spec: str | list[str] | None) -> Any:
