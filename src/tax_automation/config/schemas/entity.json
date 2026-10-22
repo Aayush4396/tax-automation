@@ -63,8 +63,26 @@
         "properties": {
           "label": { "type": "string" },
           "account_head": { "type": "string" },
+          "layer": {
+            "type": "string",
+            "enum": ["entity", "common"],
+            "default": "entity",
+            "description": "'entity' = evaluated first; 'common' = after bank base rules, before universal rules"
+          },
           "pattern": { "type": "string" },
+          "patterns_all": { "type": "array", "items": { "type": "string" }, "description": "All regexes must match" },
+          "exclude_pattern": { "type": "string" },
           "exact_amount": { "type": "number" },
+          "exact_dr": { "type": "number" },
+          "exclude_exact_dr": { "type": "number" },
+          "min_dr": { "type": "number" },
+          "max_dr": { "type": "number" },
+          "dr_in": { "type": "array", "items": { "type": "number" } },
+          "exact_cr": { "type": "number" },
+          "exclude_exact_cr": { "type": "number" },
+          "min_cr": { "type": "number" },
+          "max_cr": { "type": "number" },
+          "cr_in": { "type": "array", "items": { "type": "number" } },
           "direction": { "type": "string", "enum": ["DR", "CR", "dr", "cr", "ANY", "any", "both"] },
           "confidence": { "type": "number" }
         }
@@ -90,10 +108,6 @@
           "meta_signals_extra": { "type": "array", "items": { "type": "string" } }
         }
       }
-    },
-    "banks": {
-      "type": "object",
-      "description": "Legacy bank mapping dictionary for backward compatibility"
     }
   }
 }

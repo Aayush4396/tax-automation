@@ -265,27 +265,7 @@
     "direction": "ANY",
     "confidence": 0.88
   },
-  {
-    "label": "NEFT Transfer",
-    "account_head": "Transfer",
-    "pattern": "\\bNEFT\\b|\\bRTGS\\b|\\bIMPS\\b|\\bMMT\\b|\\bINFT\\b",
-    "direction": "ANY",
-    "confidence": 0.7
-  },
-  {
-    "label": "MOB Transfer",
-    "account_head": "Transfer",
-    "pattern": "\\bMOB/TPFT\\b|\\bMOB/TFR\\b|\\bMOB\\s*TFR\\b",
-    "direction": "ANY",
-    "confidence": 0.7
-  },
-  {
-    "label": "IB Transfer",
-    "account_head": "Transfer",
-    "pattern": "^IB:\\s*",
-    "direction": "ANY",
-    "confidence": 0.72
-  },
+
   {
     "label": "Misc Income",
     "account_head": "Misc Income",
@@ -344,9 +324,16 @@
   {
     "label": "MF Investment",
     "account_head": "Investments",
-    "pattern": "iccl|BSE\\s*MF|NSE\\s*MF|INDIAN\\s*CLEARING\\s*CORP",
-    "direction": "DR",
+    "pattern": "iccl|BSE\\s*MF|NSE\\s*MF|INDIAN\\s*CLEARING\\s*CORP|NSE\\s*CLEARING",
+    "direction": "ANY",
     "confidence": 0.9
+  },
+  {
+    "label": "CDSL / Depository Credit",
+    "account_head": "Dividend Income",
+    "pattern": "CENTRAL\\s*DEPOSITORY|CDSL",
+    "direction": "CR",
+    "confidence": 0.88
   },
   {
     "label": "Zerodha Broking",
@@ -481,6 +468,27 @@
     "pattern": "ABHUSHAN",
     "direction": "DR",
     "confidence": 0.85
+  },
+  {
+    "label": "NEFT Transfer",
+    "account_head": "Transfer",
+    "pattern": "\\bNEFT\\b|\\bRTGS\\b|\\bIMPS\\b|\\bMMT\\b|\\bINFT\\b",
+    "direction": "ANY",
+    "confidence": 0.7
+  },
+  {
+    "label": "MOB Transfer",
+    "account_head": "Transfer",
+    "pattern": "\\bMOB/TPFT\\b|\\bMOB/TFR\\b|\\bMOB\\s*TFR\\b",
+    "direction": "ANY",
+    "confidence": 0.7
+  },
+  {
+    "label": "IB Transfer",
+    "account_head": "Transfer",
+    "pattern": "^IB:\\s*",
+    "direction": "ANY",
+    "confidence": 0.72
   },
   {
     "label": "UPI Payment",

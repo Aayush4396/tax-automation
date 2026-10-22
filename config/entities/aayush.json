@@ -46,15 +46,58 @@
   "rent": {
     "landlords": ["NELABALLI", "NAGARAJ A", "MOHITH\\s*(S\\s*)?REDDY"],
     "vpas": ["4897690162095"],
-    "keywords": ["PG FEES", "PG RENT", "RENT"]
+    "keywords": ["PG FEES", "PG RENT", "\\bRENT\\b"]
   },
   "custom_rules": [
     {
       "label": "Salary",
       "account_head": "Salary",
       "pattern": "^TRANS$",
-      "exact_amount": 91056,
+      "exact_amount": 9109,
       "direction": "cr",
+      "confidence": 0.90
+    },
+    {
+      "label": "Contra - SBI",
+      "account_head": "SBI 1227",
+      "layer": "common",
+      "patterns_all": ["\\bAAYUSH\\b", "STATE\\s*BANK\\s*OF\\s*INDIA|SBI\\b|SBIN"],
+      "confidence": 0.90
+    },
+    {
+      "label": "Contra - Kotak",
+      "account_head": "KOTAK 0333",
+      "layer": "common",
+      "patterns_all": ["\\bAAYUSH\\b", "KOTAK\\b|KKBK"],
+      "confidence": 0.90
+    },
+    {
+      "label": "Contra - Jupiter",
+      "account_head": "FEDERAL 0847",
+      "layer": "common",
+      "patterns_all": ["\\bAAYUSH\\b", "JUPITER|FEDERAL\\b|FDRL"],
+      "confidence": 0.90
+    },
+    {
+      "label": "Contra - Axis",
+      "account_head": "Axis",
+      "layer": "common",
+      "patterns_all": ["\\bAAYUSH\\b", "AXIS\\b|UTIB"],
+      "confidence": 0.90
+    },
+    {
+      "label": "Contra - HDFC",
+      "account_head": "HDFC 5413",
+      "layer": "common",
+      "patterns_all": ["\\bAAYUSH\\b", "HDFC"],
+      "exclude_pattern": "HDFC\\s*SECURITIES|HDBFSS|HDFCLIFE|HDFC\\s*MF|HDFC\\s*MUTUAL\\s*FUND|HDFCMF",
+      "confidence": 0.90
+    },
+    {
+      "label": "Contra - SBM",
+      "account_head": "SBM",
+      "layer": "common",
+      "patterns_all": ["\\bAAYUSH\\b", "SBM\\b|STCB"],
       "confidence": 0.90
     }
   ],

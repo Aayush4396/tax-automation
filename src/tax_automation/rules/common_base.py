@@ -22,6 +22,7 @@ def _compile_declarative_rule(r_dict: dict) -> tuple:
     pat_str = r_dict.get("pattern")
     direction = r_dict.get("direction", "ANY").upper()
     conf = float(r_dict.get("confidence", 0.90))
+    exact_amount = float(r_dict["exact_amount"]) if "exact_amount" in r_dict else None
     min_dr = float(r_dict["min_dr"]) if "min_dr" in r_dict else None
     max_dr = float(r_dict["max_dr"]) if "max_dr" in r_dict else None
     exact_dr = float(r_dict["exact_dr"]) if "exact_dr" in r_dict else None
@@ -29,6 +30,14 @@ def _compile_declarative_rule(r_dict: dict) -> tuple:
         float(r_dict["exclude_exact_dr"]) if "exclude_exact_dr" in r_dict else None
     )
     dr_in = [float(x) for x in r_dict["dr_in"]] if "dr_in" in r_dict else None
+
+    min_cr = float(r_dict["min_cr"]) if "min_cr" in r_dict else None
+    max_cr = float(r_dict["max_cr"]) if "max_cr" in r_dict else None
+    exact_cr = float(r_dict["exact_cr"]) if "exact_cr" in r_dict else None
+    exclude_exact_cr = (
+        float(r_dict["exclude_exact_cr"]) if "exclude_exact_cr" in r_dict else None
+    )
+    cr_in = [float(x) for x in r_dict["cr_in"]] if "cr_in" in r_dict else None
 
     exclude_pat_str = r_dict.get("exclude_pattern")
     patterns_all_str = r_dict.get("patterns_all")
@@ -48,6 +57,10 @@ def _compile_declarative_rule(r_dict: dict) -> tuple:
             return False
         if direction == "CR" and cr <= 0:
             return False
+        if exact_amount is not None:
+            amt = cr if direction == "CR" or (direction == "ANY" and cr > 0) else dr
+            if abs(amt - exact_amount) > 0.01:
+                return False
         if min_dr is not None and dr < min_dr:
             return False
         if max_dr is not None and dr > max_dr:
@@ -57,6 +70,16 @@ def _compile_declarative_rule(r_dict: dict) -> tuple:
         if exclude_exact_dr is not None and abs(dr - exclude_exact_dr) < 0.01:
             return False
         if dr_in is not None and not any(abs(dr - amt) < 0.01 for amt in dr_in):
+            return False
+        if min_cr is not None and cr < min_cr:
+            return False
+        if max_cr is not None and cr > max_cr:
+            return False
+        if exact_cr is not None and abs(cr - exact_cr) > 0.01:
+            return False
+        if exclude_exact_cr is not None and abs(cr - exclude_exact_cr) < 0.01:
+            return False
+        if cr_in is not None and not any(abs(cr - amt) < 0.01 for amt in cr_in):
             return False
         if exclude_pattern and exclude_pattern.search(p):
             return False

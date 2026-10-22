@@ -3,12 +3,12 @@
 
 Dynamic rule chain compiler:
 Assembles runtime classification rules combining:
-1. Dynamic Entity Custom Rules (exact amounts, specific overrides)
+1. Dynamic Entity Custom Rules (layer "entity": exact amounts, specific overrides)
 2. Dynamic Rent Rules (synthesized from entity_config["rent"])
 3. Dynamic Contra Rules (synthesized from entity_config["accounts"] + self identity)
 4. Dynamic Family Transfer Rules (synthesized from entity_config["family_members"])
-5. Python Entity Extensions (optional entity_extensions/<entity>_rules.py)
-6. Bank Base Rules (loaded directly from config/banks/<bank>.json rules_module)
+5. Bank Base Rules (loaded directly from config/banks/<bank>.json rules_module)
+6. Entity Custom Rules (layer "common": evaluated just before universal rules)
 7. Agnostic Common Rules (from config/rules_common.json)
 """
 
@@ -24,7 +24,6 @@ from tax_automation.config_loader import (
 from tax_automation.rules.common_base import RULES_COMMON, _compile_declarative_rule
 
 _BANK_RULES_CACHE: dict[str, list[tuple]] = {}
-_EXT_CACHE: dict[str, dict[str, list[tuple]]] = {}
 
 # Standard bank alias tokens used for dynamic Contra synthesis
 _BANK_ALIAS_TOKENS: dict[str, list[str]] = {
@@ -37,24 +36,6 @@ _BANK_ALIAS_TOKENS: dict[str, list[str]] = {
     "sbm": [r"\bSBM\b", r"\bSTCB\b"],
     "icici": [r"\bICICI\b", r"\bICIC\b"],
 }
-
-
-def load_entity_extensions(entity_id: str) -> dict[str, list[tuple]]:
-    """Loads optional Python entity rule extensions from
-    entity_extensions/<entity>_rules.py.
-    """
-    if entity_id in _EXT_CACHE:
-        return _EXT_CACHE[entity_id]
-
-    module_name = f"tax_automation.rules.entity_extensions.{entity_id.lower()}_rules"
-    try:
-        mod = importlib.import_module(module_name)
-        ext = getattr(mod, "EXTRA_RULES", {})
-    except (ImportError, AttributeError):
-        ext = {}
-
-    _EXT_CACHE[entity_id] = ext
-    return ext
 
 
 def load_bank_rules(bank_key: str, rules_module: str | None = None) -> list[tuple]:
@@ -159,6 +140,29 @@ def build_dynamic_contra_rules(
             )
         )
 
+    # General self-transfer rule for any entity:
+    # Catches transfers where the counterparty in UPI is self or marked as Self Transfer
+    # even when the destination bank is omitted in the statement text (e.g. Kotak/GPay).
+    self_xfer_pat = re.compile(r"\b(?:Self|Internal)\s*transfer\b", re.IGNORECASE)
+    upi_self_pats = [
+        re.compile(rf"UPI/(?:CR/|DR/)?.*{sr.pattern}", re.IGNORECASE)
+        for sr in self_regexes
+    ]
+
+    def make_generic_self_matcher():
+        return lambda p, dr, cr: bool(
+            self_xfer_pat.search(p) or any(r.search(p) for r in upi_self_pats)
+        )
+
+    contra_rules.append(
+        (
+            "Contra - Self Transfer",
+            "Contra",
+            make_generic_self_matcher(),
+            0.88,
+        )
+    )
+
     return contra_rules
 
 
@@ -208,7 +212,14 @@ def build_dynamic_rent_rules(entity_config: dict[str, Any]) -> list[tuple]:
     if not all_tokens:
         return []
 
-    regexes = [re.compile(t, re.IGNORECASE) for t in all_tokens]
+    token_patterns = []
+    for t in all_tokens:
+        if t.isalnum() and r"\b" not in t:
+            token_patterns.append(rf"\b{t}\b")
+        else:
+            token_patterns.append(t)
+
+    regexes = [re.compile(t, re.IGNORECASE) for t in token_patterns]
 
     def rent_matcher(p: str, dr: float, cr: float) -> bool:
         return dr > 0 and any(r.search(p) for r in regexes)
@@ -216,14 +227,23 @@ def build_dynamic_rent_rules(entity_config: dict[str, Any]) -> list[tuple]:
     return [("Rent", "Rent", rent_matcher, 0.90)]
 
 
-def build_dynamic_custom_rules(entity_config: dict[str, Any]) -> list[tuple]:
-    """Compiles declarative custom rules declared in the entity configuration."""
+def build_dynamic_custom_rules(
+    entity_config: dict[str, Any], layer: str = "entity"
+) -> list[tuple]:
+    """Compiles declarative custom rules declared in the entity configuration.
+
+    Each rule may set ``"layer"``:
+      - ``"entity"`` (default): evaluated first, before all other rules.
+      - ``"common"``: evaluated after bank base rules, just before universal rules.
+    """
     custom = entity_config.get("custom_rules", [])
     if not custom or not isinstance(custom, list):
         return []
 
     rules = []
     for r_dict in custom:
+        if r_dict.get("layer", "entity").lower() != layer:
+            continue
         try:
             compiled = _compile_declarative_rule(r_dict)
             rules.append(compiled)
@@ -235,12 +255,12 @@ def build_dynamic_custom_rules(entity_config: dict[str, Any]) -> list[tuple]:
 def build_rule_chain(entity_id: str, bank_key: str) -> tuple[list[tuple], list[tuple]]:
     """Builds the full runtime rule chain for an entity and bank account.
 
-    Layer 1: Entity custom rules (exact amounts, specific overrides)
+    Layer 1: Entity custom rules, layer "entity" (exact amounts, specific overrides)
     Layer 2: Dynamic rent rules
     Layer 3: Dynamic contra rules (between accounts)
     Layer 4: Dynamic family member transfer rules
-    Layer 5: Entity extension Python rules (if any)
-    Layer 6: Bank base rules
+    Layer 5: Bank base rules
+    Layer 6: Entity custom rules, layer "common"
     Layer 7: Universal common rules
     """
     entity_cfg = {}
@@ -250,25 +270,21 @@ def build_rule_chain(entity_id: str, bank_key: str) -> tuple[list[tuple], list[t
         pass
 
     # Synthesize dynamic entity-specific rules
-    custom_rules = build_dynamic_custom_rules(entity_cfg)
+    custom_rules = build_dynamic_custom_rules(entity_cfg, layer="entity")
     rent_rules = build_dynamic_rent_rules(entity_cfg)
     contra_rules = build_dynamic_contra_rules(entity_cfg, bank_key)
     family_rules = build_dynamic_family_rules(entity_cfg)
-
-    # Legacy Python extensions (if present)
-    ext = load_entity_extensions(entity_id)
-    bank_ext = ext.get(bank_key.lower(), [])
-    common_ext = ext.get("common", [])
+    entity_common_rules = build_dynamic_custom_rules(entity_cfg, layer="common")
 
     # Bank base rules
     bank_base = load_bank_rules(bank_key)
 
     # Assemble bank-level rules (evaluated before common rules)
     full_bank_rules = (
-        custom_rules + rent_rules + contra_rules + family_rules + bank_ext + bank_base
+        custom_rules + rent_rules + contra_rules + family_rules + bank_base
     )
 
-    # Universal common rules
-    full_common_rules = common_ext + RULES_COMMON
+    # Universal common rules, preceded by entity common-layer rules
+    full_common_rules = entity_common_rules + RULES_COMMON
 
     return full_bank_rules, full_common_rules
