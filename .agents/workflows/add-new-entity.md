@@ -18,10 +18,12 @@ Scaffolds the declarative JSON profile configuration, canonical data directory t
 
 ## Execution Steps
 
-### Step 1: Automated Scaffolding via CLI
-Run the onboarding CLI tool:
+### Step 1: Automated Scaffolding via API
+Create the entity via the FastAPI REST endpoint:
 ```bash
-python -m tax_automation init-entity --entity <entity_id> --name "<Full Name>" [--pan <PAN>] [--fy FY26]
+curl -X POST "http://localhost:8000/entities" \
+  -H "Content-Type: application/json" \
+  -d '{"entity_id": "<entity_id>", "display_name": "<Full Name>", "pan": "<PAN>", "fy": "FY26"}'
 ```
 This automatically:
 1. Generates `config/entities/<entity_id>.json` conforming to `config/schemas/entity.json`.
@@ -50,13 +52,17 @@ Declare family members, rent keywords/landlords, and custom rules in `config/ent
 Create `config/consolidation/<entity_id>_<fy>.json` mapping filenames to worksheet names.
 
 ### Step 5: Verification Run
-1. Place bank statement files in `data/<entity_id>/<FY>/input/bank_statements/`.
-2. Run consolidation (if multi-file):
+1. Place bank statement files in `data/<entity_id>/<FY>/input/bank_statements/` (or via `POST /files/<entity_id>/<FY>/upload`).
+2. Run one-shot consolidation and narration:
    ```bash
-   python -m tax_automation consolidate --entity <entity_id> --fy <FY>
+   curl -X POST "http://localhost:8000/pipeline/<entity_id>/<FY>/run-all"
    ```
-3. Run narration pipeline:
-   ```bash
-   python -m tax_automation process --entity <entity_id> --fy <FY>
+   *Or via Python directly:*
+   ```python
+   from tax_automation.pipeline.consolidation import consolidate_entity
+   from tax_automation.pipeline.narration import process_entity_narration
+
+   consolidate_entity("<entity_id>", "<FY>")
+   process_entity_narration("<entity_id>", "<FY>")
    ```
-4. Verify contras and review generated master ledger in `data/<entity_id>/<FY>/output/narrated_ledger.xlsx`.
+3. Verify contras via `GET http://localhost:8000/diagnostics/<entity_id>/<FY>/contras` and review generated master ledger in `data/<entity_id>/<FY>/output/narrated_ledger.xlsx`.

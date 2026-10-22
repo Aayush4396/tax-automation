@@ -70,12 +70,33 @@ pip install -e .
 
 ---
 
-### 2. Entity Onboarding
+### 2. Launching the API Service
 
-Initialize a new taxpayer entity using the CLI onboarding utility:
+Start the local FastAPI server using the PowerShell startup script or uvicorn:
+
+```powershell
+# Quick start via PowerShell script:
+.\scripts\start_api.ps1
+
+# Or run directly via uvicorn:
+python -m uvicorn tax_automation.api.main:app --port 8000 --reload
+```
+
+- **Interactive Swagger UI**: [http://localhost:8000/docs](http://localhost:8000/docs)
+- **ReDoc Documentation**: [http://localhost:8000/redoc](http://localhost:8000/redoc)
+- **Liveness Probe**: `GET http://localhost:8000/health`
+
+---
+
+### 3. Entity Onboarding
+
+Initialize a new taxpayer entity via the REST API or by creating a declarative JSON file:
 
 ```bash
-python -m tax_automation init-entity --entity demo_entity --name "Sample Taxpayer" --pan XXXXX0000X --fy FY26
+# Via REST API:
+curl -X POST "http://localhost:8000/entities" \
+  -H "Content-Type: application/json" \
+  -d '{"entity_id": "demo_entity", "display_name": "Sample Taxpayer", "pan": "XXXXX0000X", "fy": "FY26"}'
 ```
 
 This scaffolds:
@@ -85,7 +106,7 @@ This scaffolds:
 
 ---
 
-### 3. Bank Account Configuration
+### 4. Bank Account Configuration
 
 Open `config/entities/demo_entity.json` to declare the taxpayer's bank accounts. Assign standard bank types (`hdfc`, `sbi`, `kotak`, `axis`, `boi`, `federal`, `sbm`, `icici`, `generic`):
 
@@ -114,32 +135,45 @@ Open `config/entities/demo_entity.json` to declare the taxpayer's bank accounts.
 
 ---
 
-### 4. Statement Processing
+### 5. Statement Processing
 
 1. Place downloaded bank statement files into the entity's input folder:
    ```text
    data/demo_entity/FY26/input/bank_statements/
    ```
+   *(Or upload directly via `POST /files/{entity_id}/{fy}/upload`)*
 
-2. Execute the processing pipeline:
+2. Trigger the pipeline via REST API:
    ```bash
-   python -m tax_automation process --entity demo_entity --fy FY26
+   # One-shot Consolidation + Narration Processing:
+   curl -X POST "http://localhost:8000/pipeline/demo_entity/FY26/run-all"
    ```
 
-*(Optional: If consolidating separate raw statements into a single multi-sheet workbook first, run `python -m tax_automation consolidate --entity demo_entity --fy FY26`)*
+   *Alternatively, call programmatically via Python:*
+   ```python
+   from tax_automation.pipeline.consolidation import consolidate_entity
+   from tax_automation.pipeline.narration import process_entity_narration
+
+   consolidate_entity("demo_entity", "FY26")
+   process_entity_narration("demo_entity", "FY26")
+   ```
 
 ---
 
-### 5. Reviewing Financial Deliverables
+### 6. Reviewing Financial Deliverables & Diagnostics
 
 The master ledger is generated at:
 ```text
 data/demo_entity/FY26/output/narrated_ledger.xlsx
 ```
+Download directly via `GET /files/demo_entity/FY26/ledger`.
 
-To run automated contra-balance diagnostics:
+Run automated contra-balance and classification diagnostics:
 ```bash
-python -m tax_automation.tools.check_contras --entity demo_entity --fy FY26
+# Via REST API:
+curl "http://localhost:8000/diagnostics/demo_entity/FY26/contras"
+curl "http://localhost:8000/diagnostics/demo_entity/FY26/narration-stats"
+curl "http://localhost:8000/diagnostics/demo_entity/FY26/bank-summary"
 ```
 
 ---
@@ -159,17 +193,15 @@ The generated Excel workbook contains structured worksheets tailored for audit a
 
 ---
 
-## Convenience Runners
+## Convenience Runners & Startup Scripts
 
-Pre-configured shell runners provide single-step execution:
-
-- **Windows PowerShell**:
+- **Start FastAPI Service (Windows PowerShell)**:
   ```powershell
-  .\scripts\run_and_verify.ps1 -Entity demo_entity -FY FY26
+  .\scripts\start_api.ps1
   ```
-- **Linux / macOS**:
-  ```bash
-  ./scripts/run_and_verify.sh demo_entity FY26
+- **Run Unit Tests (Full 29-test Suite)**:
+  ```powershell
+  .venv\Scripts\python -m unittest discover -s src/tax_automation/tests
   ```
 
 ---
@@ -209,18 +241,20 @@ For a comprehensive deep-dive into internal pipeline stages, data flow transform
 ```text
 tax-automation/
 ├── src/tax_automation/
-│   ├── cli.py                  # CLI entry point (init-entity, consolidate, process)
+│   ├── api/                    # FastAPI server (routers, schemas, deps, lifespan)
 │   ├── config_loader.py        # Schema validation, path resolution, bank registry
-│   ├── core/                   # Header detection, bank fingerprinting, merchant signals
+│   ├── core/                   # Header detection, bank fingerprinting, merchant signals, safe parsing
 │   ├── consolidators/          # In-memory decryptor & multi-sheet consolidator
 │   ├── rules/                  # Dynamic rule compiler & bank-specific rules
 │   ├── pipeline/               # Narration classification & statement pipelines
 │   ├── exporters/              # Master Excel ledger, Tally formatting, pivot tables
-│   └── tools/                  # Diagnostics: check_contras, narration_stats
+│   ├── tools/                  # Diagnostics: check_contras, narration_stats
+│   └── tests/                  # 29 automated unit & integration tests
 ├── config/
 │   ├── entities/               # Taxpayer profiles (declarative JSON configs)
 │   ├── banks/                  # Reusable bank schemas (hdfc, sbi, kotak, etc.)
 │   ├── consolidation/          # Multi-statement file-to-sheet maps
+│   ├── schemas/                # JSON Schema specifications (entity.json, rules.json)
 │   └── rules_common.json       # Universal Indian merchant/banking rules
 ├── data/                       # Local data hierarchy (gitignored financial data)
 │   ├── <entity_id>/<FY>/
@@ -228,8 +262,7 @@ tax-automation/
 │   │   └── output/
 │   └── README.md
 └── scripts/
-    ├── run_and_verify.ps1      # 1-click PowerShell runner
-    └── run_and_verify.sh       # 1-click Bash runner
+    └── start_api.ps1           # 1-click FastAPI startup script
 ```
 
 ### Verification & Testing Suite

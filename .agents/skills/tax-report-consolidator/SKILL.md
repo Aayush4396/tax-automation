@@ -27,5 +27,9 @@ Consolidate individual bank statement files (XLS, XLSX, CSV, PDF) for an entity 
 2. Apply header formatting and auto-column width calculations.
 3. Save output workbook to `data/<entity>/<FY>/output/consolidated_statements.xlsx`:
    ```bash
-   python -m tax_automation consolidate --entity <entity> --fy <FY>
+   # Via FastAPI REST endpoint:
+   curl -X POST "http://localhost:8000/pipeline/<entity>/<FY>/consolidate"
+
+   # Or via Python directly:
+   python -c "from tax_automation.pipeline.consolidation import consolidate_entity; consolidate_entity('<entity>', '<FY>')"
    ```

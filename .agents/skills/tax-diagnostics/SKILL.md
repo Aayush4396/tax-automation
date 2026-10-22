@@ -19,21 +19,26 @@ Execute validation checks on narrated Excel ledgers to ensure 100% classificatio
 4. Verify that every debit transfer from Account A has a matching credit transfer in Account B.
 5. Report asymmetric or missing contra entries:
    ```bash
+   # Via REST API:
+   curl "http://localhost:8000/diagnostics/<entity>/<FY>/contras"
+
+   # Or via CLI tool:
    python -m tax_automation.tools.check_contras --entity <entity> --fy <FY>
    ```
 
-### Step 2: Confidence Score Analysis (`check_narration_results.py`)
+### Step 2: Confidence Score Analysis (`parse_narration_stats.py`)
 1. Scan generated ledger `data/<entity>/<FY>/output/narrated_ledger.xlsx`.
 2. Exclude summary sheets specified in entity configuration (`output_sheet_names`).
-3. Identify transactions with confidence score `< 0.70`.
-4. Calculate percentage of transactions classified with high confidence (`≥ 0.85`):
+3. Calculate percentage of transactions classified across high, medium, and low confidence tiers:
    ```bash
-   python -m tax_automation.tools.check_narration_results --entity <entity> --fy <FY>
+   # Via REST API:
+   curl "http://localhost:8000/diagnostics/<entity>/<FY>/narration-stats"
    ```
 
 ### Step 3: Performance & Summary Analytics (`parse_all_stats.py`)
 1. Extract bank opening & closing balances from `Bank Summary` worksheet.
 2. Aggregate category debit/credit totals:
    ```bash
-   python -m tax_automation.tools.parse_all_stats --entity <entity> --fy <FY>
+   # Via REST API:
+   curl "http://localhost:8000/diagnostics/<entity>/<FY>/bank-summary"
    ```

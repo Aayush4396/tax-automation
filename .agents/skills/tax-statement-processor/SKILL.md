@@ -38,5 +38,9 @@ Process bank statements and credit card statements for a designated entity profi
 4. Generate Monthly Pivot analysis and append colour legend.
 5. Save final master workbook to `data/<entity>/<FY>/output/narrated_ledger.xlsx`:
    ```bash
-   python -m tax_automation process --entity <entity> --fy <FY>
+   # Via FastAPI REST endpoint:
+   curl -X POST "http://localhost:8000/pipeline/<entity>/<FY>/process"
+
+   # Or via Python directly:
+   python -c "from tax_automation.pipeline.narration import process_entity_narration; process_entity_narration('<entity>', '<FY>')"
    ```

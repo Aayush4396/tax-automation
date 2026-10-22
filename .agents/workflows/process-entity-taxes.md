@@ -24,16 +24,30 @@ Processes raw or consolidated bank statements for an entity (e.g., `demo_entity`
 
 ### Step 2: Statement Consolidation
 1. Check if raw individual bank statements exist in `data/<entity>/<FY>/input/bank_statements/`.
-2. If raw statements exist, consolidate via:
+2. If raw statements exist, consolidate via REST API or Python:
    ```bash
-   python -m tax_automation consolidate --entity <entity> --fy <FY>
+   curl -X POST "http://localhost:8000/pipeline/<entity>/<FY>/consolidate"
+   ```
+   *Or via Python directly:*
+   ```python
+   from tax_automation.pipeline.consolidation import consolidate_entity
+   consolidate_entity("<entity>", "<FY>")
    ```
 3. Output consolidated workbook: `data/<entity>/<FY>/output/consolidated_statements.xlsx`.
 
 ### Step 3: Narration Classification & Master Ledger Generation
-1. Execute the narration pipeline:
+1. Execute the narration pipeline via REST API:
    ```bash
-   python -m tax_automation process --entity <entity> --fy <FY>
+   curl -X POST "http://localhost:8000/pipeline/<entity>/<FY>/process"
+   ```
+   *Or run one-shot consolidation + narration:*
+   ```bash
+   curl -X POST "http://localhost:8000/pipeline/<entity>/<FY>/run-all"
+   ```
+   *Or via Python directly:*
+   ```python
+   from tax_automation.pipeline.narration import process_entity_narration
+   process_entity_narration("<entity>", "<FY>")
    ```
 2. The pipeline:
    - Dynamic compiler synthesizes personal Contras, Family transfers, Rent rules, and custom rules.
@@ -44,10 +58,10 @@ Processes raw or consolidated bank statements for an entity (e.g., `demo_entity`
 ### Step 4: Diagnostics & Parity Verification
 1. Run contra symmetry verification:
    ```bash
-   python -m tax_automation.tools.check_contras --entity <entity> --fy <FY>
+   curl "http://localhost:8000/diagnostics/<entity>/<FY>/contras"
    ```
 2. Run narration score inspection:
    ```bash
-   python -m tax_automation.tools.check_narration_results --entity <entity> --fy <FY>
+   curl "http://localhost:8000/diagnostics/<entity>/<FY>/narration-stats"
    ```
 3. Verify that all debit/credit contras match and inspect transactions flagged with confidence `< 0.70`.

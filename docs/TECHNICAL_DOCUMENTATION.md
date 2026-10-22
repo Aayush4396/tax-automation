@@ -28,13 +28,14 @@ The Tax Automation System follows a decoupled, declarative, and stateless pipeli
 
 ```mermaid
 graph TD
-    CLI["CLI Entrypoint<br/>(tax_automation.cli)"] --> ConfigLoader["Config Loader<br/>(config_loader.py)"]
+    API["FastAPI / Pipeline Entrypoint<br/>(tax_automation.api)"] --> ConfigLoader["Config Loader<br/>(config_loader.py)"]
     
     subgraph ConfigLayer ["Declarative Configuration Layer"]
         EntityCfg["Entity Profiles<br/>(config/entities/*.json)"]
         BankSchemas["Bank Schemas<br/>(config/banks/*.json)"]
         CommonRules["Universal Rules<br/>(config/rules_common.json)"]
         ConsoMaps["Consolidation Maps<br/>(config/consolidation/*.json)"]
+        Schemas["JSON Schemas<br/>(config/schemas/*.json)"]
     end
     
     ConfigLoader --> EntityCfg
@@ -42,11 +43,11 @@ graph TD
     ConfigLoader --> CommonRules
     ConfigLoader --> ConsoMaps
 
-    CLI --> Stage1["Stage 1: Consolidator<br/>(consolidators/generic_consolidator.py)"]
-    CLI --> Stage2["Stage 2: Ingestion & Identification<br/>(core/auto_header.py, core/bank_identifier.py)"]
-    CLI --> Stage3["Stage 3: Dynamic Rule Compiler<br/>(rules/loader.py)"]
-    CLI --> Stage4["Stage 4: Exporter & Pivot Engine<br/>(exporters/exporter.py)"]
-    CLI --> Stage5["Stage 5: Diagnostic Toolsuite<br/>(tools/check_contras.py, tools/check_narration.py)"]
+    API --> Stage1["Stage 1: Consolidator<br/>(consolidators/generic_consolidator.py)"]
+    API --> Stage2["Stage 2: Ingestion & Identification<br/>(core/auto_header.py, core/bank_identifier.py)"]
+    API --> Stage3["Stage 3: Dynamic Rule Compiler<br/>(rules/loader.py)"]
+    API --> Stage4["Stage 4: Exporter & Pivot Engine<br/>(exporters/exporter.py)"]
+    API --> Stage5["Stage 5: Diagnostic Toolsuite<br/>(tools/check_contras.py, api/routers/diagnostics.py)"]
 
     Stage1 -->|"Raw Statements (PDF, XLS, CSV)"| PreConso["Consolidated Statements<br/>(consolidated_statements.xlsx)"]
     PreConso --> Stage2
@@ -63,31 +64,31 @@ graph TD
 ```mermaid
 sequenceDiagram
     autonumber
-    actor User as Taxpayer / User
-    participant CLI as tax_automation CLI
+    actor User as Taxpayer / Client
+    participant API as FastAPI / Pipeline
     participant Stage1 as Stage 1: Consolidator
     participant Stage2 as Stage 2: Bank Fingerprinter
     participant Stage3 as Stage 3: Dynamic Rule Compiler
     participant Stage4 as Stage 4: Ledger Exporter
     participant Stage5 as Stage 5: Diagnostics
 
-    User->>CLI: python -m tax_automation process --entity <eid> --fy <fy>
+    User->>API: POST /pipeline/{eid}/{fy}/run-all (or process_entity_narration)
     
     opt Consolidation Required
-        CLI->>Stage1: consolidate_entity_statements(eid, fy)
-        Stage1-->>CLI: consolidated_statements.xlsx
+        API->>Stage1: consolidate_entity_statements(eid, fy)
+        Stage1-->>API: consolidated_statements.xlsx
     end
     
-    CLI->>Stage2: Identify sheets & header offsets
-    Stage2-->>CLI: Extracted DataFrame per account
+    API->>Stage2: Identify sheets & header offsets
+    Stage2-->>API: Extracted DataFrame per account
     
-    CLI->>Stage3: Compile runtime rule chain & classify rows
-    Stage3-->>CLI: Narrated transactions (DR, CR, Head, Conf)
+    API->>Stage3: Compile runtime rule chain & classify rows
+    Stage3-->>API: Narrated transactions (DR, CR, Head, Conf)
     
-    CLI->>Stage4: Assemble master workbook
-    Stage4-->>CLI: narrated_ledger.xlsx
+    API->>Stage4: Assemble master workbook
+    Stage4-->>API: narrated_ledger.xlsx
     
-    CLI->>Stage5: check_contras(eid, fy)
+    API->>Stage5: check_contras(eid, fy)
     Stage5-->>User: Contra symmetry report & master ledger
 ```
 
@@ -454,7 +455,7 @@ During Stage 3 and Stage 4, all transaction records are represented with the fol
 
 | Module | Location | Primary Responsibility | Key Functions / Classes |
 | :--- | :--- | :--- | :--- |
-| **CLI** | `src/tax_automation/cli.py` | Unified CLI dispatch for onboarding, consolidation, and processing. | `main()`, `_init_entity()` |
+| **API Service** | `src/tax_automation/api/` | FastAPI REST application, endpoints, routers, file streaming, and diagnostics. | `create_app()`, `lifespan`, routers |
 | **Config Loader** | `src/tax_automation/config_loader.py` | Validates JSON profiles, bank schemas, and path resolution. | `resolve_entity_bank_registry()`, `resolve_input_dir()`, `resolve_output_dir()` |
 | **Auto Header** | `src/tax_automation/core/auto_header.py` | Detects variable tabular header row index in raw sheets. | `find_header_row()` |
 | **Bank Identifier** | `src/tax_automation/core/bank_identifier.py` | Fingerprints bank institution and maps account identity. | `identify_bank()` |
