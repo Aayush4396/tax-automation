@@ -80,10 +80,7 @@ def get_entity(entity_id: str) -> EntityResponse:
     response_model=EntityResponse,
 )
 def create_entity(body: CreateEntityRequest) -> EntityResponse:
-    """Scaffolds a new entity config file and data directories.
-
-    Equivalent to the old CLI: `python -m tax_automation init-entity`.
-    """
+    """Scaffolds a new entity config file and data directories."""
     eid = body.entity_id.strip().lower()
     if not re.match(r"^[a-z0-9_]+$", eid):
         raise HTTPException(

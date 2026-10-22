@@ -31,8 +31,6 @@ def run_consolidate(entity_id: str, fy: str) -> ConsolidateResponse:
     """Reads all raw statement files from the consolidation map and merges them
     into a single multi-sheet workbook at
     `data/{entity}/{FY}/output/consolidated_statements.xlsx`.
-
-    Equivalent to the old CLI: `python -m tax_automation consolidate --entity X --fy Y`.
     """
     eid, f = validate_entity_fy(entity_id, fy)
     try:
@@ -70,8 +68,6 @@ def run_process(
     """Loads the consolidated workbook, classifies every transaction using the
     entity's full rule chain, and writes the narrated Excel ledger.
 
-    Equivalent to the old CLI: `python -m tax_automation process --entity X --fy Y`.
-
     Optionally accepts `input_path` and `output_path` overrides in the request body.
     """
     eid, f = validate_entity_fy(entity_id, fy)
@@ -107,11 +103,7 @@ def run_process(
     response_model=RunAllResponse,
 )
 def run_all(entity_id: str, fy: str) -> RunAllResponse:
-    """Runs consolidation followed immediately by narration processing.
-
-    This is the most common workflow — equivalent to running both CLI commands
-    back-to-back for a given entity and FY.
-    """
+    """Runs consolidation followed immediately by narration processing."""
     eid, f = validate_entity_fy(entity_id, fy)
 
     # Step 1: Consolidate

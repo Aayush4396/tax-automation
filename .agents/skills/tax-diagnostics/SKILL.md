@@ -19,11 +19,7 @@ Execute validation checks on narrated Excel ledgers to ensure 100% classificatio
 4. Verify that every debit transfer from Account A has a matching credit transfer in Account B.
 5. Report asymmetric or missing contra entries:
    ```bash
-   # Via REST API:
    curl "http://localhost:8000/diagnostics/<entity>/<FY>/contras"
-
-   # Or via CLI tool:
-   python -m tax_automation.tools.check_contras --entity <entity> --fy <FY>
    ```
 
 ### Step 2: Confidence Score Analysis (`parse_narration_stats.py`)

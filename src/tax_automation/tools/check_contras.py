@@ -91,13 +91,3 @@ def verify_contras(entity_id: str, fy: str, file_path: Path | None = None) -> bo
     else:
         print(f"[WARN] Imbalance of {diff:,.2f} detected across Contras.")
         return False
-
-
-if __name__ == "__main__":
-    import argparse
-
-    parser = argparse.ArgumentParser(description="Verify contra symmetry in ledger")
-    parser.add_argument("--entity", required=True, help="Entity ID (e.g. aayush)")
-    parser.add_argument("--fy", default="FY26", help="Financial Year (e.g. FY26)")
-    args = parser.parse_args()
-    verify_contras(args.entity, args.fy)
