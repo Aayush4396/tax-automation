@@ -36,7 +36,7 @@ Transforms duplicated scripts across legacy entity roots into a single modular P
 - Update `exporter.py` and diagnostic tools.
 
 ### Phase 5: Declarative Entity Profiles & Onboarding CLI
-- Update `src/tax_automation/config/schemas/entity.json` schema.
+- Update `config/schemas/entity.json` schema.
 - Migrate entity JSON profiles (`config/entities/*.json`) to the declarative schema.
 - Add `init-entity` command to `src/tax_automation/cli.py`.
 

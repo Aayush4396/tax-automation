@@ -1,0 +1,117 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EntityProfileConfig",
+  "description": "Declarative configuration schema for an entity / taxpayer profile",
+  "type": "object",
+  "required": [
+    "entity_id",
+    "display_name"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Path or URL to JSON schema for IDE auto-completion and validation"
+    },
+    "entity_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$",
+      "description": "Lowercase alphanumeric identifier for the entity"
+    },
+    "display_name": {
+      "type": "string",
+      "description": "Full legal name or display name of the taxpayer"
+    },
+    "pan": {
+      "type": "string",
+      "description": "Permanent Account Number (optional)"
+    },
+    "self_patterns": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Regex patterns matching the entity's own name on transfers and UPI"
+    },
+    "self_vpas": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Personal UPI VPAs or mobile numbers"
+    },
+    "family_members": {
+      "type": "array",
+      "description": "Declared family members for automatic transfer classification",
+      "items": {
+        "type": "object",
+        "required": ["name", "patterns", "account_head"],
+        "properties": {
+          "name": { "type": "string" },
+          "relationship": { "type": "string" },
+          "patterns": { "type": "array", "items": { "type": "string" } },
+          "account_head": { "type": "string" }
+        }
+      }
+    },
+    "rent": {
+      "type": "object",
+      "description": "Rent and landlord classification configuration",
+      "properties": {
+        "landlords": { "type": "array", "items": { "type": "string" } },
+        "vpas": { "type": "array", "items": { "type": "string" } },
+        "keywords": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "custom_rules": {
+      "type": "array",
+      "description": "Declarative custom classification rules specific to this entity",
+      "items": {
+        "type": "object",
+        "required": ["label", "account_head"],
+        "properties": {
+          "label": { "type": "string" },
+          "account_head": { "type": "string" },
+          "layer": {
+            "type": "string",
+            "enum": ["entity", "common"],
+            "default": "entity",
+            "description": "'entity' = evaluated first; 'common' = after bank base rules, before universal rules"
+          },
+          "pattern": { "type": "string" },
+          "patterns_all": { "type": "array", "items": { "type": "string" }, "description": "All regexes must match" },
+          "exclude_pattern": { "type": "string" },
+          "exact_amount": { "type": "number" },
+          "exact_dr": { "type": "number" },
+          "exclude_exact_dr": { "type": "number" },
+          "min_dr": { "type": "number" },
+          "max_dr": { "type": "number" },
+          "dr_in": { "type": "array", "items": { "type": "number" } },
+          "exact_cr": { "type": "number" },
+          "exclude_exact_cr": { "type": "number" },
+          "min_cr": { "type": "number" },
+          "max_cr": { "type": "number" },
+          "cr_in": { "type": "array", "items": { "type": "number" } },
+          "direction": { "type": "string", "enum": ["DR", "CR", "dr", "cr", "ANY", "any", "both"] },
+          "confidence": { "type": "number" }
+        }
+      }
+    },
+    "output_sheet_names": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of sheet names to exclude from statement ingestion"
+    },
+    "accounts": {
+      "type": "array",
+      "description": "List of bank and financial accounts belonging to this entity",
+      "items": {
+        "type": "object",
+        "required": ["account_key", "bank", "account_id", "sheet_name"],
+        "properties": {
+          "account_key": { "type": "string" },
+          "bank": { "type": "string" },
+          "account_id": { "type": "string" },
+          "sheet_name": { "type": "string" },
+          "display_name": { "type": "string" },
+          "meta_signals_extra": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  }
+}

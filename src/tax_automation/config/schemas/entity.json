@@ -8,6 +8,10 @@
     "display_name"
   ],
   "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Path or URL to JSON schema for IDE auto-completion and validation"
+    },
     "entity_id": {
       "type": "string",
       "pattern": "^[a-z0-9_]+$",

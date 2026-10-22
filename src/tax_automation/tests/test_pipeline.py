@@ -27,11 +27,18 @@ class TestNarrationPipeline(unittest.TestCase):
         wb = Workbook()
         ws = wb.active
         ws.title = "HDFC Bank"
-        # Add headers
-        headers = ["Date", "Particulars", "Debit", "Credit", "Balance"]
+        # Add headers matching HDFC schema
+        headers = [
+            "Date",
+            "Narration",
+            "Chq./Ref.No.",
+            "Withdrawal Amt.",
+            "Deposit Amt.",
+            "Closing Balance",
+        ]
         ws.append(headers)
         # Add sample data
-        ws.append(["2026-04-01", "Salary", "50000", "0", "50000"])
+        ws.append(["2026-04-01", "Salary", "REF123", "0", "50000", "50000"])
         wb.save(self.input_file)
 
     def tearDown(self):
@@ -49,17 +56,15 @@ class TestNarrationPipeline(unittest.TestCase):
             # Setup mocks
             mock_config.return_value = {
                 "display_name": "Test Entity",
-                "banks": {
-                    "hdfc": {
-                        "display_name": "HDFC Bank",
+                "accounts": [
+                    {
+                        "account_key": "hdfc",
+                        "bank": "hdfc",
                         "account_id": "HDFC 5413",
-                        "col_date": "Date",
-                        "col_particulars": "Particulars",
-                        "col_dr": "Debit",
-                        "col_cr": "Credit",
-                        "col_balance": "Balance",
+                        "sheet_name": "HDFC Bank",
+                        "display_name": "HDFC Bank",
                     }
-                },
+                ],
             }
             mock_identify.return_value = ("hdfc", 0.9)
             mock_find_header.return_value = 0

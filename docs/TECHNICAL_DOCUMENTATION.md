@@ -311,7 +311,7 @@ flowchart TD
 ## 3. Data Specifications & Schemas
 
 ### Entity Profile Configuration Schema
-Defined in `src/tax_automation/config/schemas/entity.json`:
+Defined in `config/schemas/entity.json`:
 
 ```json
 {

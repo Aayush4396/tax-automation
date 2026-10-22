@@ -24,7 +24,7 @@ Run the onboarding CLI tool:
 python -m tax_automation init-entity --entity <entity_id> --name "<Full Name>" [--pan <PAN>] [--fy FY26]
 ```
 This automatically:
-1. Generates `config/entities/<entity_id>.json` conforming to `src/tax_automation/config/schemas/entity.json`.
+1. Generates `config/entities/<entity_id>.json` conforming to `config/schemas/entity.json`.
 2. Creates the canonical input directory: `data/<entity_id>/<FY>/input/bank_statements/`.
 3. Creates the canonical output directory: `data/<entity_id>/<FY>/output/`.
 
