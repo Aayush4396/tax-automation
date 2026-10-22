@@ -122,15 +122,8 @@ def consolidate_entity_statements(
 
         file_path = data_dir / filename
         if not file_path.exists():
-            # Check canonical input if data_dir was legacy
-            canonical_file = (
-                resolve_input_dir(entity_id, fy, "bank_statements") / filename
-            )
-            if canonical_file.exists():
-                file_path = canonical_file
-            else:
-                print(f"Warning: File not found {file_path}")
-                continue
+            print(f"Warning: File not found {file_path}")
+            continue
 
         df, _ = load_file_to_df(file_path, password)
         ws = wb.create_sheet(title=target_sheet)

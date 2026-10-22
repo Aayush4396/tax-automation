@@ -89,7 +89,6 @@ def resolve_entity_bank_registry(entity_id: str) -> dict[str, dict[str, Any]]:
     """Constructs the complete runtime bank registry for an entity.
 
     Merges each account declared in the entity profile with its base bank schema.
-    Supports both the new declarative 'accounts' list and legacy 'banks' dictionary.
     """
     config = get_entity_config(entity_id)
     registry: dict[str, dict[str, Any]] = {}
@@ -121,16 +120,6 @@ def resolve_entity_bank_registry(entity_id: str) -> dict[str, dict[str, Any]]:
                 ]
 
             registry[acc_key] = merged
-        return registry
-
-    # Case 2: Legacy banks dictionary (Backward compatibility during transition)
-    if "banks" in config and isinstance(config["banks"], dict):
-        for b_key, b_cfg in config["banks"].items():
-            base_schema = get_bank_schema(b_key)
-            merged = dict(base_schema)
-            merged.update(b_cfg)
-            registry[b_key.lower()] = merged
-        return registry
 
     return registry
 
