@@ -16,7 +16,7 @@
     "Automotive": ["CC - Automotive", "Transport"],
     "Recreation": ["CC - Recreation", "Entertainment"],
     "Services": ["CC - Services", "Miscellaneous"],
-    "OtherMerchants": ["CC - Other", "Personal"],
+    "OtherMerchants": ["CC - Other", "Drawings & Personal"],
     "Fuel": ["CC - Fuel", "Transport"],
     "Insurance": ["CC - Insurance", "Insurance"],
     "Healthcare": ["CC - Healthcare", "Healthcare"],
@@ -33,9 +33,9 @@
     "Railroads": ["CC - Travel", "Travel"],
     "TravelAgencies": ["CC - Travel", "Travel"],
     "Medical": ["CC - Healthcare", "Healthcare"],
-    "Computer": ["CC - Other", "Personal"],
-    "Commercial": ["CC - Other", "Personal"],
-    "DirectMarketing": ["CC - Other", "Personal"]
+    "Computer": ["CC - Other", "Drawings & Personal"],
+    "Commercial": ["CC - Other", "Drawings & Personal"],
+    "DirectMarketing": ["CC - Other", "Drawings & Personal"]
   },
   "colour_map": {
     "CC - Groceries": "D5F5CC",

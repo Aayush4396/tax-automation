@@ -51,7 +51,7 @@
   "custom_rules": [
     {
       "label": "Salary",
-      "account_head": "Salary",
+      "account_head": "Income from Salary",
       "pattern": "^TRANS$",
       "exact_amount": 9109,
       "direction": "cr",
@@ -60,7 +60,7 @@
     {
       "_comment": "HDFC Securities settlement via FT- transfers from linked savings account 50200085415108",
       "label": "HDFC Securities - Settlement",
-      "account_head": "HDFC Securities",
+      "account_head": "Equity & Broker Settlement",
       "layer": "entity",
       "patterns_all": ["^FT-", "50200085415108"],
       "confidence": 0.93
@@ -68,7 +68,7 @@
     {
       "_comment": "IPO applications - JSW Cement",
       "label": "IPO - JSW Cement",
-      "account_head": "Equities",
+      "account_head": "Equity & Capital Market",
       "layer": "entity",
       "pattern": "JSWCEMENTG",
       "direction": "DR",
@@ -77,7 +77,7 @@
     {
       "_comment": "IPO applications - Tata Technologies",
       "label": "IPO - Tata Tech",
-      "account_head": "Equities",
+      "account_head": "Equity & Capital Market",
       "layer": "entity",
       "pattern": "TATAG",
       "direction": "DR",
@@ -86,7 +86,7 @@
     {
       "_comment": "IPO applications - JSW Infrastructure",
       "label": "IPO - JSW Infra",
-      "account_head": "Equities",
+      "account_head": "Equity & Capital Market",
       "layer": "entity",
       "pattern": "JSINFRA",
       "direction": "DR",
@@ -95,7 +95,7 @@
     {
       "_comment": "IPO applications - Aeroflex",
       "label": "IPO - Aeroflex",
-      "account_head": "Equities",
+      "account_head": "Equity & Capital Market",
       "layer": "entity",
       "pattern": "AEROFLEXG",
       "direction": "DR",
@@ -145,7 +145,18 @@
       "confidence": 0.90
     }
   ],
-  "output_sheet_names": ["For Tally", "Conso", "Bank Summary", "Monthly Pivot", "Guidelines"],
+  "output_sheet_names": [
+    "Tally Vouchers",
+    "Combined Bank Book",
+    "Bank Summary",
+    "Credit Card Book",
+    "Monthly Cash Flow Pivot",
+    "Classification Legend",
+    "For Tally",
+    "Conso",
+    "Monthly Pivot",
+    "Guidelines"
+  ],
   "pivot_overrides": {
     "narration_to_payment_category": {
       "IPO - Billion Garages": "Investments & Wealth",

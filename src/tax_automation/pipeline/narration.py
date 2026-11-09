@@ -149,7 +149,7 @@ def classify_transaction(
             continue
 
     # 5. Absolute fallback — no rule matched at all
-    return "What is this?", "Suspense", 0.0
+    return "Unclassified - Pending Review", "Suspense A/c (Pending Review)", 0.0
 
 
 def process_entity_narration(

@@ -6,28 +6,28 @@
   "rules": [
     {
       "label": "Bank Interest",
-      "account_head": "Bank Interest",
+      "account_head": "Interest on Savings A/c (80TTA)",
       "pattern": "SBINT:",
       "direction": "CR",
       "confidence": 0.96
     },
     {
       "label": "MF Redemption",
-      "account_head": "Mutual Funds",
+      "account_head": "Mutual Fund Investments",
       "pattern": "NFT/NAVI\\s*REDEMPTION|NFT/.*REDEMPTION",
       "direction": "CR",
       "confidence": 0.93
     },
     {
       "label": "MF Investment",
-      "account_head": "Investments",
+      "account_head": "Mutual Fund Investments",
       "pattern": "NFT/\\s*NEOSIEXEDDD|NFT/\\s*(?:INVEST|SIP)",
       "direction": "DR",
       "confidence": 0.88
     },
     {
       "label": "Misc Income",
-      "account_head": "Misc Income",
+      "account_head": "Other Receipts (IFOS)",
       "pattern": "^IFN/",
       "direction": "CR",
       "confidence": 0.60

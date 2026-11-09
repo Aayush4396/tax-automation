@@ -6,28 +6,28 @@
   "rules": [
     {
       "label": "Dividend Income",
-      "account_head": "Dividend Income",
+      "account_head": "Dividend Income (IFOS)",
       "pattern": "BULK\\s*POSTING[-\\s]*(?:ACHCr|C\\d+)",
       "direction": "CR",
       "confidence": 0.88
     },
     {
       "label": "Bank Interest",
-      "account_head": "Bank Interest",
+      "account_head": "Interest on Savings A/c (80TTA)",
       "pattern": "CREDIT\\s*INTEREST|INT(?:EREST)?\\s*CREDIT",
       "direction": "CR",
       "confidence": 0.92
     },
     {
       "label": "Life Insurance Premium",
-      "account_head": "Life Insurance",
+      "account_head": "Deduction u/s 80C - Life Insurance",
       "pattern": "INB\\s*HDFC\\s*LIFE|INB.*INSURANCE|HDFC\\s*LIFE\\s*INSUR|LIC\\s*PREMIUM",
       "direction": "DR",
       "confidence": 0.88
     },
     {
       "label": "PPF Deposit",
-      "account_head": "PPF Deposit",
+      "account_head": "Deduction u/s 80C - PPF",
       "pattern": "SBIYA.*PPF|INB.*PPF|\\bPPF\\b",
       "direction": "DR",
       "confidence": 0.88
@@ -48,7 +48,7 @@
     },
     {
       "label": "ATM Withdrawal",
-      "account_head": "Cash Withdrawal",
+      "account_head": "Cash",
       "pattern": "ATM\\s*WDL|ATM\\s*CASH|CASH\\s*WDL\\s*ATM",
       "direction": "DR",
       "confidence": 0.90

@@ -1,7 +1,7 @@
 [
   {
     "label": "SIP",
-    "account_head": "SIP",
+    "account_head": "Mutual Fund Investments",
     "pattern": "INDIANESIGN",
     "direction": "ANY",
     "confidence": 0.95
@@ -15,14 +15,14 @@
   },
   {
     "label": "Dividend Income",
-    "account_head": "Dividend Income",
+    "account_head": "Dividend Income (IFOS)",
     "pattern": "CEMTEX",
     "direction": "CR",
     "confidence": 0.95
   },
   {
     "label": "SBI Securities - Charges",
-    "account_head": "SBI Securities",
+    "account_head": "Depository Charges",
     "patterns_all": [
       "SBICAP|SBI\\s*CAPS?|SBI\\s*CAP\\s*SECURITIES",
       "Demat\\s*Charges|Charges"
@@ -32,28 +32,28 @@
   },
   {
     "label": "SBI Securities - Buy",
-    "account_head": "SBI Securities",
+    "account_head": "Equity & Broker Settlement",
     "pattern": "SBICAP|SBI\\s*CAPS?|SBI\\s*CAP\\s*SECURITIES",
     "direction": "DR",
     "confidence": 0.92
   },
   {
     "label": "SBI Securities - Sell",
-    "account_head": "SBI Securities",
+    "account_head": "Equity & Broker Settlement",
     "pattern": "SBICAP|SBI\\s*CAPS?|SBI\\s*CAP\\s*SECURITIES",
     "direction": "CR",
     "confidence": 0.92
   },
   {
     "label": "Bank Interest",
-    "account_head": "Bank Interest",
+    "account_head": "Interest on Savings A/c (80TTA)",
     "pattern": "\\bTO\\s*INTEREST\\b",
     "direction": "DR",
     "confidence": 0.95
   },
   {
     "label": "Sanofi Dividend",
-    "account_head": "Dividend Income",
+    "account_head": "Dividend Income (IFOS)",
     "pattern": "Sanofi",
     "direction": "CR",
     "confidence": 0.95
@@ -74,77 +74,77 @@
   },
   {
     "label": "Jio Postpaid Bill",
-    "account_head": "Personal",
+    "account_head": "Utilities",
     "pattern": "Jio\\s*Postpaid|Jio\\s*Bill",
     "direction": "DR",
     "confidence": 0.92
   },
   {
     "label": "NSDL Charges",
-    "account_head": "Personal",
+    "account_head": "Depository Charges",
     "pattern": "NSDL",
     "direction": "DR",
     "confidence": 0.92
   },
   {
     "label": "Techprocess Transfer",
-    "account_head": "Personal",
+    "account_head": "Drawings & Personal",
     "pattern": "TECHPROCESS",
     "direction": "ANY",
     "confidence": 0.92
   },
   {
     "label": "Salary",
-    "account_head": "Salary",
+    "account_head": "Income from Salary",
     "pattern": "MPHASIS",
     "direction": "CR",
     "confidence": 0.97
   },
   {
     "label": "Salary",
-    "account_head": "Salary",
+    "account_head": "Income from Salary",
     "pattern": "SALARY(?:\\b|(?=[A-Z]))|SALARYTRANS|PAYROLL|PAYSLIP",
     "direction": "CR",
     "confidence": 0.95
   },
   {
     "label": "Bank Interest",
-    "account_head": "Bank Interest",
+    "account_head": "Interest on Savings A/c (80TTA)",
     "pattern": "Int\\.Pd[:.]|INTEREST\\s*PAID|INT\\s*PD\\b|SB\\s*INT:|SBINT:|INTEREST\\s*CAPITALISED",
     "direction": "CR",
     "confidence": 0.95
   },
   {
     "label": "SIP",
-    "account_head": "SIP",
+    "account_head": "Mutual Fund Investments",
     "pattern": "\\bNACH[- ]MUT[- ]DR\\b|ACH\\s*D[- ]+TP\\s*ACH|INDIANESIGN|BILLDKINDIAN|NACHINDIANCLEARING|ECS\\s*D[- ]",
     "direction": "DR",
     "confidence": 0.9
   },
   {
     "label": "Dividend Income",
-    "account_head": "Dividend Income",
+    "account_head": "Dividend Income (IFOS)",
     "pattern": "^ACH\\s*C[- ]|^NACH[- ]ECS[- ]CR|^NACH[- ]10[- ]CR[- ]",
     "direction": "CR",
     "confidence": 0.9
   },
   {
     "label": "Dividend Income",
-    "account_head": "Dividend Income",
+    "account_head": "Dividend Income (IFOS)",
     "pattern": "\\bDIV\\d*\\b|\\bDIVIDEND\\b",
     "direction": "CR",
     "confidence": 0.85
   },
   {
     "label": "Advance Tax",
-    "account_head": "Advance Tax",
+    "account_head": "Income Tax & Advance Tax",
     "pattern": "ETAX|ADVANCE\\s*TAX|TAX\\s*PAY(?:MENT)?|NSDL\\s*TDS\\b|CBDT",
     "direction": "DR",
     "confidence": 0.92
   },
   {
     "label": "Income Tax Refund",
-    "account_head": "Income Tax",
+    "account_head": "Income Tax & Advance Tax",
     "pattern": "\\bITDTAX\\b\\s*REFUND\\b|\\bITD\\b\\s*TAX\\s*REFUND|\\bIT\\b\\s*REFUND|\\bTAX\\s*REFUND\\b|\\bINCOME\\s*TAX\\s*REFUND\\b",
     "direction": "CR",
     "confidence": 0.95
@@ -173,56 +173,56 @@
   },
   {
     "label": "MF Redemption",
-    "account_head": "Mutual Funds",
+    "account_head": "Mutual Fund Investments",
     "pattern": "INVESCO|PPFAS|PARAG\\s*PARIKH|MIRAE\\s*ASSET|NIPPON|QUANT\\s*SMALL|AXIS\\s*MF|HDFC\\s*MF|SBI\\s*MF|CAMS|KFIN|REDEMPTION|MF\\s*REDEEM|BIRLA|BSLMF|ADITYA\\s*BSLMF",
     "direction": "CR",
     "confidence": 0.85
   },
   {
     "label": "Upwork Income",
-    "account_head": "Misc Income",
+    "account_head": "Professional Receipts (44ADA)",
     "pattern": "UPWORK",
     "direction": "CR",
     "confidence": 0.95
   },
   {
     "label": "UPI Reversal",
-    "account_head": "Personal",
+    "account_head": "Drawings & Personal",
     "pattern": "^REV[-/]UPI|UPI_CRADJ",
     "direction": "ANY",
     "confidence": 0.88
   },
   {
     "label": "Freelance Income",
-    "account_head": "Misc Income",
+    "account_head": "Professional Receipts (44ADA)",
     "pattern": "ESCROW",
     "direction": "CR",
     "confidence": 0.92
   },
   {
     "label": "Cashback - BHIM",
-    "account_head": "Misc Income",
+    "account_head": "Other Receipts (IFOS)",
     "pattern": "NPCI\\s*BHIM|bhimcashba",
     "direction": "CR",
     "confidence": 0.88
   },
   {
     "label": "Cashback - Kiwi",
-    "account_head": "Misc Income",
+    "account_head": "Other Receipts (IFOS)",
     "pattern": "GoKiwi|Kiwi\\s*Tech|KIWI",
     "direction": "CR",
     "confidence": 0.88
   },
   {
     "label": "SuperMoney (Rewards)",
-    "account_head": "Misc Income",
+    "account_head": "Other Receipts (IFOS)",
     "pattern": "supermoney|SUPERMONEY",
     "direction": "CR",
     "confidence": 0.88
   },
   {
     "label": "MF Redemption",
-    "account_head": "Mutual Funds",
+    "account_head": "Mutual Fund Investments",
     "pattern": "NAVI\\s*MUTUA",
     "direction": "CR",
     "confidence": 0.88
@@ -265,10 +265,9 @@
     "direction": "ANY",
     "confidence": 0.88
   },
-
   {
     "label": "Misc Income",
-    "account_head": "Misc Income",
+    "account_head": "Other Receipts (IFOS)",
     "pattern": "REFUND|REVERSAL|CASHBACK|CREDIT\\s*ADJ|\\bREV\\b",
     "direction": "CR",
     "confidence": 0.7
@@ -309,42 +308,42 @@
   },
   {
     "label": "INDmoney Investment",
-    "account_head": "Investments",
+    "account_head": "Mutual Fund Investments",
     "pattern": "INDmoney|INDMoney",
     "direction": "DR",
     "confidence": 0.88
   },
   {
     "label": "IPO Application (UPI)",
-    "account_head": "Investments",
+    "account_head": "Equity & Capital Market",
     "pattern": "^UPIM/",
     "direction": "DR",
     "confidence": 0.92
   },
   {
     "label": "MF Investment",
-    "account_head": "Investments",
+    "account_head": "Mutual Fund Investments",
     "pattern": "iccl|BSE\\s*MF|NSE\\s*MF|INDIAN\\s*CLEARING\\s*CORP|NSE\\s*CLEARING",
     "direction": "ANY",
     "confidence": 0.9
   },
   {
     "label": "CDSL / Depository Credit",
-    "account_head": "Dividend Income",
+    "account_head": "Dividend Income (IFOS)",
     "pattern": "CENTRAL\\s*DEPOSITORY|CDSL",
     "direction": "CR",
     "confidence": 0.88
   },
   {
     "label": "Zerodha Broking",
-    "account_head": "Zerodha Broking Limited",
+    "account_head": "Equity & Broker Settlement",
     "pattern": "zerodha|zerodhab",
     "direction": "ANY",
     "confidence": 0.88
   },
   {
     "label": "Health Insurance",
-    "account_head": "Health Insurance",
+    "account_head": "Deduction u/s 80D - Health Insurance",
     "pattern": "Care\\s*Health\\s*Insur|Max\\s*Bupa|MaxBupa|Niva\\s*Bupa|Religare|Star\\s*Health|Bajaj\\s*Allianz",
     "direction": "DR",
     "confidence": 0.92
@@ -492,7 +491,7 @@
   },
   {
     "label": "UPI Payment",
-    "account_head": "Personal",
+    "account_head": "Drawings & Personal",
     "pattern": "\\bUPI[/ -]|UPIOUT/",
     "direction": "DR",
     "confidence": 0.55,
@@ -500,15 +499,15 @@
   },
   {
     "label": "UPI Receipt",
-    "account_head": "Personal",
+    "account_head": "Drawings & Personal",
     "pattern": "\\bUPI[/ -]|UPIIN/",
     "direction": "CR",
     "confidence": 0.55,
     "is_fallback": true
   },
   {
-    "label": "What is this?",
-    "account_head": "Suspense",
+    "label": "Unclassified - Pending Review",
+    "account_head": "Suspense A/c (Pending Review)",
     "pattern": ".*",
     "direction": "ANY",
     "confidence": 0.0,

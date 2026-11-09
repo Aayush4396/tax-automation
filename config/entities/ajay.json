@@ -62,9 +62,14 @@
     }
   ],
   "output_sheet_names": [
+    "Tally Vouchers",
+    "Combined Bank Book",
+    "Bank Summary",
+    "Credit Card Book",
+    "Monthly Cash Flow Pivot",
+    "Classification Legend",
     "For Tally",
     "Conso",
-    "Bank Summary",
     "Salary",
     "Leave Encashment",
     "Contra Summary",

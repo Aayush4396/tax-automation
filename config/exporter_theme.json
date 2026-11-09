@@ -17,6 +17,8 @@
     "Investments & Wealth": "D0ECF8",
     "Bank & Depository Charges": "F8D7DA",
     "General/Other Spends": "EDE9F6",
+    "Suspense / Pending Human Review": "FFE6CC",
+    "Unclassified - Pending Review": "FFE6CC",
     "Self-Transfer (Contra)": "FFE8CC",
     "Credit Card Payment": "F5D5E8",
     "Salary": "B8F0C4",
@@ -33,29 +35,34 @@
     "Auto_Narration": "Narration",
     "Account_Head": "Account Head",
     "Account_ID": "Account No",
-    "Human_Narration": "Kya Hai?",
+    "Human_Narration": "Review Remarks",
     "Bank_Display": "Bank",
     "Pivot_Category": "Pivot Category"
   },
   "tally_hidden_columns": [
-    "TX Date", "Date", "Beneficiary", "Kya Hai?", "Pivot Category"
+    "TX Date", "Date", "Beneficiary", "Review Remarks", "Pivot Category"
   ],
   "bank_sheet_hidden_columns": [
     "Date", "Value_Date", "Ref", "Balance", "Human_Narration", "Beneficiary"
   ],
   "output_sheets": {
-    "tally": "For Tally",
-    "conso": "Conso",
+    "tally": "Tally Vouchers",
+    "conso": "Combined Bank Book",
     "summary": "Bank Summary",
-    "cc": "CC Transactions",
-    "pivot": "Monthly Pivot",
-    "legend": "Colour Legend",
+    "cc": "Credit Card Book",
+    "pivot": "Monthly Cash Flow Pivot",
+    "legend": "Classification Legend",
     "guidelines": "Guidelines"
   },
   "default_output_sheet_names": [
+    "Tally Vouchers",
+    "Combined Bank Book",
+    "Bank Summary",
+    "Credit Card Book",
+    "Monthly Cash Flow Pivot",
+    "Classification Legend",
     "For Tally",
     "Conso",
-    "Bank Summary",
     "CC Transactions",
     "Monthly Pivot",
     "Colour Legend",

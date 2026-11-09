@@ -55,16 +55,16 @@
   {"keyword": "CRED Club", "label": "Credit Card Bill Payment (CRED)", "account_head": "Credit Card", "confidence": 0.85},
   {"keyword": "CredClub", "label": "Credit Card Bill Payment (CRED)", "account_head": "Credit Card", "confidence": 0.85},
   {"keyword": "payment on CRED", "label": "Credit Card Bill Payment (CRED)", "account_head": "Credit Card", "confidence": 0.85},
-  {"keyword": "cred.wallet", "label": "UPI - CRED Wallet", "account_head": "Personal", "confidence": 0.75},
-  {"keyword": "CRED WALLET", "label": "UPI - CRED Wallet", "account_head": "Personal", "confidence": 0.75},
+  {"keyword": "cred.wallet", "label": "UPI - CRED Wallet", "account_head": "Drawings & Personal", "confidence": 0.75},
+  {"keyword": "CRED WALLET", "label": "UPI - CRED Wallet", "account_head": "Drawings & Personal", "confidence": 0.75},
   {"keyword": "cred", "label": "UPI - CRED", "account_head": "Credit Card", "confidence": 0.68},
 
-  {"keyword": "phonepe", "label": "UPI - PhonePe", "account_head": "Personal", "confidence": 0.65},
-  {"keyword": "paytm", "label": "UPI - Paytm", "account_head": "Personal", "confidence": 0.65},
-  {"keyword": "bharatpe", "label": "UPI - BharatPe", "account_head": "Personal", "confidence": 0.65},
-  {"keyword": "navi", "label": "UPI - Navi", "account_head": "Personal", "confidence": 0.65},
-  {"keyword": "gpay", "label": "UPI - Google Pay", "account_head": "Personal", "confidence": 0.65},
-  {"keyword": "googlepay", "label": "UPI - Google Pay", "account_head": "Personal", "confidence": 0.65},
+  {"keyword": "phonepe", "label": "UPI - PhonePe", "account_head": "Drawings & Personal", "confidence": 0.65},
+  {"keyword": "paytm", "label": "UPI - Paytm", "account_head": "Drawings & Personal", "confidence": 0.65},
+  {"keyword": "bharatpe", "label": "UPI - BharatPe", "account_head": "Drawings & Personal", "confidence": 0.65},
+  {"keyword": "navi", "label": "UPI - Navi", "account_head": "Drawings & Personal", "confidence": 0.65},
+  {"keyword": "gpay", "label": "UPI - Google Pay", "account_head": "Drawings & Personal", "confidence": 0.65},
+  {"keyword": "googlepay", "label": "UPI - Google Pay", "account_head": "Drawings & Personal", "confidence": 0.65},
 
   {"keyword": "practo", "label": "UPI - Practo", "account_head": "Healthcare", "confidence": 0.68},
   {"keyword": "pharmeasy", "label": "UPI - PharmEasy", "account_head": "Healthcare", "confidence": 0.68},
@@ -86,7 +86,7 @@
   {"keyword": "MATS FUEL", "label": "UPI - Fuel", "account_head": "Fuel & Petrol", "confidence": 0.75},
   {"keyword": "fuel park", "label": "UPI - Fuel", "account_head": "Fuel & Petrol", "confidence": 0.75},
 
-  {"keyword": "CBDT", "label": "Income Tax Payment", "account_head": "Tax", "confidence": 0.85},
+  {"keyword": "CBDT", "label": "Income Tax Payment", "account_head": "Income Tax & Advance Tax", "confidence": 0.85},
 
   {"keyword": "irctc", "label": "UPI - IRCTC", "account_head": "Travel", "confidence": 0.68},
   {"keyword": "makemytrip", "label": "UPI - MakeMyTrip", "account_head": "Travel", "confidence": 0.68},
@@ -97,6 +97,6 @@
   {"keyword": "airindia", "label": "UPI - Air India", "account_head": "Travel", "confidence": 0.68},
 
   {"keyword": "star bazaar", "label": "UPI - Star Bazaar", "account_head": "Groceries", "confidence": 0.70},
-  {"keyword": "supermoney", "label": "SuperMoney (Rewards)", "account_head": "Personal", "confidence": 0.70},
-  {"keyword": "finzoomers", "label": "Finzoomers Invest", "account_head": "Investments", "confidence": 0.70}
+  {"keyword": "supermoney", "label": "SuperMoney (Rewards)", "account_head": "Other Receipts (IFOS)", "confidence": 0.70},
+  {"keyword": "finzoomers", "label": "Finzoomers Invest", "account_head": "Mutual Fund Investments", "confidence": 0.70}
 ]

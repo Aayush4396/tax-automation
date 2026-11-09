@@ -20,21 +20,21 @@
     },
     {
       "label": "Bank Interest",
-      "account_head": "Bank Interest",
+      "account_head": "Interest on Savings A/c (80TTA)",
       "pattern": "Int\\.Pd|SB:",
       "direction": "CR",
       "confidence": 0.93
     },
     {
       "label": "SIP",
-      "account_head": "SIP",
+      "account_head": "Mutual Fund Investments",
       "pattern": "ACH\\s*D[- ]|ECS\\s*D\\b",
       "direction": "DR",
       "confidence": 0.85
     },
     {
       "label": "Dividend Income",
-      "account_head": "Dividend Income",
+      "account_head": "Dividend Income (IFOS)",
       "pattern": "ACH\\s*C[- ]|ECS\\s*C\\b",
       "direction": "CR",
       "confidence": 0.82
@@ -48,7 +48,7 @@
     },
     {
       "label": "MF Redemption",
-      "account_head": "Mutual Funds",
+      "account_head": "Mutual Fund Investments",
       "pattern": "\\bMF\\b|MUTUAL\\s*FUND|CAMS|KARVY|KFINTECH|INVESCO\\s*MF|AXIS\\s*MF|SBI\\s*MF|HDFC\\s*MF|MIRAE|PPFAS",
       "direction": "CR",
       "confidence": 0.82

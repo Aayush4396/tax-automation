@@ -11,7 +11,13 @@
     "keywords": []
   },
   "custom_rules": [],
-  "output_sheet_names": ["For Tally", "Conso", "Bank Summary"],
+  "output_sheet_names": [
+    "Tally Vouchers",
+    "Combined Bank Book",
+    "Bank Summary",
+    "For Tally",
+    "Conso"
+  ],
   "accounts": [
     {
       "account_key": "hdfc",

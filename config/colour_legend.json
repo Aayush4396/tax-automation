@@ -1,85 +1,86 @@
 [
   {
-    "group": "Income & Inflows",
+    "group": "Income & Inflows (Taxable & Exempt)",
     "items": [
-      { "label": "Salary", "description": "Salary Credit (Mphasis)" },
-      { "label": "Bank Interest", "description": "Interest earned on Savings accounts" },
-      { "label": "Dividend Income", "description": "Dividend payout from shares" },
-      { "label": "Annuity Income", "description": "Annuity credits (HDFC Life)" },
-      { "label": "Income Tax Refund", "description": "Income Tax Refund from Department" },
-      { "label": "MF Redemption", "description": "Inflows from selling Mutual Funds" },
-      { "label": "Upwork Income", "description": "Inward remittances from Upwork freelancing" },
-      { "label": "Cash Deposit", "description": "Cash deposits made at CDM / Branch" },
-      { "label": "Freelance Income", "description": "Freelance work escrow payouts" },
-      { "label": "Cashback - BHIM", "description": "Cashback rewards earned on BHIM app" },
-      { "label": "Cashback - Kiwi", "description": "Cashback rewards earned on Kiwi app" },
-      { "label": "Refund - Wakefit", "description": "Refund from Wakefit for online shopping" }
+      { "label": "Salary", "description": "Income from Salary (u/s 15-17)" },
+      { "label": "Bank Interest", "description": "Interest on Savings A/c (Deduction u/s 80TTA / 80TTB)" },
+      { "label": "Dividend Income", "description": "Dividend Income from Shares/MFs (IFOS)" },
+      { "label": "Annuity Income", "description": "Annuity / Pension Receipts" },
+      { "label": "Income Tax Refund", "description": "Income Tax Refund from CBDT / ITD" },
+      { "label": "MF Redemption", "description": "Mutual Fund Redemption Inflows (Capital Gains)" },
+      { "label": "Upwork Income", "description": "Professional / Freelance Remittances (u/s 44ADA)" },
+      { "label": "Cash Deposit", "description": "Cash Deposits at CDM / Branch" },
+      { "label": "Freelance Income", "description": "Professional / Freelance Escrow Payouts (u/s 44ADA)" },
+      { "label": "Cashback - BHIM", "description": "Other Receipts / Cashback Rewards (IFOS)" },
+      { "label": "Cashback - Kiwi", "description": "Other Receipts / Cashback Rewards (IFOS)" },
+      { "label": "Refund - Wakefit", "description": "Merchant Purchase Refunds & Reversals" }
     ]
   },
   {
-    "group": "Investments",
+    "group": "Investments & Capital Market",
     "items": [
-      { "label": "SIP", "description": "Monthly Mutual Fund SIP payments" },
-      { "label": "MF Investment", "description": "Lumpsum Mutual Fund investments" },
-      { "label": "Auto Sweep FD", "description": "Sweep in/out between Savings and FD" },
-      { "label": "Depository Credit", "description": "CDSL credits / payouts" },
-      { "label": "Zerodha Broking", "description": "Payments/payouts associated with Zerodha" },
-      { "label": "HDFC Securities - Settlement", "description": "Settlement transfers to HDFC Securities" }
+      { "label": "SIP", "description": "Systematic Investment Plan (Mutual Fund Investments)" },
+      { "label": "MF Investment", "description": "Lumpsum Mutual Fund Purchases (ICCL / BSE / NSE)" },
+      { "label": "Auto Sweep FD", "description": "Auto-Sweep Fixed Deposit Transfers (Contra / FD)" },
+      { "label": "Depository Credit", "description": "CDSL / NSDL Corporate Action & Dividend Credits" },
+      { "label": "Zerodha Broking", "description": "Equity & Broker Settlement (Zerodha)" },
+      { "label": "HDFC Securities - Settlement", "description": "Equity & Broker Settlement (HDFC Securities)" }
     ]
   },
   {
-    "group": "Regular Outflows & Insurance",
+    "group": "Chapter VI-A Deductions & Regular Outflows",
     "items": [
-      { "label": "Rent", "description": "Rent payments to landlord" },
-      { "label": "Life Insurance Premium", "description": "Life insurance premium payments (HDFC Life)" },
-      { "label": "Health Insurance", "description": "Health insurance premium payments" },
-      { "label": "Security Deposit", "description": "Security deposit paid for rental home" },
-      { "label": "Security Deposit Return", "description": "Refund/return of security deposit" }
+      { "label": "Rent", "description": "House Rent Paid (HRA Exemption / u/s 80GG)" },
+      { "label": "Life Insurance Premium", "description": "Life Insurance Premium (Deduction u/s 80C)" },
+      { "label": "Health Insurance", "description": "Medical / Health Insurance Premium (Deduction u/s 80D)" },
+      { "label": "PPF Deposit", "description": "Public Provident Fund Contribution (Deduction u/s 80C)" },
+      { "label": "Security Deposit", "description": "Refundable Rental Security Deposit (Asset)" },
+      { "label": "Security Deposit Return", "description": "Refund of Rental Security Deposit" }
     ]
   },
   {
-    "group": "Taxes & Bank Charges",
+    "group": "Direct Taxes & Bank Charges",
     "items": [
-      { "label": "Advance Tax", "description": "Advance tax payments" },
-      { "label": "Income Tax Payment", "description": "Income tax payments to CBDT" },
-      { "label": "Bank Charges", "description": "SMS charges, minimum balance fees, alert fees" },
-      { "label": "Depository Charges", "description": "CDSL / DP charges" }
+      { "label": "Advance Tax", "description": "Advance Tax & Self-Assessment Tax Paid (CBDT)" },
+      { "label": "Income Tax Payment", "description": "Direct Tax Payments to Income Tax Department" },
+      { "label": "Bank Charges", "description": "Bank Service Charges, SMS Alerts & Card Fees" },
+      { "label": "Depository Charges", "description": "Demat / CDSL / NSDL DP Maintenance Charges" }
     ]
   },
   {
-    "group": "Family Transfers",
+    "group": "Family & Related Party Transfers",
     "items": [
-      { "label": "Transfer - <Family Member>", "description": "Transfers to/from declared family members" }
+      { "label": "Transfer - <Family Member>", "description": "Transfers to/from Declared Family Members / HUF" }
     ]
   },
   {
-    "group": "Self Transfers (Contra)",
+    "group": "Self-Transfers (Contra Entries)",
     "items": [
-      { "label": "Contra - <Account>", "description": "Self-transfers between own declared bank accounts" },
-      { "label": "Contra - Self", "description": "Self-transfers between own accounts" }
+      { "label": "Contra - <Account>", "description": "Inter-Bank Self-Transfers between Own Declared Accounts" },
+      { "label": "Contra - Self Transfer", "description": "Generic Self-Transfers between Own Accounts" }
     ]
   },
   {
-    "group": "UPI Spend Categories",
+    "group": "Personal & Drawings (UPI Spend Categories)",
     "items": [
-      { "label": "UPI - Zomato", "description": "Food ordering via Zomato" },
-      { "label": "UPI - Swiggy", "description": "Food / Instamart ordering via Swiggy" },
-      { "label": "UPI - BigBasket", "description": "Grocery shopping via BigBasket / Zepto / Blinkit" },
-      { "label": "UPI - Amazon", "description": "Online shopping via Amazon / Flipkart / Ajio" },
-      { "label": "UPI - Ola", "description": "Cab / auto booking via Ola / Uber / BluSmart" },
-      { "label": "UPI - Netflix", "description": "Subscriptions like Netflix, Spotify, Prime Video" },
-      { "label": "UPI - CRED", "description": "Payments made through CRED, PhonePe, Paytm" },
-      { "label": "UPI - Apollo", "description": "Medical expenses via Apollo / MedPlus / Wellness" },
-      { "label": "UPI - IRCTC", "description": "Train / flight bookings via IRCTC or IndiGo" },
-      { "label": "UPI - Fuel", "description": "Fuel purchases at HPCL / BPCL / IOCL pumps" }
+      { "label": "UPI - Zomato", "description": "Food & Dining via Zomato" },
+      { "label": "UPI - Swiggy", "description": "Food / Instamart via Swiggy" },
+      { "label": "UPI - BigBasket", "description": "Groceries & Household via BigBasket / Zepto / Blinkit" },
+      { "label": "UPI - Amazon", "description": "Shopping & Lifestyle via Amazon / Flipkart / Myntra" },
+      { "label": "UPI - Ola", "description": "Transport & Commute via Ola / Uber / Rapido" },
+      { "label": "UPI - Netflix", "description": "Subscriptions & OTT Services" },
+      { "label": "UPI - CRED", "description": "Credit Card Bill Settlements via CRED" },
+      { "label": "UPI - Apollo", "description": "Healthcare & Pharmacy Spends" },
+      { "label": "UPI - IRCTC", "description": "Rail & Air Travel Bookings" },
+      { "label": "UPI - Fuel", "description": "Fuel & Petrol Purchases (HPCL / BPCL / IOCL)" }
     ]
   },
   {
-    "group": "Generic Fallbacks & Suspense",
+    "group": "Fallbacks & Suspense (Pending Human Review)",
     "items": [
-      { "label": "UPI Payment", "description": "Generic outbound UPI transfers to individuals" },
-      { "label": "UPI Receipt", "description": "Generic inbound UPI transfers from individuals" },
-      { "label": "What is this?", "description": "Suspense items requiring review (Suspense)" }
+      { "label": "UPI Payment", "description": "Generic Outbound UPI Drawings (Confidence 0.55)" },
+      { "label": "UPI Receipt", "description": "Generic Inbound UPI Receipts (Confidence 0.55)" },
+      { "label": "Unclassified - Pending Review", "description": "Unclear Transaction in Suspense A/c (Pending Review) — Requires Human / CA Clarification" }
     ]
   }
 ]

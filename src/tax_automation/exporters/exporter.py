@@ -36,16 +36,16 @@ _CONF_MED_THRESHOLD: float = float(_bands.get("medium_low", 0.60))
 
 # ── Column label overrides — from config/exporter_theme.json ───────────────
 _COL_LABELS: dict[str, str] = _theme_cfg.get("column_labels") or _theme_cfg.get("rename_columns", {})
-_HUMAN_NARRATION_LABEL: str = _COL_LABELS.get("Human_Narration", "Kya Hai?")
+_HUMAN_NARRATION_LABEL: str = _COL_LABELS.get("Human_Narration", "Review Remarks")
 
 # ── Output sheet titles — from config/exporter_theme.json ──────────────────
 _OUTPUT_SHEETS: dict[str, str] = _theme_cfg.get("output_sheets", {})
-_SHEET_TALLY: str = _OUTPUT_SHEETS.get("tally", "For Tally")
-_SHEET_CONSO: str = _OUTPUT_SHEETS.get("conso", "Conso")
+_SHEET_TALLY: str = _OUTPUT_SHEETS.get("tally", "Tally Vouchers")
+_SHEET_CONSO: str = _OUTPUT_SHEETS.get("conso", "Combined Bank Book")
 _SHEET_SUMMARY: str = _OUTPUT_SHEETS.get("summary", "Bank Summary")
-_SHEET_CC: str = _OUTPUT_SHEETS.get("cc", "CC Transactions")
-_SHEET_PIVOT: str = _OUTPUT_SHEETS.get("pivot", "Monthly Pivot")
-_SHEET_LEGEND: str = _OUTPUT_SHEETS.get("legend", "Colour Legend")
+_SHEET_CC: str = _OUTPUT_SHEETS.get("cc", "Credit Card Book")
+_SHEET_PIVOT: str = _OUTPUT_SHEETS.get("pivot", "Monthly Cash Flow Pivot")
+_SHEET_LEGEND: str = _OUTPUT_SHEETS.get("legend", "Classification Legend")
 
 # Canonical CC sheet columns (order defines Excel column letters dynamically)
 _CC_SHEET_COLUMNS: list[str] = [

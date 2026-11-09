@@ -6,7 +6,7 @@
   "rules": [
     {
       "label": "Bank Interest",
-      "account_head": "Bank Interest",
+      "account_head": "Interest on Savings A/c (80TTA)",
       "pattern": "Int\\.Pd|INTEREST\\s*PAID",
       "direction": "CR",
       "confidence": 0.97

@@ -11,6 +11,7 @@ from openpyxl import load_workbook
 
 from tax_automation.config_loader import (
     get_entity_config,
+    get_exporter_theme_config,
     get_pivot_category_config,
     resolve_output_dir,
 )
@@ -20,7 +21,12 @@ from tax_automation.core.utils import safe_float
 def verify_contras(entity_id: str, fy: str, file_path: Path | None = None) -> bool:
     """Verifies contra symmetry for an entity and FY."""
     config = get_entity_config(entity_id)
-    output_sheet_names = set(config.get("output_sheet_names", []))
+    theme_cfg = get_exporter_theme_config()
+    output_sheet_names = (
+        set(config.get("output_sheet_names", []))
+        | set(theme_cfg.get("default_output_sheet_names", []))
+        | set(theme_cfg.get("output_sheets", {}).values())
+    )
     contra_prefix = get_pivot_category_config().get("contra_label_prefix", "Contra -").split()[0]
 
     if file_path is None:

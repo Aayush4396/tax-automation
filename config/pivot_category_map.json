@@ -27,7 +27,8 @@
     "Entertainment & Leisure",
     "Investments & Wealth",
     "Bank & Depository Charges",
-    "General/Other Spends"
+    "General/Other Spends",
+    "Suspense / Pending Human Review"
   ],
 
   "receipt_categories": [
@@ -37,7 +38,8 @@
     "Bank Interest",
     "Investment Inflows (MF/Stocks)",
     "Refunds & Reversals",
-    "Personal Inflows / Transfers"
+    "Personal Inflows / Transfers",
+    "Suspense / Pending Human Review"
   ],
 
   "default_payment_category": "General/Other Spends",
@@ -54,12 +56,18 @@
     "Transport": "Transport & Automotive",
     "Healthcare": "Healthcare & Medical",
     "Medical": "Healthcare & Medical",
+    "Deduction u/s 80C - Life Insurance": "Life Insurance",
     "Life Insurance": "Life Insurance",
+    "Deduction u/s 80D - Health Insurance": "Health Insurance",
     "Health Insurance": "Health Insurance",
     "Subscriptions": "Subscriptions & Services",
     "Utilities": "Utilities & Mobile",
     "Shopping": "Shopping & Lifestyle",
     "Entertainment": "Entertainment & Leisure",
+    "Mutual Fund Investments": "Investments & Wealth",
+    "Deduction u/s 80C - PPF": "Investments & Wealth",
+    "Equity & Broker Settlement": "Investments & Wealth",
+    "Equity & Capital Market": "Investments & Wealth",
     "SIP": "Investments & Wealth",
     "PPF Deposit": "Investments & Wealth",
     "HDFC Securities": "Investments & Wealth",
@@ -67,7 +75,9 @@
     "IPO": "Investments & Wealth",
     "Investments": "Investments & Wealth",
     "Bank Charges": "Bank & Depository Charges",
-    "Depository Charges": "Bank & Depository Charges"
+    "Depository Charges": "Bank & Depository Charges",
+    "Suspense A/c (Pending Review)": "Suspense / Pending Human Review",
+    "Suspense": "Suspense / Pending Human Review"
   },
 
   "narration_to_payment_category": {
@@ -93,19 +103,27 @@
     "UPI - Hotstar": "Subscriptions & Services",
     "UPI - OpenAI": "Subscriptions & Services",
     "Govt / Utility Payment": "Utilities & Mobile",
+    "Jio Postpaid Bill": "Utilities & Mobile",
     "Shopping - Jewellery": "Shopping & Lifestyle",
     "UPI - Amazon": "Shopping & Lifestyle",
     "UPI - Flipkart": "Shopping & Lifestyle",
     "SBI PPF": "Investments & Wealth",
+    "PPF Deposit": "Investments & Wealth",
     "HDFC Securities - Buy": "Investments & Wealth",
+    "SBI Securities - Buy": "Investments & Wealth",
     "Securities Settlement": "Investments & Wealth",
     "MF Investment": "Investments & Wealth",
     "INDmoney Investment": "Investments & Wealth",
     "IPO - Billion Garages": "Investments & Wealth",
     "IPO - JSW Cement": "Investments & Wealth",
+    "IPO Application": "Investments & Wealth",
+    "IPO Application (UPI)": "Investments & Wealth",
     "Bank Charges": "Bank & Depository Charges",
     "Lounge Access Charge": "Bank & Depository Charges",
-    "Depository Charges": "Bank & Depository Charges"
+    "Depository Charges": "Bank & Depository Charges",
+    "SBI Securities - Charges": "Bank & Depository Charges",
+    "NSDL Charges": "Bank & Depository Charges",
+    "Unclassified - Pending Review": "Suspense / Pending Human Review"
   },
 
   "narration_contains_payment_category": [
@@ -115,31 +133,48 @@
   ],
 
   "head_to_receipt_category": {
+    "Income from Salary": "Salary",
     "Salary": "Salary",
+    "Professional Receipts (44ADA)": "Freelance & Business Income",
     "Freelance Income": "Freelance & Business Income",
+    "Dividend Income (IFOS)": "Dividend Income",
     "Dividend Income": "Dividend Income",
+    "Interest on Savings A/c (80TTA)": "Bank Interest",
     "Bank Interest": "Bank Interest",
+    "Mutual Fund Investments": "Investment Inflows (MF/Stocks)",
+    "Equity & Broker Settlement": "Investment Inflows (MF/Stocks)",
+    "Equity & Capital Market": "Investment Inflows (MF/Stocks)",
     "Mutual Funds": "Investment Inflows (MF/Stocks)",
     "CDSL": "Investment Inflows (MF/Stocks)",
-    "HDFC Securities": "Investment Inflows (MF/Stocks)"
+    "HDFC Securities": "Investment Inflows (MF/Stocks)",
+    "Other Receipts (IFOS)": "Refunds & Reversals",
+    "Suspense A/c (Pending Review)": "Suspense / Pending Human Review",
+    "Suspense": "Suspense / Pending Human Review"
   },
 
   "narration_to_receipt_category": {
     "Salary": "Salary",
     "Freelance Income": "Freelance & Business Income",
+    "Upwork Income": "Freelance & Business Income",
     "Dividend Income": "Dividend Income",
+    "Sanofi Dividend": "Dividend Income",
     "Bank Interest": "Bank Interest",
     "MF Redemption": "Investment Inflows (MF/Stocks)",
     "Depository Credit": "Investment Inflows (MF/Stocks)",
+    "CDSL / Depository Credit": "Investment Inflows (MF/Stocks)",
     "HDFC Securities - Sell": "Investment Inflows (MF/Stocks)",
+    "SBI Securities - Sell": "Investment Inflows (MF/Stocks)",
     "HDFC Securities - Settlement": "Investment Inflows (MF/Stocks)",
+    "BSE Settlement": "Investment Inflows (MF/Stocks)",
+    "IPO Refund": "Investment Inflows (MF/Stocks)",
     "Refund - Wakefit": "Refunds & Reversals",
     "Security Deposit Return": "Refunds & Reversals",
     "UPI Reversal": "Refunds & Reversals",
     "Income Tax Refund": "Refunds & Reversals",
     "Cashback - BHIM": "Refunds & Reversals",
     "Cashback - Kiwi": "Refunds & Reversals",
-    "SuperMoney (Rewards)": "Refunds & Reversals"
+    "SuperMoney (Rewards)": "Refunds & Reversals",
+    "Unclassified - Pending Review": "Suspense / Pending Human Review"
   },
 
   "narration_contains_receipt_category": [],

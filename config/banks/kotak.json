@@ -6,14 +6,14 @@
   "rules": [
     {
       "label": "Bank Interest",
-      "account_head": "Bank Interest",
+      "account_head": "Interest on Savings A/c (80TTA)",
       "pattern": "Int\\.Pd[:.]|INTEREST\\s*PAID|INT\\s*PD\\b",
       "direction": "ANY",
       "confidence": 0.95
     },
     {
       "label": "Premium Payment (ECS Return Charge)",
-      "account_head": "Life Insurance",
+      "account_head": "Deduction u/s 80C - Life Insurance",
       "pattern": "Chrg:\\s*ECS\\s*Return.*HDFC\\s*Life|ECS\\s*Return.*HDFCLife",
       "direction": "DR",
       "confidence": 0.93
@@ -34,14 +34,14 @@
     },
     {
       "label": "MF Investment",
-      "account_head": "Investments",
+      "account_head": "Mutual Fund Investments",
       "pattern": "iccl",
       "direction": "DR",
       "confidence": 0.90
     },
     {
       "label": "Zerodha Broking",
-      "account_head": "Zerodha Broking Limited",
+      "account_head": "Equity & Broker Settlement",
       "pattern": "ZERODHA",
       "exclude_pattern": "NACH[- ]MUT[- ]DR|ICCL",
       "direction": "ANY",
@@ -49,35 +49,35 @@
     },
     {
       "label": "SIP",
-      "account_head": "SIP",
+      "account_head": "Mutual Fund Investments",
       "pattern": "NACH[- ]MUT[- ]DR",
       "direction": "DR",
       "confidence": 0.96
     },
     {
       "label": "MF Investment",
-      "account_head": "Investments",
+      "account_head": "Mutual Fund Investments",
       "pattern": "PG\\s+(?:INDIAN\\s+CLEARING|FOR\\s+\\w+|INVESTMENT)",
       "direction": "DR",
       "confidence": 0.88
     },
     {
       "label": "Dividend Income",
-      "account_head": "Dividend Income",
+      "account_head": "Dividend Income (IFOS)",
       "pattern": "NACH[- ]ECS[- ]CR",
       "direction": "CR",
       "confidence": 0.93
     },
     {
       "label": "Dividend Income",
-      "account_head": "Dividend Income",
+      "account_head": "Dividend Income (IFOS)",
       "pattern": "NACH[- ]10[- ]CR[- ]",
       "direction": "CR",
       "confidence": 0.93
     },
     {
       "label": "Dividend Income",
-      "account_head": "Dividend Income",
+      "account_head": "Dividend Income (IFOS)",
       "pattern": "\\bDIV\\b|\\bDIVIDEND\\b|\\bIDIV\\d*\\b|FNLDIV|INTDIV|\\bNACH-ECS-CR\\b|\\bNACH-10-CR\\b",
       "direction": "ANY",
       "confidence": 0.85
@@ -91,49 +91,49 @@
     },
     {
       "label": "Card Purchase",
-      "account_head": "Personal",
+      "account_head": "Drawings & Personal",
       "pattern": "^PCD/",
       "direction": "DR",
       "confidence": 0.88
     },
     {
       "label": "Credit Card Payment",
-      "account_head": "Personal",
+      "account_head": "Credit Card",
       "pattern": "^MB:PAID\\s*CARD|CREDIT\\s*CARD\\s*PAY",
       "direction": "DR",
       "confidence": 0.90
     },
     {
       "label": "Depository Credit",
-      "account_head": "CDSL",
+      "account_head": "Dividend Income (IFOS)",
       "pattern": "CENTRAL\\s*DEPOSITORY|CDSL|NSDL\\s*DEPOS",
       "direction": "CR",
       "confidence": 0.90
     },
     {
       "label": "MF Refund / Reversal",
-      "account_head": "Mutual Funds",
+      "account_head": "Mutual Fund Investments",
       "pattern": "PG\\s+RETURN|RETURN\\s+NK",
       "direction": "ANY",
       "confidence": 0.80
     },
     {
       "label": "IMPS Receipt",
-      "account_head": "Personal",
+      "account_head": "Drawings & Personal",
       "pattern": "^Recd:IMPS|^IMPS\\s*IN",
       "direction": "CR",
       "confidence": 0.72
     },
     {
       "label": "IPO Application",
-      "account_head": "Equities",
+      "account_head": "Equity & Capital Market",
       "pattern": "Billionbrains\\s*Garage|BILLIONBRAINS",
       "direction": "DR",
       "confidence": 0.95
     },
     {
       "label": "UPI Reversal",
-      "account_head": "Personal",
+      "account_head": "Drawings & Personal",
       "pattern": "^REV[-/]UPI|UPI_CRADJ",
       "direction": "ANY",
       "confidence": 0.88

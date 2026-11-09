@@ -136,7 +136,7 @@ class TestRulesEngine(unittest.TestCase):
         _, common_rules, fallback_rules = build_rule_chain("aayush", "hdfc")
         fallback_labels = {r[0] for r in fallback_rules}
         common_labels = {r[0] for r in common_rules}
-        self.assertIn("What is this?", fallback_labels)
+        self.assertIn("Unclassified - Pending Review", fallback_labels)
         self.assertTrue(fallback_labels.isdisjoint(common_labels))
 
     def test_contra_exclude_patterns(self):

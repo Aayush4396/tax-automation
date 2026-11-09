@@ -6,28 +6,28 @@
   "rules": [
     {
       "label": "HDFC Securities - Buy",
-      "account_head": "HDFC Securities",
+      "account_head": "Equity & Broker Settlement",
       "pattern": "NET\\s*PI\\s*TO\\s*HSL",
       "direction": "DR",
       "confidence": 0.97
     },
     {
       "label": "HDFC Securities - Sell",
-      "account_head": "HDFC Securities",
+      "account_head": "Equity & Broker Settlement",
       "pattern": "NET\\s*PO\\s*FROM\\s*HSL",
       "direction": "CR",
       "confidence": 0.97
     },
     {
       "label": "HDFC Securities - Settlement",
-      "account_head": "HDFC Securities",
+      "account_head": "Equity & Broker Settlement",
       "pattern": "HDFC\\s*SECURITIES\\s*LTD",
       "direction": "ANY",
       "confidence": 0.93
     },
     {
       "label": "BSE Settlement",
-      "account_head": "HDFC Securities",
+      "account_head": "Equity & Broker Settlement",
       "pattern": "INDIAN\\s*CLEARING\\s*CORP|ICCL|UTIB0000004.*CLEARING",
       "direction": "CR",
       "confidence": 0.93
@@ -48,70 +48,70 @@
     },
     {
       "label": "SIP",
-      "account_head": "SIP",
+      "account_head": "Mutual Fund Investments",
       "pattern": "ACH\\s*D[- ]+TP\\s*ACH\\s*INDIANESIGN|INDIANESIGN",
       "direction": "DR",
       "confidence": 0.95
     },
     {
       "label": "SIP",
-      "account_head": "SIP",
+      "account_head": "Mutual Fund Investments",
       "pattern": "BILLDK|BILLDKINDIAN|NACHINDIANCLEARING",
       "direction": "DR",
       "confidence": 0.90
     },
     {
       "label": "Life Insurance Premium",
-      "account_head": "Life Insurance",
+      "account_head": "Deduction u/s 80C - Life Insurance",
       "pattern": "ACH\\s*D[- ]+HDFCLIFE|ACH\\s*D[- ].*HDFCLIFE",
       "direction": "DR",
       "confidence": 0.95
     },
     {
       "label": "Life Insurance Premium",
-      "account_head": "Life Insurance",
+      "account_head": "Deduction u/s 80C - Life Insurance",
       "pattern": "HDFCSTANDARDLIFE|HDFCLIFE|HDFC\\s*STANDARD\\s*LIFE|HDFC\\s*LIFE|HLIC[-_ ]*INST",
       "direction": "DR",
       "confidence": 0.90
     },
     {
       "label": "Annuity Income",
-      "account_head": "Annuity",
+      "account_head": "Annuity / Pension Income",
       "pattern": "HDFCLIFE\\s*CENTR",
       "direction": "CR",
       "confidence": 0.95
     },
     {
       "label": "Health Insurance",
-      "account_head": "Health Insurance",
+      "account_head": "Deduction u/s 80D - Health Insurance",
       "pattern": "CARE\\s*HEALTH|RELIGARE|STAR\\s*HEALTH|NIVA\\s*BUPA|MAX\\s*BUPA|MAXBUPA|BAJAJ\\s*ALLIANZ",
       "direction": "DR",
       "confidence": 0.92
     },
     {
       "label": "Dividend Income",
-      "account_head": "Dividend Income",
+      "account_head": "Dividend Income (IFOS)",
       "pattern": "^ACH\\s*C[- ]",
       "direction": "CR",
       "confidence": 0.88
     },
     {
       "label": "Dividend Income",
-      "account_head": "Dividend Income",
+      "account_head": "Dividend Income (IFOS)",
       "pattern": "\\bDIV\\d*\\b|\\bDIVIDEND\\b|\\s+DIV\\d+",
       "direction": "CR",
       "confidence": 0.85
     },
     {
       "label": "MF Redemption",
-      "account_head": "Mutual Funds",
+      "account_head": "Mutual Fund Investments",
       "pattern": "INVESCO\\s*MF|PPFAS|MIRAE|SBI\\s*MF|HDFC\\s*MF|AXIS\\s*MF|CAMS|KFIN",
       "direction": "CR",
       "confidence": 0.87
     },
     {
       "label": "Misc Income",
-      "account_head": "Misc Income",
+      "account_head": "Other Receipts (IFOS)",
       "pattern": "^IMPS",
       "direction": "CR",
       "exact_dr": 0.0,
@@ -126,14 +126,14 @@
     },
     {
       "label": "MF Redemption",
-      "account_head": "Mutual Funds",
+      "account_head": "Mutual Fund Investments",
       "pattern": "NSE\\s*CLEARING|MFSS\\s*SETTLEMENT|NSE\\s*MFSS",
       "direction": "CR",
       "confidence": 0.90
     },
     {
       "label": "Securities Settlement",
-      "account_head": "HDFC Securities",
+      "account_head": "Equity & Broker Settlement",
       "pattern": "HDBFSS",
       "direction": "ANY",
       "confidence": 0.80
@@ -147,14 +147,14 @@
     },
     {
       "label": "IPO Application",
-      "account_head": "Equities",
+      "account_head": "Equity & Capital Market",
       "pattern": "TATACAPG|HDFCBANKIPOG|SMBCG|BAJAJHFG|BHARATIHWNG|KFIN\\s*IPO|LINKINTIME.*IPO|IPOREFUND|ASBAREFUND|\\bIPO\\b.*REFUND|UPI[/-]IPO|/ASBA|ASBA/|ASBA\\s*BLOCK|ASBA\\s*UNBLOCK|\\bIPO\\b",
       "direction": "DR",
       "confidence": 0.92
     },
     {
       "label": "IPO Refund",
-      "account_head": "Equities",
+      "account_head": "Equity & Capital Market",
       "pattern": "TATACAPG|IPOREFUND|ASBAREFUND|IPO.*REFUND|REFUND.*IPO|ASBA\\s*UNBLOCK",
       "direction": "CR",
       "confidence": 0.92
