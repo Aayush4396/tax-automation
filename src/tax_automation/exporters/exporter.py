@@ -423,15 +423,18 @@ def write_bank_sheet(
     _colour_rows(ws, narr_idx, conf_idx, match_idx, start_row=hdr_row + 1)
     _auto_col_widths(ws, df_clean[export_cols])
 
-    # Hide requested columns
-    cols_to_hide = [
-        "Date",
-        "Value_Date",
-        "Ref",
-        "Balance",
-        "Human_Narration",
-        "Beneficiary",
-    ]
+    # Hide requested columns from config/exporter_theme.json
+    cols_to_hide = _theme_cfg.get(
+        "bank_sheet_hidden_columns",
+        [
+            "Date",
+            "Value_Date",
+            "Ref",
+            "Balance",
+            "Human_Narration",
+            "Beneficiary",
+        ],
+    )
     for col_name in cols_to_hide:
         if col_name in export_cols:
             idx = export_cols.index(col_name) + 1
@@ -443,6 +446,21 @@ def write_bank_sheet(
 
 
 # ── For Tally sheet ─────────────────────────────────────────────────────────
+
+
+def _get_tally_rename_map() -> dict[str, str]:
+    """Returns the column rename dictionary for the Tally sheet from config."""
+    default_rename = {
+        "TX_Date": "TX Date",
+        "Value_Date": "Date",
+        "Auto_Narration": "Narration",
+        "Account_Head": "Account Head",
+        "Account_ID": "Account No",
+        "Human_Narration": _HUMAN_NARRATION_LABEL,
+        "Bank_Display": "Bank",
+        "Pivot_Category": "Pivot Category",
+    }
+    return {**default_rename, **_COL_LABELS}
 
 
 def write_for_tally(wb: Workbook, all_df: pd.DataFrame):
@@ -465,17 +483,7 @@ def write_for_tally(wb: Workbook, all_df: pd.DataFrame):
         "Pivot_Category",
     ]
 
-    # Rename to match original header labels
-    rename = {
-        "TX_Date": "TX Date",
-        "Value_Date": "Date",
-        "Auto_Narration": "Narration",
-        "Account_Head": "Account Head",
-        "Account_ID": "Account No",
-        "Human_Narration": _HUMAN_NARRATION_LABEL,
-        "Bank_Display": "Bank",
-        "Pivot_Category": "Pivot Category",
-    }
+    rename = _get_tally_rename_map()
     out_cols = [c for c in cols if c in all_df.columns]
     out_df = all_df[out_cols].copy().rename(columns=rename)
 
@@ -485,7 +493,8 @@ def write_for_tally(wb: Workbook, all_df: pd.DataFrame):
     for _, row in out_df.iterrows():
         ws.append(list(row))
 
-    narr_idx = list(out_df.columns).index("Narration") + 1
+    narr_label = rename.get("Auto_Narration", "Narration")
+    narr_idx = list(out_df.columns).index(narr_label) + 1
     conf_idx = (
         list(out_df.columns).index("Confidence") + 1
         if "Confidence" in out_df.columns
@@ -494,14 +503,17 @@ def write_for_tally(wb: Workbook, all_df: pd.DataFrame):
     _colour_rows(ws, narr_idx, conf_idx, None, start_row=hdr_row + 1)
     _auto_col_widths(ws, out_df)
 
-    # Hide requested columns
-    tally_cols_to_hide = [
-        "TX Date",
-        "Date",
-        "Beneficiary",
-        _HUMAN_NARRATION_LABEL,
-        "Pivot Category",
-    ]
+    # Hide requested columns from config/exporter_theme.json
+    tally_cols_to_hide = _theme_cfg.get(
+        "tally_hidden_columns",
+        [
+            "TX Date",
+            "Date",
+            "Beneficiary",
+            _HUMAN_NARRATION_LABEL,
+            "Pivot Category",
+        ],
+    )
     for col_name in tally_cols_to_hide:
         if col_name in out_df.columns:
             idx = list(out_df.columns).index(col_name) + 1
@@ -582,8 +594,10 @@ def write_conso(
     for i, w in enumerate(widths[: ws.max_column], 1):
         ws.column_dimensions[get_column_letter(i)].width = w
 
-    # Hide requested columns
-    conso_cols_to_hide = ["TX Date", "Ref", "Balance"]
+    # Hide requested columns from config/exporter_theme.json
+    conso_cols_to_hide = _theme_cfg.get(
+        "conso_hidden_columns", ["TX Date", "Ref", "Balance"]
+    )
     for col_name in conso_cols_to_hide:
         if col_name in header_row:
             idx = header_row.index(col_name) + 1
@@ -633,15 +647,7 @@ def write_bank_summary(
         "Bank_Display",
         "Duplicate",
     ]
-    tally_rename = {
-        "TX_Date": "TX Date",
-        "Value_Date": "Date",
-        "Auto_Narration": "Narration",
-        "Account_Head": "Account Head",
-        "Account_ID": "Account No",
-        "Human_Narration": _HUMAN_NARRATION_LABEL,
-        "Bank_Display": "Bank",
-    }
+    tally_rename = _get_tally_rename_map()
     tally_cols = [tally_rename.get(c, c) for c in tally_cols_def if c in all_df.columns]
     dr_col_letter = get_column_letter(tally_cols.index("DR") + 1)
     cr_col_letter = get_column_letter(tally_cols.index("CR") + 1)
@@ -971,16 +977,7 @@ def write_monthly_pivot(
         "Duplicate",
         "Pivot_Category",
     ]
-    tally_rename = {
-        "TX_Date": "TX Date",
-        "Value_Date": "Date",
-        "Auto_Narration": "Narration",
-        "Account_Head": "Account Head",
-        "Account_ID": "Account No",
-        "Human_Narration": _HUMAN_NARRATION_LABEL,
-        "Bank_Display": "Bank",
-        "Pivot_Category": "Pivot Category",
-    }
+    tally_rename = _get_tally_rename_map()
     tally_cols = [tally_rename.get(c, c) for c in tally_cols_def if c in all_df.columns]
 
     tally_dr_letter = get_column_letter(tally_cols.index("DR") + 1)

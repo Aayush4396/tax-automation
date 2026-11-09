@@ -16,7 +16,11 @@ from tax_automation.api.schemas.diagnostics import (
     ResultsCheckResponse,
     ConfidenceBand,
 )
-from tax_automation.config_loader import get_entity_config
+from tax_automation.config_loader import (
+    get_entity_config,
+    get_exporter_theme_config,
+    get_pivot_category_config,
+)
 from tax_automation.core.utils import safe_float
 from tax_automation.tools.check_narration_results import check_results
 from tax_automation.tools.parse_all_stats import parse_bank_summary
@@ -42,7 +46,17 @@ def check_contras(entity_id: str, fy: str) -> ContraResult:
 
     try:
         config = get_entity_config(eid)
-        output_sheet_names = set(config.get("output_sheet_names", []))
+        theme_cfg = get_exporter_theme_config()
+        output_sheet_names = (
+            set(config.get("output_sheet_names", []))
+            | set(theme_cfg.get("default_output_sheet_names", []))
+            | set(theme_cfg.get("output_sheets", {}).values())
+        )
+        contra_prefix = (
+            get_pivot_category_config()
+            .get("contra_label_prefix", "Contra -")
+            .split()[0]
+        )
 
         wb = load_workbook(ledger, data_only=True)
         sheet_names = [s for s in wb.sheetnames if s not in output_sheet_names]
@@ -85,7 +99,7 @@ def check_contras(entity_id: str, fy: str) -> ContraResult:
 
             for r in rows[h_idx + 1 :]:
                 lbl = str(r[lbl_idx] or "")
-                if lbl.startswith("Contra"):
+                if lbl.startswith(contra_prefix):
                     contras.append(
                         {
                             "dr": safe_float(r[dr_idx]),

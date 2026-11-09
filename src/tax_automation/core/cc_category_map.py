@@ -18,8 +18,11 @@ CC_NARRATION_MAP: dict[str, tuple[str, str]] = {
 }
 
 CC_COLOUR_MAP: dict[str, str] = _cfg.get("colour_map", {})
+_DEFAULT_FALLBACK_HEAD: str = _cfg.get("default_fallback_head", "Drawings & Personal")
 
 
 def map_category(cc_category: str) -> tuple[str, str]:
     """Return (Auto_Narration, Account_Head) for a CC SpendsArea string."""
-    return CC_NARRATION_MAP.get(cc_category, (f"CC - {cc_category}", "Miscellaneous"))
+    return CC_NARRATION_MAP.get(
+        cc_category, (f"CC - {cc_category}", _DEFAULT_FALLBACK_HEAD)
+    )

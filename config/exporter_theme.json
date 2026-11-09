@@ -45,6 +45,9 @@
   "bank_sheet_hidden_columns": [
     "Date", "Value_Date", "Ref", "Balance", "Human_Narration", "Beneficiary"
   ],
+  "conso_hidden_columns": [
+    "TX Date", "Ref", "Balance"
+  ],
   "output_sheets": {
     "tally": "Tally Vouchers",
     "conso": "Combined Bank Book",

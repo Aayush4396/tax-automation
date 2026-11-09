@@ -64,5 +64,16 @@
       "default_narration": "CC - Telecom",
       "default_account_head": "Utilities"
     }
-  ]
+  ],
+  "default_fallback_head": "Drawings & Personal",
+  "pdf_parser": {
+    "date_formats": ["%d/%m/%Y", "%d-%b-%Y"],
+    "transaction_line_pattern": "^(\\d{2}/\\d{2}/\\d{4})\\s+(.+?)\\s+({categories})\\s+([\\d,]+\\.\\d{2})\\s*(Cr)?$",
+    "payment_line_pattern": "^(\\d{2}/\\d{2}/\\d{4})\\s+(DP\\w+)\\s+([\\d,]+\\.\\d{2})\\s+Cr$",
+    "statement_date_pattern": "StatementDate\\s+(\\d{2}-\\w{3}-\\d{4})",
+    "period_pattern": "from\\s+(\\d{2}-\\w{3}-\\d{4})\\s+to\\s+(\\d{2}-\\w{3}-\\d{4})",
+    "pay_by_pattern": "Remembertopayby\\s+(\\d{2}-\\w{3}-\\d{4})",
+    "total_amount_due_pattern": "TotalAmountDue\\(TAD\\)\\s+Rs\\.([\\d,]+\\.\\d{2})",
+    "merchant_extract_pattern": "UPI-\\d+-(.+)"
+  }
 }

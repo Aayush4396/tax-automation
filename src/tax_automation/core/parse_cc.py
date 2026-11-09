@@ -58,6 +58,8 @@ _CC_CATEGORIES = _cc_cfg.get("categories") or [
 _CC_CATEGORIES = sorted(_CC_CATEGORIES, key=len, reverse=True)
 _CAT_PAT = "|".join(re.escape(c) for c in _CC_CATEGORIES)
 _MERCHANT_OVERRIDES = _cc_cfg.get("merchant_overrides", [])
+_PDF_CFG = _cc_cfg.get("pdf_parser", {})
+_DATE_FORMATS: list[str] = _PDF_CFG.get("date_formats", ["%d/%m/%Y", "%d-%b-%Y"])
 
 CC_TRANSACTION_COLUMNS: list[str] = [
     "TX_Date",
@@ -73,21 +75,45 @@ CC_TRANSACTION_COLUMNS: list[str] = [
     "Source",
 ]
 
+_tx_pat_tpl = _PDF_CFG.get(
+    "transaction_line_pattern",
+    r"^(\d{2}/\d{2}/\d{4})\s+(.+?)\s+({categories})\s+([\d,]+\.\d{2})\s*(Cr)?$",
+)
 _TX_RE = re.compile(
-    rf"^(\d{{2}}/\d{{2}}/\d{{4}})\s+(.+?)\s+({_CAT_PAT})\s+([\d,]+\.\d{{2}})\s*(Cr)?$",
+    _tx_pat_tpl.replace("{categories}", _CAT_PAT),
     re.IGNORECASE,
 )
 
-_PMT_RE = re.compile(r"^(\d{2}/\d{2}/\d{4})\s+(DP\w+)\s+([\d,]+\.\d{2})\s+Cr$")
+_PMT_RE = re.compile(
+    _PDF_CFG.get(
+        "payment_line_pattern",
+        r"^(\d{2}/\d{2}/\d{4})\s+(DP\w+)\s+([\d,]+\.\d{2})\s+Cr$",
+    )
+)
 
-_STMT_DATE_RE = re.compile(r"StatementDate\s+(\d{2}-\w{3}-\d{4})")
-_PERIOD_RE = re.compile(r"from\s+(\d{2}-\w{3}-\d{4})\s+to\s+(\d{2}-\w{3}-\d{4})")
-_PAY_BY_RE = re.compile(r"Remembertopayby\s+(\d{2}-\w{3}-\d{4})")
-_TAD_RE = re.compile(r"TotalAmountDue\(TAD\)\s+Rs\.([\d,]+\.\d{2})")
+_STMT_DATE_RE = re.compile(
+    _PDF_CFG.get("statement_date_pattern", r"StatementDate\s+(\d{2}-\w{3}-\d{4})")
+)
+_PERIOD_RE = re.compile(
+    _PDF_CFG.get(
+        "period_pattern", r"from\s+(\d{2}-\w{3}-\d{4})\s+to\s+(\d{2}-\w{3}-\d{4})"
+    )
+)
+_PAY_BY_RE = re.compile(
+    _PDF_CFG.get("pay_by_pattern", r"Remembertopayby\s+(\d{2}-\w{3}-\d{4})")
+)
+_TAD_RE = re.compile(
+    _PDF_CFG.get(
+        "total_amount_due_pattern", r"TotalAmountDue\(TAD\)\s+Rs\.([\d,]+\.\d{2})"
+    )
+)
+_MERCHANT_EXTRACT_RE = re.compile(
+    _PDF_CFG.get("merchant_extract_pattern", r"UPI-\d+-(.+)")
+)
 
 
 def _parse_date(s: str) -> datetime | None:
-    for fmt in ("%d/%m/%Y", "%d-%b-%Y"):
+    for fmt in _DATE_FORMATS:
         try:
             return datetime.strptime(s.strip(), fmt)
         except ValueError:
@@ -103,7 +129,7 @@ def _parse_amount(s: str) -> float:
 
 
 def _extract_merchant(particulars: str) -> str:
-    m = re.match(r"UPI-\d+-(.+)", particulars)
+    m = _MERCHANT_EXTRACT_RE.match(particulars)
     if m:
         return m.group(1).strip().title()
     return particulars.strip()

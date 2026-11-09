@@ -8,7 +8,11 @@ from __future__ import annotations
 from pathlib import Path
 from openpyxl import load_workbook
 
-from tax_automation.config_loader import get_entity_config, resolve_output_dir
+from tax_automation.config_loader import (
+    get_entity_config,
+    get_exporter_theme_config,
+    resolve_output_dir,
+)
 
 
 def check_results(entity_id: str, fy: str, file_path: Path | None = None) -> dict:
@@ -18,7 +22,12 @@ def check_results(entity_id: str, fy: str, file_path: Path | None = None) -> dic
         dict with total_sheets, bank_sheets counts, and sheet name lists.
     """
     config = get_entity_config(entity_id)
-    output_sheet_names = set(config.get("output_sheet_names", []))
+    theme_cfg = get_exporter_theme_config()
+    output_sheet_names = (
+        set(config.get("output_sheet_names", []))
+        | set(theme_cfg.get("default_output_sheet_names", []))
+        | set(theme_cfg.get("output_sheets", {}).values())
+    )
 
     if file_path is None:
         file_path = resolve_output_dir(entity_id, fy) / "narrated_ledger.xlsx"
