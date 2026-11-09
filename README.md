@@ -15,51 +15,65 @@ Built around a **100% zero-code, declarative JSON architecture**, adding or upda
 ## High-Level Architecture & Data Flow
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 10, 'bottom': 18}, 'wrappingWidth': 320}}}%%
 flowchart TD
-    subgraph Inputs["Raw Inputs (data/{entity}/{FY}/input/)"]
-        RAW_BANK["bank_statements/\n(.xlsx, .xls, .csv, .pdf)"]
-        ENV_FILE[".env\n(Statement Passwords)"]
+    subgraph Inputs["Raw Inputs"]
+        RAW_BANK["bank_statements/<br/>(.xlsx, .xls, .csv, .pdf)"]
+        ENV_FILE[".env<br/>(Statement Passwords)"]
     end
 
-    subgraph Stage1["Stage 1: Multi-Format Consolidation"]
-        DEC["In-Memory Decryption\n(msoffcrypto / pdfplumber)"]
-        NORM["Tab Extraction & Normalization\n(generic_consolidator.py)"]
-        CONSO_XLSX["data/{entity}/{FY}/output/\nconsolidated_statements.xlsx"]
+    subgraph Stage1["Stage 1: Consolidation"]
+        DEC["In-Memory Decryption<br/>(msoffcrypto / pdfplumber)"]
+        NORM["Tab Extraction & Normalization<br/>(generic_consolidator.py)"]
+        CONSO_XLSX["consolidated_statements.xlsx"]
     end
 
-    subgraph Stage2["Stage 2: Auto-Header & Bank Fingerprinting"]
-        HDR["Header Row Detection\n(auto_header.py + header_keywords.json)"]
-        FING["Weighted Bank Scoring\n(bank_identifier.py + scoring.json)"]
+    subgraph Stage2["Stage 2: Fingerprinting"]
+        HDR["Header Row Detection<br/>(auto_header.py + header_keywords.json)"]
+        FING["Weighted Bank Scoring<br/>(bank_identifier.py + scoring.json)"]
     end
 
-    subgraph Stage3["Stage 3: 8-Tier Classification Engine"]
-        CHAIN["Dynamic Rule Chain Assembly\n(rules/loader.py)"]
-        CLASS["Transaction Classifier\n(pipeline/narration.py)"]
-        PIV_MAP["Pivot Category Assignment\n(exporter.py + pivot_category_map.json)"]
+    subgraph Stage3["Stage 3: 8-Tier Engine"]
+        CHAIN["Dynamic Rule Chain Assembly<br/>(rules/loader.py)"]
+        CLASS["Transaction Classifier<br/>(pipeline/narration.py)"]
+        PIV_MAP["Pivot Category Assignment<br/>(exporter.py + pivot_category_map.json)"]
     end
 
-    subgraph Stage4["Stage 4: Master Tax Workbook Export"]
-        OUT_XLSX["data/{entity}/{FY}/output/\nnarrated_ledger.xlsx"]
-        TAB_BANK["Per-Bank Sheets\n(e.g. HDFC 5413, SBI 1227)"]
-        TAB_TALLY["Tally Vouchers\n(All banks, date-sorted)"]
-        TAB_CONSO["Combined Bank Book\n(Subtotals & running ledger)"]
-        TAB_SUM["Bank Summary\n(Narration SUMIFS, Balances, Confidence)"]
-        TAB_PIV["Monthly Cash Flow Pivot\n(Payments, Receipts, Contras, Suspense Review)"]
-        TAB_LEG["Classification Legend\n(Tax & Tally Reference)"]
+    subgraph Stage4["Stage 4: Workbook Export"]
+        OUT_XLSX["narrated_ledger.xlsx"]
+        TAB_BANK["Per-Bank Sheets<br/>(HDFC 5413, SBI 1227)"]
+        TAB_TALLY["Tally Vouchers<br/>(All banks, date-sorted)"]
+        TAB_CONSO["Combined Bank Book<br/>(Subtotals & running ledger)"]
+        TAB_SUM["Bank Summary<br/>(Narration SUMIFS & Balances)"]
+        TAB_PIV["Monthly Cash Flow Pivot<br/>(Payments, Receipts, Contras, Suspense)"]
+        TAB_LEG["Classification Legend<br/>(Tax & Tally Reference)"]
     end
 
-    subgraph Stage5["Stage 5: Diagnostics & Human Audit"]
-        DIAG_CON["Contra Symmetry Verification\n(check_contras.py)"]
-        DIAG_CONF["Confidence Band Breakdown\n(parse_narration_stats.py)"]
-        HUMAN["Human / CA Review of\n'Unclassified - Pending Review'"]
+    subgraph Stage5["Stage 5: Diagnostics"]
+        DIAG_CON["Contra Symmetry Check<br/>(check_contras.py)"]
+        DIAG_CONF["Confidence Breakdown<br/>(parse_narration_stats.py)"]
+        HUMAN["Human / CA Review<br/>(Unclassified - Pending Review)"]
     end
 
     RAW_BANK --> DEC
     ENV_FILE --> DEC
-    DEC --> NORM --> CONSO_XLSX
-    CONSO_XLSX --> HDR --> FING --> CHAIN --> CLASS --> PIV_MAP --> OUT_XLSX
-    OUT_XLSX --> TAB_BANK & TAB_TALLY & TAB_CONSO & TAB_SUM & TAB_PIV & TAB_LEG
-    OUT_XLSX --> DIAG_CON & DIAG_CONF & HUMAN
+    DEC --> NORM
+    NORM --> CONSO_XLSX
+    CONSO_XLSX --> HDR
+    HDR --> FING
+    FING --> CHAIN
+    CHAIN --> CLASS
+    CLASS --> PIV_MAP
+    PIV_MAP --> OUT_XLSX
+    OUT_XLSX --> TAB_BANK
+    OUT_XLSX --> TAB_TALLY
+    OUT_XLSX --> TAB_CONSO
+    OUT_XLSX --> TAB_SUM
+    OUT_XLSX --> TAB_PIV
+    OUT_XLSX --> TAB_LEG
+    OUT_XLSX --> DIAG_CON
+    OUT_XLSX --> DIAG_CONF
+    OUT_XLSX --> HUMAN
 ```
 
 ---
@@ -150,14 +164,16 @@ The generated workbook (`data/<entity>/<FY>/output/narrated_ledger.xlsx`) contai
 
 ```mermaid
 flowchart LR
-    A["Open narrated_ledger.xlsx"] --> B["Check 'Monthly Cash Flow Pivot'\nLook at 'Suspense / Pending Human Review' row"]
-    B --> C["Filter 'Tally Vouchers' sheet by:\nNarration = 'Unclassified - Pending Review'\nor Confidence < 0.60"]
-    C --> D{"Recurring pattern\nor one-off?"}
-    D -- "UPI Merchant" --> E["Add keyword to\nconfig/merchants.json"]
-    D -- "Universal Pattern" --> F["Add rule to\nconfig/rules_common.json"]
-    D -- "Entity-Specific" --> G["Add to config/entities/{entity}.json\n(custom_rules / rent / family_members)"]
-    D -- "One-Off Clarification" --> H["Record note in 'Review Remarks' column\nfor CA / Tally entry"]
-    E & F & G --> I["Re-run Pipeline\nSuspense total drops to 0"]
+    A["Open narrated_ledger.xlsx"] --> B["Check Monthly Cash Flow Pivot (Suspense / Pending Human Review row)"]
+    B --> C["Filter Tally Vouchers by Narration = Unclassified - Pending Review"]
+    C --> D{"Recurring pattern or one-off?"}
+    D -- "UPI Merchant" --> E["Add keyword to config/merchants.json"]
+    D -- "Universal Pattern" --> F["Add rule to config/rules_common.json"]
+    D -- "Entity-Specific" --> G["Add to config/entities/entity.json"]
+    D -- "One-Off Clarification" --> H["Record note in Review Remarks column"]
+    E --> I["Re-run Pipeline (Suspense drops to 0)"]
+    F --> I
+    G --> I
 ```
 
 ### 3. Onboarding a Brand-New Taxpayer Entity (Zero Code Changes)

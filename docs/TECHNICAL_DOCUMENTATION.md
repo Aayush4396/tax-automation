@@ -27,26 +27,27 @@ This document provides the complete technical specification of the **Tax Automat
 The Tax Automation System follows a decoupled, declarative, and stateless pipeline pattern. Every rule, bank schema, alias token, scoring threshold, pivot category, and worksheet layout resides in JSON files under `config/` and is loaded via `src/tax_automation/config_loader.py`.
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 10, 'bottom': 18}, 'wrappingWidth': 320}}}%%
 flowchart LR
-    subgraph Configs["Declarative JSON Configurations (config/)"]
-        C_ENT["config/entities/{entity}.json\n(Accounts, Family, Rent, Custom Rules)"]
-        C_CON["config/consolidation/{entity}_{fy}.json\n(File -> Sheet Map & Password Env Vars)"]
-        C_BNK["config/banks/{bank}.json\n(Signals, Columns, Alias Tokens, Bank Rules)"]
-        C_COM["config/rules_common.json\n(Universal & Fallback Rules)"]
-        C_MER["config/merchants.json\n(100+ UPI Merchant Keywords)"]
-        C_CC["config/cc_categories.json\n(CC Categories, Overrides & PDF Regexes)"]
-        C_SCR["config/scoring.json\n(Fingerprinting Weights & Confidence Bands)"]
-        C_PIV["config/pivot_category_map.json\n(Monthly Cash Flow Pivot Mappings)"]
-        C_THM["config/exporter_theme.json\n(Sheet Names, Colours, Hidden Columns)"]
-        C_LEG["config/colour_legend.json\n(Classification Legend Groups)"]
+    subgraph Configs["JSON Configs (config/)"]
+        C_ENT["config/entities/*.json<br/>(Accounts, Family, Rent, Rules)"]
+        C_CON["config/consolidation/*.json<br/>(File-to-Sheet Map & Passwords)"]
+        C_BNK["config/banks/*.json<br/>(Signals, Columns, Tokens, Rules)"]
+        C_COM["config/rules_common.json<br/>(Universal & Fallback Rules)"]
+        C_MER["config/merchants.json<br/>(100+ UPI Merchant Keywords)"]
+        C_CC["config/cc_categories.json<br/>(CC Categories & PDF Regexes)"]
+        C_SCR["config/scoring.json<br/>(Weights & Confidence Bands)"]
+        C_PIV["config/pivot_category_map.json<br/>(Monthly Cash Flow Pivot Map)"]
+        C_THM["config/exporter_theme.json<br/>(Sheet Names, Colours, Columns)"]
+        C_LEG["config/colour_legend.json<br/>(Classification Legend Groups)"]
     end
 
-    subgraph Engine["Core Python Pipeline (src/tax_automation/)"]
-        P_CON["Stage 1: Consolidator\ngeneric_consolidator.py"]
-        P_ID["Stage 2: Fingerprinting\nauto_header.py + bank_identifier.py"]
-        P_RUL["Stage 3: Rule Compiler & Classifier\nloader.py + narration.py"]
-        P_EXP["Stage 4: Workbook Exporter\nexporter.py"]
-        P_DIA["Stage 5: Diagnostics\ncheck_contras.py + parse_narration_stats.py"]
+    subgraph Engine["Python Pipeline (src/)"]
+        P_CON["Stage 1: Consolidator<br/>(generic_consolidator.py)"]
+        P_ID["Stage 2: Fingerprinting<br/>(auto_header.py + bank_identifier.py)"]
+        P_RUL["Stage 3: 8-Tier Classifier<br/>(loader.py + narration.py)"]
+        P_EXP["Stage 4: Workbook Exporter<br/>(exporter.py)"]
+        P_DIA["Stage 5: Diagnostics<br/>(check_contras.py + stats)"]
     end
 
     C_CON --> P_CON
@@ -139,24 +140,24 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-    START(["Raw Transaction Row\n(Particulars, DR, CR, Entity, Bank)"]) --> HEAL["Normalize Whitespace & Line Breaks"]
-    HEAL --> T1{"Tier 1: Entity Custom Rules\n(layer = 'entity')"}
+    START(["Raw Transaction Row (Particulars, DR, CR, Entity, Bank)"]) --> HEAL["Normalize Whitespace and Line Breaks"]
+    HEAL --> T1{"Tier 1: Entity Custom Rules (layer = entity)"}
     T1 -- Match --> HIT(["Return (Label, Account_Head, Confidence)"])
-    T1 -- No Match --> T2{"Tier 2: Synthesized Rent Rules\n(entity.rent landlords/VPAs/keywords & DR > 0)"}
+    T1 -- No Match --> T2{"Tier 2: Synthesized Rent Rules (Landlords, VPAs, Keywords)"}
     T2 -- Match --> HIT
-    T2 -- No Match --> T3{"Tier 3: Synthesized Contra Rules\n(Self Identity + Target Bank Alias Tokens\nminus Account exclude_patterns)"}
+    T2 -- No Match --> T3{"Tier 3: Synthesized Contra Rules (Self Identity + Target Bank Alias Tokens)"}
     T3 -- Match --> HIT
-    T3 -- No Match --> T4{"Tier 4: Synthesized Family Rules\n(entity.family_members regexes)"}
+    T3 -- No Match --> T4{"Tier 4: Synthesized Family Rules (family_members regexes)"}
     T4 -- Match --> HIT
-    T4 -- No Match --> T5{"Tier 5: Bank Declarative Rules\n(config/banks/{bank}.json -> rules[])"}
+    T4 -- No Match --> T5{"Tier 5: Bank Declarative Rules (config/banks/bank.json)"}
     T5 -- Match --> HIT
-    T5 -- No Match --> T6{"Tier 6: Entity Common Rules + Universal Common Rules\n(entity layer='common' + config/rules_common.json non-fallback)"}
+    T5 -- No Match --> T6{"Tier 6: Entity Common + Universal Rules (config/rules_common.json)"}
     T6 -- Match --> HIT
-    T6 -- No Match --> T7{"Tier 7: UPI Merchant Lookup\n(If UPI pattern -> config/merchants.json)"}
+    T6 -- No Match --> T7{"Tier 7: UPI Merchant Lookup (config/merchants.json)"}
     T7 -- Match --> HIT
-    T7 -- No Match --> T8{"Tier 8: Fallback Rules\n(config/rules_common.json is_fallback=true)"}
-    T8 -- "UPI DR/CR (conf 0.55)" --> HIT_UPI(["Return ('UPI Payment' / 'UPI Receipt',\n'Drawings & Personal', 0.55)"])
-    T8 -- "Catch-all '.*' (conf 0.0)" --> HIT_SUSP(["Return ('Unclassified - Pending Review',\n'Suspense A/c (Pending Review)', 0.0)"])
+    T7 -- No Match --> T8{"Tier 8: Fallback Rules (is_fallback = true)"}
+    T8 -- "UPI DR or CR (conf 0.55)" --> HIT_UPI(["Return UPI Payment or Receipt (Drawings and Personal, 0.55)"])
+    T8 -- "Catch-all (conf 0.0)" --> HIT_SUSP(["Return Unclassified - Pending Review (Suspense A/c, 0.0)"])
 ```
 
 #### Declarative Rule Compiler (`_compile_declarative_rule`)
