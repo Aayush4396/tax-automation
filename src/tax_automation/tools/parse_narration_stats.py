@@ -29,7 +29,14 @@ def get_narration_stats(filepath: Path, fy: str) -> dict:
     default_excludes = set(
         theme_cfg.get(
             "default_output_sheet_names",
-            ["Conso", "For Tally", "Bank Summary", "Monthly Pivot", "Colour Legend", "Guidelines"],
+            [
+                "Conso",
+                "For Tally",
+                "Bank Summary",
+                "Monthly Pivot",
+                "Colour Legend",
+                "Guidelines",
+            ],
         )
     ) | set(output_sheets_map.values())
 

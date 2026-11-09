@@ -74,7 +74,9 @@ def find_header_row(rows: list, max_scan: int | None = None) -> int:
 
         score = 0
         # Use config-driven keyword sets exclusively — no inline hardcoding.
-        has_date = any(any(dk in c for dk in _DATE_KEYS) or c in _DATE_KEYS for c in cells)
+        has_date = any(
+            any(dk in c for dk in _DATE_KEYS) or c in _DATE_KEYS for c in cells
+        )
         has_amt = any(any(ak in c for ak in _AMT_KEYS) or c in _AMT_KEYS for c in cells)
 
         if has_date:

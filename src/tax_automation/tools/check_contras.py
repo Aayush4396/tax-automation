@@ -27,7 +27,9 @@ def verify_contras(entity_id: str, fy: str, file_path: Path | None = None) -> bo
         | set(theme_cfg.get("default_output_sheet_names", []))
         | set(theme_cfg.get("output_sheets", {}).values())
     )
-    contra_prefix = get_pivot_category_config().get("contra_label_prefix", "Contra -").split()[0]
+    contra_prefix = (
+        get_pivot_category_config().get("contra_label_prefix", "Contra -").split()[0]
+    )
 
     if file_path is None:
         file_path = resolve_output_dir(entity_id, fy) / "narrated_ledger.xlsx"

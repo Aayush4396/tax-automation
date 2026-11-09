@@ -209,7 +209,8 @@ def get_pivot_category_config() -> dict[str, Any]:
     - ``narration_to_payment_category``: narration label → pivot category for DR rows
     - ``head_to_receipt_category``: account_head → pivot category for CR rows
     - ``narration_to_receipt_category``: narration label → pivot category for CR rows
-    - ``contra_label_prefix``: string prefix that identifies contra labels (default "Contra -")
+    - ``contra_label_prefix``: string prefix that identifies contra labels
+      (default "Contra -")
     - ``cc_payment_narrations``: narration labels that map to "Credit Card Payment"
     """
     p_file = CONFIG_DIR / "pivot_category_map.json"
@@ -222,7 +223,8 @@ def get_pivot_category_config() -> dict[str, Any]:
 def get_colour_legend_config() -> list[dict[str, Any]]:
     """Loads the colour legend group definitions from config/colour_legend.json.
 
-    Returns a list of group dicts: ``[{"group": "...", "items": [{"label": "...", "description": "..."}]}]``
+    Returns a list of group dicts:
+    ``[{"group": "...", "items": [{"label": "...", "description": "..."}]}]``
     """
     l_file = CONFIG_DIR / "colour_legend.json"
     if not l_file.exists():

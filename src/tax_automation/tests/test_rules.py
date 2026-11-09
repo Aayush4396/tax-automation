@@ -132,7 +132,7 @@ class TestRulesEngine(unittest.TestCase):
         self.assertTrue(len(fallback_rules) > 0)
 
     def test_fallback_rules_are_separated(self):
-        """Fallback rules (is_fallback: true) must not appear in the main common list."""
+        """Fallback rules (is_fallback: true) must not appear in main common list."""
         _, common_rules, fallback_rules = build_rule_chain("aayush", "hdfc")
         fallback_labels = {r[0] for r in fallback_rules}
         common_labels = {r[0] for r in common_rules}

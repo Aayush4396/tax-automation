@@ -35,7 +35,9 @@ _CONF_HIGH_THRESHOLD: float = float(_bands.get("high", 0.85))
 _CONF_MED_THRESHOLD: float = float(_bands.get("medium_low", 0.60))
 
 # ── Column label overrides — from config/exporter_theme.json ───────────────
-_COL_LABELS: dict[str, str] = _theme_cfg.get("column_labels") or _theme_cfg.get("rename_columns", {})
+_COL_LABELS: dict[str, str] = _theme_cfg.get("column_labels") or _theme_cfg.get(
+    "rename_columns", {}
+)
 _HUMAN_NARRATION_LABEL: str = _COL_LABELS.get("Human_Narration", "Review Remarks")
 
 # ── Output sheet titles — from config/exporter_theme.json ──────────────────
@@ -123,8 +125,12 @@ def get_pivot_category_for_row(
 
     # Read mapping config (cached at module load)
     contra_prefix: str = _pivot_cfg.get("contra_label_prefix", "Contra -")
-    contra_category: str = _pivot_cfg.get("contra_pivot_category", "Self-Transfer (Contra)")
-    cc_category: str = _pivot_cfg.get("credit_card_pivot_category", "Credit Card Payment")
+    contra_category: str = _pivot_cfg.get(
+        "contra_pivot_category", "Self-Transfer (Contra)"
+    )
+    cc_category: str = _pivot_cfg.get(
+        "credit_card_pivot_category", "Credit Card Payment"
+    )
     cc_narrations: set = set(_pivot_cfg.get("cc_payment_narrations", []))
 
     if is_dr:
@@ -153,7 +159,9 @@ def get_pivot_category_for_row(
             return head_map[head]
 
         # Substring lookup (ordered, first hit wins)
-        for needle, category in _pivot_cfg.get("narration_contains_payment_category", []):
+        for needle, category in _pivot_cfg.get(
+            "narration_contains_payment_category", []
+        ):
             if needle in narr:
                 return category
 
@@ -180,11 +188,15 @@ def get_pivot_category_for_row(
             return head_map_cr[head]
 
         # Substring lookup (ordered, first hit wins)
-        for needle, category in _pivot_cfg.get("narration_contains_receipt_category", []):
+        for needle, category in _pivot_cfg.get(
+            "narration_contains_receipt_category", []
+        ):
             if needle in narr:
                 return category
 
-        return _pivot_cfg.get("default_receipt_category", "Personal Inflows / Transfers")
+        return _pivot_cfg.get(
+            "default_receipt_category", "Personal Inflows / Transfers"
+        )
 
 
 def get_cc_pivot_category(narr: str) -> str:
@@ -789,7 +801,8 @@ def write_bank_summary(
 def write_cc_sheet(wb: Workbook, cc_df: pd.DataFrame) -> None:
     """
     Writes a Credit Card Transactions sheet with all itemised CC spends.
-    Columns: Date | Merchant | CC Category | Auto Narration | DR (Rs.) | CR (Rs.) | Statement Period | Pivot Category
+    Columns: Date | Merchant | CC Category | Auto Narration | DR (Rs.) | CR (Rs.)
+    | Statement Period | Pivot Category.
     Rows colour-coded by Auto_Narration (same palette as bank sheets).
     Monthly subtotals appended at the end.
     """
@@ -1052,7 +1065,8 @@ def write_monthly_pivot(
 
             # Bank part
             formula = (
-                f"SUMPRODUCT(SUMIFS('{_SHEET_TALLY}'!{tally_dr_letter}:{tally_dr_letter}, "
+                f"SUMPRODUCT(SUMIFS('{_SHEET_TALLY}'!"
+                f"{tally_dr_letter}:{tally_dr_letter}, "
                 f"'{_SHEET_TALLY}'!{tally_pivot_cat_letter}:{tally_pivot_cat_letter}, "
                 f"$A{new_row}, "
                 f"'{_SHEET_TALLY}'!{tally_val_date_letter}:{tally_val_date_letter}, "
@@ -1065,12 +1079,20 @@ def write_monthly_pivot(
             # CC part — column letters resolved dynamically from _CC_SHEET_COLUMNS
             if cc_df is not None and not cc_df.empty:
                 cc_date_letter = get_column_letter(_CC_SHEET_COLUMNS.index("Date") + 1)
-                cc_dr_letter = get_column_letter(_CC_SHEET_COLUMNS.index("DR (Rs.)") + 1)
-                cc_pivot_letter = get_column_letter(_CC_SHEET_COLUMNS.index("Pivot Category") + 1)
+                cc_dr_letter = get_column_letter(
+                    _CC_SHEET_COLUMNS.index("DR (Rs.)") + 1
+                )
+                cc_pivot_letter = get_column_letter(
+                    _CC_SHEET_COLUMNS.index("Pivot Category") + 1
+                )
                 formula += (
-                    f" + SUMIFS('{_SHEET_CC}'!{cc_dr_letter}:{cc_dr_letter}, '{_SHEET_CC}'!{cc_pivot_letter}:{cc_pivot_letter}, "
-                    f"$A{new_row}, '{_SHEET_CC}'!{cc_date_letter}:{cc_date_letter}, \">={start_date_str}\", "
-                    f"'{_SHEET_CC}'!{cc_date_letter}:{cc_date_letter}, \"<={end_date_str}\")"
+                    f" + SUMIFS('{_SHEET_CC}'!{cc_dr_letter}:{cc_dr_letter}, "
+                    f"'{_SHEET_CC}'!{cc_pivot_letter}:{cc_pivot_letter}, "
+                    f"$A{new_row}, "
+                    f"'{_SHEET_CC}'!{cc_date_letter}:{cc_date_letter}, "
+                    f'">={start_date_str}", '
+                    f"'{_SHEET_CC}'!{cc_date_letter}:{cc_date_letter}, "
+                    f'"<={end_date_str}")'
                 )
             ws.cell(new_row, 2 + i, f"={formula}")
 
@@ -1144,7 +1166,8 @@ def write_monthly_pivot(
             end_date_str = m.end_time.strftime("%Y-%m-%d")
 
             formula = (
-                f"SUMPRODUCT(SUMIFS('{_SHEET_TALLY}'!{tally_cr_letter}:{tally_cr_letter}, "
+                f"SUMPRODUCT(SUMIFS('{_SHEET_TALLY}'!"
+                f"{tally_cr_letter}:{tally_cr_letter}, "
                 f"'{_SHEET_TALLY}'!{tally_pivot_cat_letter}:{tally_pivot_cat_letter}, "
                 f"$A{new_row}, "
                 f"'{_SHEET_TALLY}'!{tally_val_date_letter}:{tally_val_date_letter}, "

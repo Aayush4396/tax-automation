@@ -113,7 +113,9 @@ def classify_transaction(
     cr_val = safe_float(cr)
 
     # Load assembled rules for this entity and bank
-    bank_rules, main_common_rules, fallback_rules = build_rule_chain(entity_id, bank_key)
+    bank_rules, main_common_rules, fallback_rules = build_rule_chain(
+        entity_id, bank_key
+    )
 
     # 1. Apply bank & dynamic entity rules (high priority)
     for rule in bank_rules:

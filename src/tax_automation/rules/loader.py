@@ -31,7 +31,7 @@ _BANK_RULES_CACHE: dict[str, list[tuple]] = {}
 
 
 def _get_bank_alias_tokens(bank_key: str) -> list[str]:
-    """Returns alias token regex patterns for a bank, loaded from the bank's schema JSON.
+    """Returns alias token regex patterns for a bank from its schema JSON.
 
     Each bank config file declares an ``alias_tokens`` array.  This replaces
     the former hard-coded ``_BANK_ALIAS_TOKENS`` dict so that adding a new bank
@@ -49,12 +49,14 @@ def _get_bank_alias_tokens(bank_key: str) -> list[str]:
 
 
 def load_bank_rules(bank_key: str, rules_module: str | None = None) -> list[tuple]:
-    """Loads bank base classification rules dynamically from JSON config or Python module.
+    """Loads bank base classification rules from JSON config or Python module.
 
     Priority:
-    1. Declarative ``"rules"`` array in ``config/banks/<bank>.json`` (compiled via ``_compile_declarative_rule``).
-    2. Optional Python module specified by ``rules_module`` (or fallback ``tax_automation.rules.banks.<bank>``
-       only if ``"rules"`` is not present in the JSON schema).
+    1. Declarative ``"rules"`` array in ``config/banks/<bank>.json`` (compiled
+       via ``_compile_declarative_rule``).
+    2. Optional Python module specified by ``rules_module`` (or fallback
+       ``tax_automation.rules.banks.<bank>`` only if ``"rules"`` is not present
+       in the JSON schema).
     """
     key = bank_key.lower()
     if key in _BANK_RULES_CACHE and rules_module is None:
@@ -73,7 +75,7 @@ def load_bank_rules(bank_key: str, rules_module: str | None = None) -> list[tupl
             except Exception:
                 continue
 
-    # 2. Load optional Python module rules if explicitly configured or if no declarative key exists
+    # 2. Load optional Python module rules if configured or no declarative key
     module_name = rules_module or schema.get("rules_module")
     if not module_name and not has_declarative_key:
         module_name = f"tax_automation.rules.banks.{key}"
@@ -128,8 +130,9 @@ def build_dynamic_contra_rules(
 
     self_regexes = [re.compile(p, re.IGNORECASE) for p in all_self_strs]
 
-    # Confidence values configurable per entity; fall back to scoring.json or safe defaults
+    # Confidence values configurable per entity; fall back to scoring.json
     from tax_automation.config_loader import get_scoring_config
+
     synth_defaults = get_scoring_config().get("synthesized_rule_defaults", {})
     contra_conf = float(
         entity_config.get(
@@ -144,7 +147,10 @@ def build_dynamic_contra_rules(
     )
 
     from tax_automation.config_loader import get_pivot_category_config
-    contra_prefix = get_pivot_category_config().get("contra_label_prefix", "Contra -").strip()
+
+    contra_prefix = (
+        get_pivot_category_config().get("contra_label_prefix", "Contra -").strip()
+    )
 
     contra_rules = []
     current_key = current_account_key.lower()
