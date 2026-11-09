@@ -123,11 +123,46 @@ class TestRulesEngine(unittest.TestCase):
         self.assertFalse(match_fn("ZERODHA BROKING", 0.0, 5000.0))
 
     def test_build_rule_chain(self):
-        bank_rules, common_rules = build_rule_chain("aayush", "hdfc")
+        bank_rules, common_rules, fallback_rules = build_rule_chain("aayush", "hdfc")
         self.assertIsInstance(bank_rules, list)
         self.assertIsInstance(common_rules, list)
+        self.assertIsInstance(fallback_rules, list)
         self.assertTrue(len(bank_rules) > 0)
         self.assertTrue(len(common_rules) > 0)
+        self.assertTrue(len(fallback_rules) > 0)
+
+    def test_fallback_rules_are_separated(self):
+        """Fallback rules (is_fallback: true) must not appear in the main common list."""
+        _, common_rules, fallback_rules = build_rule_chain("aayush", "hdfc")
+        fallback_labels = {r[0] for r in fallback_rules}
+        common_labels = {r[0] for r in common_rules}
+        self.assertIn("What is this?", fallback_labels)
+        self.assertTrue(fallback_labels.isdisjoint(common_labels))
+
+    def test_contra_exclude_patterns(self):
+        """Account-level exclude_patterns prevent false-positive contra matches."""
+        cfg = dict(self.entity_config)
+        cfg["accounts"] = [
+            {
+                "account_key": "hdfc",
+                "bank": "hdfc",
+                "account_id": "HDFC 5413",
+                "display_name": "HDFC Bank",
+                "exclude_patterns": [r"HDFC\s*SECURITIES"],
+            },
+            {
+                "account_key": "kotak",
+                "bank": "kotak",
+                "account_id": "KOTAK 0333",
+                "display_name": "Kotak Bank",
+            },
+        ]
+        # From Kotak account looking for Contra - HDFC Bank
+        contra_rules = build_dynamic_contra_rules(cfg, "kotak")
+        hdfc_rule = next(r for r in contra_rules if "HDFC" in r[0])
+        match_fn = hdfc_rule[2]
+        self.assertTrue(match_fn("NEFT TEST PERSON HDFC 5413", 1000.0, 0.0))
+        self.assertFalse(match_fn("NEFT TEST PERSON HDFC SECURITIES LTD", 1000.0, 0.0))
 
 
 if __name__ == "__main__":

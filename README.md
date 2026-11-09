@@ -251,11 +251,17 @@ tax-automation/
 │   ├── tools/                  # Diagnostics: check_contras, narration_stats
 │   └── tests/                  # 29 automated unit & integration tests
 ├── config/
-│   ├── entities/               # Taxpayer profiles (declarative JSON configs)
-│   ├── banks/                  # Reusable bank schemas (hdfc, sbi, kotak, etc.)
+│   ├── entities/               # Taxpayer profiles (declarative JSON configs + custom rules + pivot overrides)
+│   ├── banks/                  # Reusable bank schemas + declarative bank rules + alias tokens (hdfc, sbi, kotak, etc.)
 │   ├── consolidation/          # Multi-statement file-to-sheet maps
 │   ├── schemas/                # JSON Schema specifications (entity.json, rules.json)
-│   └── rules_common.json       # Universal Indian merchant/banking rules
+│   ├── rules_common.json       # Universal Indian merchant/banking rules (with is_fallback flags)
+│   ├── merchants.json          # UPI merchant keyword dictionary
+│   ├── pivot_category_map.json # Monthly Pivot row categories & narration/head mappings
+│   ├── colour_legend.json      # Workbook Colour Legend group definitions
+│   ├── exporter_theme.json     # Palette, column renames, output sheet names, input globs
+│   ├── scoring.json            # Bank ID scoring weights & confidence band thresholds
+│   └── header_keywords.json    # Auto-header scan limit & date/amount keywords
 ├── data/                       # Local data hierarchy (gitignored financial data)
 │   ├── <entity_id>/<FY>/
 │   │   ├── input/bank_statements/

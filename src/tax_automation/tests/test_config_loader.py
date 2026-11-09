@@ -19,6 +19,9 @@ from tax_automation.config_loader import (
     resolve_output_dir,
     get_merchants_config,
     get_cc_categories_config,
+    get_scoring_config,
+    get_pivot_category_config,
+    get_colour_legend_config,
 )
 
 
@@ -68,6 +71,30 @@ class TestConfigLoader(unittest.TestCase):
         cc_cats = get_cc_categories_config()
         self.assertIsInstance(cc_cats, dict)
         self.assertIn("categories", cc_cats)
+
+    def test_scoring_pivot_and_legend_configs(self):
+        scoring = get_scoring_config()
+        self.assertIn("bank_identification", scoring)
+        self.assertIn("confidence_bands", scoring)
+
+        pivot = get_pivot_category_config()
+        self.assertIn("payment_categories", pivot)
+        self.assertIn("receipt_categories", pivot)
+        self.assertIn("cc_narration_to_pivot_category", pivot)
+
+        legend = get_colour_legend_config()
+        self.assertIsInstance(legend, list)
+        self.assertTrue(len(legend) > 0)
+        self.assertIn("group", legend[0])
+        self.assertIn("items", legend[0])
+
+    def test_bank_schema_has_declarative_rules_and_aliases(self):
+        for bank_key in ("hdfc", "sbi", "kotak", "axis", "federal", "boi", "sbm"):
+            schema = get_bank_schema(bank_key)
+            self.assertIn("alias_tokens", schema)
+            self.assertIn("rules", schema)
+            self.assertIsInstance(schema["rules"], list)
+            self.assertTrue(len(schema["rules"]) > 0)
 
 
 if __name__ == "__main__":
