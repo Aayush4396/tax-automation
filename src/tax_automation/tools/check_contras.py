@@ -9,7 +9,11 @@ from __future__ import annotations
 from pathlib import Path
 from openpyxl import load_workbook
 
-from tax_automation.config_loader import get_entity_config, resolve_output_dir
+from tax_automation.config_loader import (
+    get_entity_config,
+    get_pivot_category_config,
+    resolve_output_dir,
+)
 from tax_automation.core.utils import safe_float
 
 
@@ -17,6 +21,7 @@ def verify_contras(entity_id: str, fy: str, file_path: Path | None = None) -> bo
     """Verifies contra symmetry for an entity and FY."""
     config = get_entity_config(entity_id)
     output_sheet_names = set(config.get("output_sheet_names", []))
+    contra_prefix = get_pivot_category_config().get("contra_label_prefix", "Contra -").split()[0]
 
     if file_path is None:
         file_path = resolve_output_dir(entity_id, fy) / "narrated_ledger.xlsx"
@@ -62,7 +67,7 @@ def verify_contras(entity_id: str, fy: str, file_path: Path | None = None) -> bo
 
         for r in rows[h_idx + 1 :]:
             lbl = str(r[lbl_idx] or "")
-            if lbl.startswith("Contra"):
+            if lbl.startswith(contra_prefix):
                 dr_val = safe_float(r[dr_idx])
                 cr_val = safe_float(r[cr_idx])
                 contras.append(

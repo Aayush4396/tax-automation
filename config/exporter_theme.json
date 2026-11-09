@@ -42,5 +42,33 @@
   ],
   "bank_sheet_hidden_columns": [
     "Date", "Value_Date", "Ref", "Balance", "Human_Narration", "Beneficiary"
+  ],
+  "output_sheets": {
+    "tally": "For Tally",
+    "conso": "Conso",
+    "summary": "Bank Summary",
+    "cc": "CC Transactions",
+    "pivot": "Monthly Pivot",
+    "legend": "Colour Legend",
+    "guidelines": "Guidelines"
+  },
+  "default_output_sheet_names": [
+    "For Tally",
+    "Conso",
+    "Bank Summary",
+    "CC Transactions",
+    "Monthly Pivot",
+    "Colour Legend",
+    "Guidelines"
+  ],
+  "input_search_globs": [
+    "All Bank Statements*.xlsx",
+    "All_Bank_Statements*.xlsx",
+    "*.xlsx",
+    "*.xls"
+  ],
+  "output_filename_exclusions": [
+    "Consolidated_Bank_Ledger",
+    "narrated_ledger"
   ]
 }

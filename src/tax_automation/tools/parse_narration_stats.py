@@ -8,7 +8,11 @@ from __future__ import annotations
 from pathlib import Path
 import pandas as pd
 
-from tax_automation.config_loader import resolve_output_dir
+from tax_automation.config_loader import (
+    get_exporter_theme_config,
+    get_scoring_config,
+    resolve_output_dir,
+)
 
 
 def get_narration_stats(filepath: Path, fy: str) -> dict:
@@ -20,9 +24,17 @@ def get_narration_stats(filepath: Path, fy: str) -> dict:
     if not filepath.exists():
         raise FileNotFoundError(f"File not found: {filepath}")
 
+    theme_cfg = get_exporter_theme_config()
+    output_sheets_map = theme_cfg.get("output_sheets", {})
+    default_excludes = set(
+        theme_cfg.get(
+            "default_output_sheet_names",
+            ["Conso", "For Tally", "Bank Summary", "Monthly Pivot", "Colour Legend", "Guidelines"],
+        )
+    ) | set(output_sheets_map.values())
+
     xl = pd.ExcelFile(filepath)
-    exclude = {"Conso", "For Tally", "Bank Summary", "Monthly Pivot", "Guidelines"}
-    sheet_names = [s for s in xl.sheet_names if s not in exclude]
+    sheet_names = [s for s in xl.sheet_names if s not in default_excludes]
 
     dfs = [xl.parse(s) for s in sheet_names]
     if not dfs:
@@ -40,11 +52,15 @@ def get_narration_stats(filepath: Path, fy: str) -> dict:
             "note": "No Confidence column",
         }
 
-    high = int(len(full_df[full_df["Confidence"] >= 0.85]))
+    bands = get_scoring_config().get("confidence_bands", {})
+    hi = float(bands.get("high", 0.85))
+    lo = float(bands.get("medium_low", 0.60))
+
+    high = int(len(full_df[full_df["Confidence"] >= hi]))
     med = int(
-        len(full_df[(full_df["Confidence"] >= 0.60) & (full_df["Confidence"] < 0.85)])
+        len(full_df[(full_df["Confidence"] >= lo) & (full_df["Confidence"] < hi)])
     )
-    low = int(len(full_df[full_df["Confidence"] < 0.60]))
+    low = int(len(full_df[full_df["Confidence"] < lo]))
 
     return {
         "fy": fy,

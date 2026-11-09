@@ -7,6 +7,10 @@ Writes all sheets of the output workbook:
   • For Tally sheet (all banks, date-sorted)
   • Conso sheet (all banks, with totals header)
   • Bank Summary sheet (pivot + opening/closing balances + confidence stats)
+
+All configuration (colours, thresholds, pivot categories, legend groups) is
+loaded from the config/ directory so no code changes are needed to extend or
+modify the output.
 """
 
 from __future__ import annotations
@@ -14,43 +18,96 @@ import pandas as pd
 from openpyxl import Workbook
 from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
-from tax_automation.config_loader import get_exporter_theme_config
+from tax_automation.config_loader import (
+    get_exporter_theme_config,
+    get_scoring_config,
+    get_pivot_category_config,
+    get_colour_legend_config,
+)
 
 _theme_cfg = get_exporter_theme_config()
-_THEME_COLOUR_MAP = _theme_cfg.get("colour_map", {})
+_scoring_cfg = get_scoring_config()
+_pivot_cfg = get_pivot_category_config()
 
-# ── Palette ────────────────────────────────────────────────────────────────
-_BASE_COLOUR_MAP: dict[str, str] = {
-    "Broadband & WiFi": "D5F0E8",
-    "Groceries & Household": "D5F5CC",
-    "Food & Dining": "FFD5CC",
-    "Rent": "FDDCB5",
-    "Travel & Commute": "CCE8FF",
-    "Fuel": "FFF5CC",
-    "Transport & Automotive": "CCF0FF",
-    "Healthcare & Medical": "F8D7DA",
-    "Life Insurance": "F5C6CB",
-    "Health Insurance": "FDDCB5",
-    "Subscriptions & Services": "E8D5F5",
-    "Utilities & Mobile": "FFF2CC",
-    "Shopping & Lifestyle": "F5EDD5",
-    "Entertainment & Leisure": "F8D7DA",
-    "Investments & Wealth": "D0ECF8",
-    "Bank & Depository Charges": "F8D7DA",
-    "General/Other Spends": "EDE9F6",
-    "Self-Transfer (Contra)": "FFE8CC",
-    "Credit Card Payment": "F5D5E8",
-    "Salary": "B8F0C4",
-    "Freelance & Business Income": "D0F5C8",
-    "Dividend Income": "C4EBF0",
-    "Bank Interest": "C8F5C8",
-    "Investment Inflows (MF/Stocks)": "C8DCF5",
-    "Refunds & Reversals": "D5F0E8",
-}
+# ── Confidence band thresholds — from config/scoring.json ──────────────────
+_bands = _scoring_cfg.get("confidence_bands", {})
+_CONF_HIGH_THRESHOLD: float = float(_bands.get("high", 0.85))
+_CONF_MED_THRESHOLD: float = float(_bands.get("medium_low", 0.60))
+
+# ── Column label overrides — from config/exporter_theme.json ───────────────
+_COL_LABELS: dict[str, str] = _theme_cfg.get("column_labels") or _theme_cfg.get("rename_columns", {})
+_HUMAN_NARRATION_LABEL: str = _COL_LABELS.get("Human_Narration", "Kya Hai?")
+
+# ── Output sheet titles — from config/exporter_theme.json ──────────────────
+_OUTPUT_SHEETS: dict[str, str] = _theme_cfg.get("output_sheets", {})
+_SHEET_TALLY: str = _OUTPUT_SHEETS.get("tally", "For Tally")
+_SHEET_CONSO: str = _OUTPUT_SHEETS.get("conso", "Conso")
+_SHEET_SUMMARY: str = _OUTPUT_SHEETS.get("summary", "Bank Summary")
+_SHEET_CC: str = _OUTPUT_SHEETS.get("cc", "CC Transactions")
+_SHEET_PIVOT: str = _OUTPUT_SHEETS.get("pivot", "Monthly Pivot")
+_SHEET_LEGEND: str = _OUTPUT_SHEETS.get("legend", "Colour Legend")
+
+# Canonical CC sheet columns (order defines Excel column letters dynamically)
+_CC_SHEET_COLUMNS: list[str] = [
+    "Date",
+    "Merchant",
+    "CC Category",
+    "Auto Narration",
+    "DR (Rs.)",
+    "CR (Rs.)",
+    "Statement Period",
+    "Pivot Category",
+]
+
+# ── Palette — base from config/exporter_theme.json, overridden by colour_map
+_BASE_COLOUR_MAP: dict[str, str] = _theme_cfg.get(
+    "base_colour_map",
+    {
+        # Fallback defaults if base_colour_map not in theme config
+        "Broadband & WiFi": "D5F0E8",
+        "Groceries & Household": "D5F5CC",
+        "Food & Dining": "FFD5CC",
+        "Rent": "FDDCB5",
+        "Travel & Commute": "CCE8FF",
+        "Fuel": "FFF5CC",
+        "Transport & Automotive": "CCF0FF",
+        "Healthcare & Medical": "F8D7DA",
+        "Life Insurance": "F5C6CB",
+        "Health Insurance": "FDDCB5",
+        "Subscriptions & Services": "E8D5F5",
+        "Utilities & Mobile": "FFF2CC",
+        "Shopping & Lifestyle": "F5EDD5",
+        "Entertainment & Leisure": "F8D7DA",
+        "Investments & Wealth": "D0ECF8",
+        "Bank & Depository Charges": "F8D7DA",
+        "General/Other Spends": "EDE9F6",
+        "Self-Transfer (Contra)": "FFE8CC",
+        "Credit Card Payment": "F5D5E8",
+        "Salary": "B8F0C4",
+        "Freelance & Business Income": "D0F5C8",
+        "Dividend Income": "C4EBF0",
+        "Bank Interest": "C8F5C8",
+        "Investment Inflows (MF/Stocks)": "C8DCF5",
+        "Refunds & Reversals": "D5F0E8",
+    },
+)
+_THEME_COLOUR_MAP: dict[str, str] = _theme_cfg.get("colour_map", {})
 COLOUR_MAP: dict[str, str] = {**_BASE_COLOUR_MAP, **_THEME_COLOUR_MAP}
 
 
-def get_pivot_category_for_row(dr: float, cr: float, head: str, narr: str) -> str:
+def get_pivot_category_for_row(
+    dr: float,
+    cr: float,
+    head: str,
+    narr: str,
+    entity_overrides: dict | None = None,
+) -> str:
+    """Returns the Monthly Pivot category for a transaction row.
+
+    All mapping logic is loaded from ``config/pivot_category_map.json`` (plus
+    optional ``entity_overrides`` from ``entity.json["pivot_overrides"]``) — no
+    hardcoded narration strings or account head names live in this function.
+    """
     try:
         dr = float(dr) if dr is not None else 0.0
     except (ValueError, TypeError):
@@ -62,179 +119,86 @@ def get_pivot_category_for_row(dr: float, cr: float, head: str, narr: str) -> st
     head = str(head).strip() if head is not None else ""
     narr = str(narr).strip() if narr is not None else ""
     is_dr = dr > 0
+    ov = entity_overrides or {}
+
+    # Read mapping config (cached at module load)
+    contra_prefix: str = _pivot_cfg.get("contra_label_prefix", "Contra -")
+    contra_category: str = _pivot_cfg.get("contra_pivot_category", "Self-Transfer (Contra)")
+    cc_category: str = _pivot_cfg.get("credit_card_pivot_category", "Credit Card Payment")
+    cc_narrations: set = set(_pivot_cfg.get("cc_payment_narrations", []))
 
     if is_dr:
-        # Check CC payment first
-        if narr in (
-            "Credit Card Bill Payment (CRED)",
-            "UPI - CRED",
-            "Credit Card Payment",
-            "Credit Card Bill Payment",
-        ):
-            return "Credit Card Payment"
+        # CC payment check (highest priority for DR)
+        if narr in cc_narrations:
+            return cc_category
 
-        # Check Contras
-        if narr.startswith("Contra -") or head == "Transfer":
-            return "Self-Transfer (Contra)"
+        # Contra / self-transfer
+        if narr.startswith(contra_prefix) or head == "Transfer":
+            return contra_category
 
-        # Match other payment rules
-        if narr == "Airtel WiFi":
-            return "Broadband & WiFi"
-        if head == "Groceries" or any(
-            k in narr
-            for k in (
-                "UPI - DMart",
-                "UPI - Fresh Produce",
-                "UPI - Nandini Dairy",
-                "UPI - Star Bazaar",
-                "UPI - Zepto",
-            )
-        ):
-            return "Groceries & Household"
-        if head == "Food & Dining" or any(
-            k in narr
-            for k in (
-                "Food & Dining",
-                "UPI - District (Dining)",
-                "UPI - Swiggy",
-                "UPI - Zomato",
-            )
-        ):
-            return "Food & Dining"
-        if head == "Rent" or any(
-            k in narr for k in ("Rent", "Rent Payment (via CRED)")
-        ):
-            return "Rent"
-        if head == "Travel" or narr == "UPI - IRCTC":
-            return "Travel & Commute"
-        if head == "Fuel & Petrol" or "Fuel" in narr:
-            return "Fuel"
-        if head == "Transport" or any(
-            k in narr for k in ("Toll / FASTag", "Vehicle Service")
-        ):
-            return "Transport & Automotive"
-        if (
-            head == "Healthcare"
-            or head == "Medical"
-            or any(k in narr for k in ("UPI - MedPlus", "UPI - Pharmacy"))
-        ):
-            return "Healthcare & Medical"
-        if head == "Life Insurance" or any(
-            k in narr
-            for k in ("Life Insurance Premium", "Premium Payment (ECS Return Charge)")
-        ):
-            return "Life Insurance"
-        if head == "Health Insurance" or narr == "Health Insurance":
-            return "Health Insurance"
-        if head == "Subscriptions" or any(
-            k in narr for k in ("UPI - Google Play", "UPI - Hotstar", "UPI - OpenAI")
-        ):
-            return "Subscriptions & Services"
-        if head == "Utilities" or narr == "Govt / Utility Payment":
-            return "Utilities & Mobile"
-        if head == "Shopping" or any(
-            k in narr
-            for k in ("Shopping - Jewellery", "UPI - Amazon", "UPI - Flipkart")
-        ):
-            return "Shopping & Lifestyle"
-        if head == "Entertainment":
-            return "Entertainment & Leisure"
-        if head in (
-            "SIP",
-            "PPF Deposit",
-            "HDFC Securities",
-            "Mutual Funds",
-            "IPO",
-            "Investments",
-        ) or any(
-            k in narr
-            for k in (
-                "SIP",
-                "SBI PPF",
-                "HDFC Securities - Buy",
-                "Securities Settlement",
-                "MF Investment",
-                "INDmoney Investment",
-                "IPO - Billion Garages",
-                "IPO - JSW Cement",
-            )
-        ):
-            return "Investments & Wealth"
-        if head in ("Bank Charges", "Depository Charges") or any(
-            k in narr
-            for k in ("Bank Charges", "Lounge Access Charge", "Depository Charges")
-        ):
-            return "Bank & Depository Charges"
+        # Narration-level lookup (entity overrides first, then global map)
+        ov_narr_dr = ov.get("narration_to_payment_category", {})
+        if narr in ov_narr_dr:
+            return ov_narr_dr[narr]
+        narr_map: dict = _pivot_cfg.get("narration_to_payment_category", {})
+        if narr in narr_map:
+            return narr_map[narr]
 
-        return "General/Other Spends"
+        # Account-head lookup (entity overrides first, then global map)
+        ov_head_dr = ov.get("head_to_payment_category", {})
+        if head in ov_head_dr:
+            return ov_head_dr[head]
+        head_map: dict = _pivot_cfg.get("head_to_payment_category", {})
+        if head in head_map:
+            return head_map[head]
+
+        # Substring lookup (ordered, first hit wins)
+        for needle, category in _pivot_cfg.get("narration_contains_payment_category", []):
+            if needle in narr:
+                return category
+
+        return _pivot_cfg.get("default_payment_category", "General/Other Spends")
     else:
-        # Receipts
-        if narr.startswith("Contra -") or head == "Transfer":
-            return "Self-Transfer (Contra)"
+        # Contra / self-transfer on CR side
+        if narr.startswith(contra_prefix) or head == "Transfer":
+            return contra_category
 
-        if head == "Salary" or narr == "Salary":
-            return "Salary"
-        if head == "Freelance Income" or narr == "Freelance Income":
-            return "Freelance & Business Income"
-        if head == "Dividend Income" or narr == "Dividend Income":
-            return "Dividend Income"
-        if head == "Bank Interest" or narr == "Bank Interest":
-            return "Bank Interest"
-        if head in ("Mutual Funds", "CDSL", "HDFC Securities") or any(
-            k in narr
-            for k in (
-                "MF Redemption",
-                "Depository Credit",
-                "HDFC Securities - Sell",
-                "HDFC Securities - Settlement",
-            )
-        ):
-            return "Investment Inflows (MF/Stocks)"
-        if any(
-            k in narr
-            for k in (
-                "Refund - Wakefit",
-                "Security Deposit Return",
-                "UPI Reversal",
-                "Income Tax Refund",
-                "Cashback - BHIM",
-                "Cashback - Kiwi",
-                "SuperMoney (Rewards)",
-            )
-        ):
-            return "Refunds & Reversals"
+        # Narration-level lookup (entity overrides first, then global map)
+        ov_narr_cr = ov.get("narration_to_receipt_category", {})
+        if narr in ov_narr_cr:
+            return ov_narr_cr[narr]
+        narr_map_cr: dict = _pivot_cfg.get("narration_to_receipt_category", {})
+        if narr in narr_map_cr:
+            return narr_map_cr[narr]
 
-        return "Personal Inflows / Transfers"
+        # Account-head lookup (entity overrides first, then global map)
+        ov_head_cr = ov.get("head_to_receipt_category", {})
+        if head in ov_head_cr:
+            return ov_head_cr[head]
+        head_map_cr: dict = _pivot_cfg.get("head_to_receipt_category", {})
+        if head in head_map_cr:
+            return head_map_cr[head]
+
+        # Substring lookup (ordered, first hit wins)
+        for needle, category in _pivot_cfg.get("narration_contains_receipt_category", []):
+            if needle in narr:
+                return category
+
+        return _pivot_cfg.get("default_receipt_category", "Personal Inflows / Transfers")
 
 
 def get_cc_pivot_category(narr: str) -> str:
+    """Maps a Credit Card narration label to a Monthly Pivot category using config."""
     n = str(narr).strip()
-    if n == "CC - Wifi":
-        return "Broadband & WiFi"
-    if n == "CC - Groceries":
-        return "Groceries & Household"
-    if n == "CC - Restaurants":
-        return "Food & Dining"
-    if n == "CC - Travel":
-        return "Travel & Commute"
-    if n == "CC - Fuel":
-        return "Fuel"
-    if n == "CC - Automotive":
-        return "Transport & Automotive"
-    if n == "CC - Healthcare":
-        return "Healthcare & Medical"
-    if n == "CC - Services":
-        return "Subscriptions & Services"
-    if n in ("CC - Telecom", "CC - Utilities"):
-        return "Utilities & Mobile"
-    if n == "CC - Shopping":
-        return "Shopping & Lifestyle"
-    if n in ("CC - Entertainment", "CC - Recreation"):
-        return "Entertainment & Leisure"
-    return "General/Other Spends"
+    cc_map: dict[str, str] = _pivot_cfg.get("cc_narration_to_pivot_category", {})
+    if n in cc_map:
+        return cc_map[n]
+    return _pivot_cfg.get("default_payment_category", "General/Other Spends")
 
 
-def assign_pivot_categories(all_df: pd.DataFrame) -> pd.DataFrame:
+def assign_pivot_categories(
+    all_df: pd.DataFrame, entity_overrides: dict | None = None
+) -> pd.DataFrame:
     df = all_df.copy()
     df["Pivot_Category"] = df.apply(
         lambda r: get_pivot_category_for_row(
@@ -242,6 +206,7 @@ def assign_pivot_categories(all_df: pd.DataFrame) -> pd.DataFrame:
             r.get("CR", 0),
             r.get("Account_Head", ""),
             r.get("Auto_Narration", ""),
+            entity_overrides=entity_overrides,
         ),
         axis=1,
     )
@@ -381,9 +346,9 @@ def _colour_rows(
         if conf_val is not None:
             try:
                 conf_f = float(conf_val)
-                if conf_f >= 0.85:
+                if conf_f >= _CONF_HIGH_THRESHOLD:
                     conf_colour = _CONF_HIGH_COLOUR
-                elif conf_f >= 0.60:
+                elif conf_f >= _CONF_MED_THRESHOLD:
                     conf_colour = _CONF_MED_COLOUR
                 else:
                     conf_colour = _CONF_LOW_COLOUR
@@ -469,7 +434,7 @@ def write_bank_sheet(
 
 
 def write_for_tally(wb: Workbook, all_df: pd.DataFrame):
-    ws = wb.create_sheet(title="For Tally")
+    ws = wb.create_sheet(title=_SHEET_TALLY)
 
     cols = [
         "TX_Date",
@@ -495,7 +460,7 @@ def write_for_tally(wb: Workbook, all_df: pd.DataFrame):
         "Auto_Narration": "Narration",
         "Account_Head": "Account Head",
         "Account_ID": "Account No",
-        "Human_Narration": "Kya Hai?",
+        "Human_Narration": _HUMAN_NARRATION_LABEL,
         "Bank_Display": "Bank",
         "Pivot_Category": "Pivot Category",
     }
@@ -522,7 +487,7 @@ def write_for_tally(wb: Workbook, all_df: pd.DataFrame):
         "TX Date",
         "Date",
         "Beneficiary",
-        "Kya Hai?",
+        _HUMAN_NARRATION_LABEL,
         "Pivot Category",
     ]
     for col_name in tally_cols_to_hide:
@@ -546,7 +511,7 @@ def write_conso(
     fy_label: str,
     account_holder: str = "Account Holder",
 ):
-    ws = wb.create_sheet(title="Conso")
+    ws = wb.create_sheet(title=_SHEET_CONSO)
 
     max_row = len(all_df) + 4
 
@@ -629,7 +594,7 @@ def write_bank_summary(
     """
     bank_balances: { account_id: (opening_balance, closing_balance) }
     """
-    ws = wb.create_sheet(title="Bank Summary")
+    ws = wb.create_sheet(title=_SHEET_SUMMARY)
 
     # ── Title block ──────────────────────────────────────────────────────
     ws.append(["All Banks"])
@@ -662,7 +627,7 @@ def write_bank_summary(
         "Auto_Narration": "Narration",
         "Account_Head": "Account Head",
         "Account_ID": "Account No",
-        "Human_Narration": "Kya Hai?",
+        "Human_Narration": _HUMAN_NARRATION_LABEL,
         "Bank_Display": "Bank",
     }
     tally_cols = [tally_rename.get(c, c) for c in tally_cols_def if c in all_df.columns]
@@ -704,15 +669,15 @@ def write_bank_summary(
         ws.cell(
             new_row,
             2,
-            f"=SUMIFS('For Tally'!{cr_col_letter}:{cr_col_letter}, "
-            f"'For Tally'!{narr_col_letter}:{narr_col_letter}, A{new_row})",
+            f"=SUMIFS('{_SHEET_TALLY}'!{cr_col_letter}:{cr_col_letter}, "
+            f"'{_SHEET_TALLY}'!{narr_col_letter}:{narr_col_letter}, A{new_row})",
         )
         ws.cell(new_row, 3, label)
         ws.cell(
             new_row,
             4,
-            f"=SUMIFS('For Tally'!{dr_col_letter}:{dr_col_letter}, "
-            f"'For Tally'!{narr_col_letter}:{narr_col_letter}, C{new_row})",
+            f"=SUMIFS('{_SHEET_TALLY}'!{dr_col_letter}:{dr_col_letter}, "
+            f"'{_SHEET_TALLY}'!{narr_col_letter}:{narr_col_letter}, C{new_row})",
         )
 
         row_colour = _get_row_colour(label)
@@ -760,10 +725,10 @@ def write_bank_summary(
             ws.cell(
                 row,
                 3,
-                f"=B{row} + SUMIFS('For Tally'!{cr_col_letter}:{cr_col_letter}, "
-                f"'For Tally'!{acct_col_letter}:{acct_col_letter}, A{row}) - "
-                f"SUMIFS('For Tally'!{dr_col_letter}:{dr_col_letter}, "
-                f"'For Tally'!{acct_col_letter}:{acct_col_letter}, A{row})",
+                f"=B{row} + SUMIFS('{_SHEET_TALLY}'!{cr_col_letter}:{cr_col_letter}, "
+                f"'{_SHEET_TALLY}'!{acct_col_letter}:{acct_col_letter}, A{row}) - "
+                f"SUMIFS('{_SHEET_TALLY}'!{dr_col_letter}:{dr_col_letter}, "
+                f"'{_SHEET_TALLY}'!{acct_col_letter}:{acct_col_letter}, A{row})",
             )
         else:
             ws.cell(row, 3, round(closing, 2))
@@ -782,38 +747,24 @@ def write_bank_summary(
         cell.fill = PatternFill("solid", fgColor="34495E")
         cell.font = Font(bold=True, color="FFFFFF")
 
+    hi, lo = _CONF_HIGH_THRESHOLD, _CONF_MED_THRESHOLD
     bands = [
-        ("High (≥ 0.85) — Confident", ">=0.85", "B8F0C4"),
-        ("Medium (0.60–0.84) — Review", "med", "FFF3CD"),
-        ("Low (< 0.60) — Needs attention", "<0.60", "F8D7DA"),
+        (f"High (≥ {hi:.2f}) — Confident", "high", "B8F0C4"),
+        (f"Medium ({lo:.2f}–{hi - 0.01:.2f}) — Review", "med", "FFF3CD"),
+        (f"Low (< {lo:.2f}) — Needs attention", "low", "F8D7DA"),
     ]
     conf_start_row = ws.max_row + 1
     for band_label, criteria, colour in bands:
         row = ws.max_row + 1
         ws.cell(row, 1, band_label)
         if conf_col_letter:
-            if criteria == ">=0.85":
-                ws.cell(
-                    row,
-                    2,
-                    f"=COUNTIF('For Tally'!{conf_col_letter}:{conf_col_letter}, "
-                    f'">=0.85")',
-                )
-            elif criteria == "<0.60":
-                ws.cell(
-                    row,
-                    2,
-                    f"=COUNTIF('For Tally'!{conf_col_letter}:{conf_col_letter}, "
-                    f'"<0.60")',
-                )
+            rng = f"'{_SHEET_TALLY}'!{conf_col_letter}:{conf_col_letter}"
+            if criteria == "high":
+                ws.cell(row, 2, f'=COUNTIF({rng}, ">={hi}")')
+            elif criteria == "low":
+                ws.cell(row, 2, f'=COUNTIF({rng}, "<{lo}")')
             else:
-                ws.cell(
-                    row,
-                    2,
-                    f"=COUNTIFS('For Tally'!{conf_col_letter}:{conf_col_letter}, "
-                    f"\">=0.60', 'For Tally'!{conf_col_letter}:{conf_col_letter}, "
-                    f'"<0.85")',
-                )
+                ws.cell(row, 2, f'=COUNTIFS({rng}, ">={lo}", {rng}, "<{hi}")')
         else:
             ws.cell(row, 2, 0)
         ws.cell(row, 3, f"=B{row}/SUM(B{conf_start_row}:B{conf_start_row+2})")
@@ -837,14 +788,14 @@ def write_bank_summary(
 
 def write_cc_sheet(wb: Workbook, cc_df: pd.DataFrame) -> None:
     """
-    Writes a 'CC Transactions' sheet with all itemised Kotak CC spends.
-    Columns: Date | Merchant | CC Category | Auto_Narration | DR | CR | Statement Period
+    Writes a Credit Card Transactions sheet with all itemised CC spends.
+    Columns: Date | Merchant | CC Category | Auto Narration | DR (Rs.) | CR (Rs.) | Statement Period | Pivot Category
     Rows colour-coded by Auto_Narration (same palette as bank sheets).
     Monthly subtotals appended at the end.
     """
     import calendar
 
-    ws = wb.create_sheet(title="CC Transactions")
+    ws = wb.create_sheet(title=_SHEET_CC)
 
     if cc_df is None or cc_df.empty:
         ws["A1"] = "No CC transactions loaded."
@@ -855,16 +806,7 @@ def write_cc_sheet(wb: Workbook, cc_df: pd.DataFrame) -> None:
     df = df.sort_values("TX_Date").reset_index(drop=True)
 
     # ── Header ────────────────────────────────────────────────────────────────────
-    columns = [
-        "Date",
-        "Merchant",
-        "CC Category",
-        "Auto Narration",
-        "DR (Rs.)",
-        "CR (Rs.)",
-        "Statement Period",
-        "Pivot Category",
-    ]
+    columns = list(_CC_SHEET_COLUMNS)
     ws.append(columns)
     hdr_row = ws.max_row
     for cell in ws[hdr_row]:
@@ -978,7 +920,7 @@ def write_monthly_pivot(
     """
     import calendar
 
-    ws = wb.create_sheet(title="Monthly Pivot")
+    ws = wb.create_sheet(title=_SHEET_PIVOT)
 
     # ── Prepare bank data ────────────────────────────────────────────────────
     df = all_df.copy()
@@ -1022,7 +964,7 @@ def write_monthly_pivot(
         "Auto_Narration": "Narration",
         "Account_Head": "Account Head",
         "Account_ID": "Account No",
-        "Human_Narration": "Kya Hai?",
+        "Human_Narration": _HUMAN_NARRATION_LABEL,
         "Bank_Display": "Bank",
         "Pivot_Category": "Pivot Category",
     }
@@ -1083,26 +1025,12 @@ def write_monthly_pivot(
     ws.row_dimensions[5].hidden = True
     ws.append([])  # Row 6 (blank)
 
-    # ── Payments/Expenses Unified List ───────────────────────────────────────
-    PAYMENT_CATEGORIES = [
-        "Broadband & WiFi",
-        "Groceries & Household",
-        "Food & Dining",
-        "Rent",
-        "Travel & Commute",
-        "Fuel",
-        "Transport & Automotive",
-        "Healthcare & Medical",
-        "Life Insurance",
-        "Health Insurance",
-        "Subscriptions & Services",
-        "Utilities & Mobile",
-        "Shopping & Lifestyle",
-        "Entertainment & Leisure",
-        "Investments & Wealth",
-        "Bank & Depository Charges",
-        "General/Other Spends",
-    ]
+    # ── Payments/Expenses Unified List (config/pivot_category_map.json) ──────
+    PAYMENT_CATEGORIES = _pivot_cfg.get("payment_categories", [])
+    if not PAYMENT_CATEGORIES:
+        raise ValueError(
+            "config/pivot_category_map.json is missing 'payment_categories'"
+        )
 
     # ── DEBIT section (Bank + CC Spends) ─────────────────────────────────────
     ws.append(["PAYMENTS / EXPENSES (Bank + CC)"] + month_labels + ["TOTAL"])
@@ -1124,22 +1052,25 @@ def write_monthly_pivot(
 
             # Bank part
             formula = (
-                f"SUMPRODUCT(SUMIFS('For Tally'!{tally_dr_letter}:{tally_dr_letter}, "
-                f"'For Tally'!{tally_pivot_cat_letter}:{tally_pivot_cat_letter}, "
+                f"SUMPRODUCT(SUMIFS('{_SHEET_TALLY}'!{tally_dr_letter}:{tally_dr_letter}, "
+                f"'{_SHEET_TALLY}'!{tally_pivot_cat_letter}:{tally_pivot_cat_letter}, "
                 f"$A{new_row}, "
-                f"'For Tally'!{tally_val_date_letter}:{tally_val_date_letter}, "
+                f"'{_SHEET_TALLY}'!{tally_val_date_letter}:{tally_val_date_letter}, "
                 f'">={start_date_str}", '
-                f"'For Tally'!{tally_val_date_letter}:{tally_val_date_letter}, "
+                f"'{_SHEET_TALLY}'!{tally_val_date_letter}:{tally_val_date_letter}, "
                 f'"<={end_date_str}", '
-                f"'For Tally'!{tally_bank_letter}:{tally_bank_letter}, "
+                f"'{_SHEET_TALLY}'!{tally_bank_letter}:{tally_bank_letter}, "
                 f"$B$5:${tally_bank_end_letter}$5))"
             )
-            # CC part
+            # CC part — column letters resolved dynamically from _CC_SHEET_COLUMNS
             if cc_df is not None and not cc_df.empty:
+                cc_date_letter = get_column_letter(_CC_SHEET_COLUMNS.index("Date") + 1)
+                cc_dr_letter = get_column_letter(_CC_SHEET_COLUMNS.index("DR (Rs.)") + 1)
+                cc_pivot_letter = get_column_letter(_CC_SHEET_COLUMNS.index("Pivot Category") + 1)
                 formula += (
-                    f" + SUMIFS('CC Transactions'!E:E, 'CC Transactions'!H:H, "
-                    f"$A{new_row}, 'CC Transactions'!A:A, \">={start_date_str}\", "
-                    f"'CC Transactions'!A:A, \"<={end_date_str}\")"
+                    f" + SUMIFS('{_SHEET_CC}'!{cc_dr_letter}:{cc_dr_letter}, '{_SHEET_CC}'!{cc_pivot_letter}:{cc_pivot_letter}, "
+                    f"$A{new_row}, '{_SHEET_CC}'!{cc_date_letter}:{cc_date_letter}, \">={start_date_str}\", "
+                    f"'{_SHEET_CC}'!{cc_date_letter}:{cc_date_letter}, \"<={end_date_str}\")"
                 )
             ws.cell(new_row, 2 + i, f"={formula}")
 
@@ -1187,16 +1118,12 @@ def write_monthly_pivot(
 
     ws.append([])  # spacer
 
-    # ── Receipts/Income Unified List ─────────────────────────────────────────
-    RECEIPT_CATEGORIES = [
-        "Salary",
-        "Freelance & Business Income",
-        "Dividend Income",
-        "Bank Interest",
-        "Investment Inflows (MF/Stocks)",
-        "Refunds & Reversals",
-        "Personal Inflows / Transfers",
-    ]
+    # ── Receipts/Income Unified List (config/pivot_category_map.json) ────────
+    RECEIPT_CATEGORIES = _pivot_cfg.get("receipt_categories", [])
+    if not RECEIPT_CATEGORIES:
+        raise ValueError(
+            "config/pivot_category_map.json is missing 'receipt_categories'"
+        )
 
     # ── CREDIT section (Bank Receipts) ───────────────────────────────────────
     ws.append(["RECEIPTS / INCOME (Bank)"] + month_labels + ["TOTAL"])
@@ -1217,14 +1144,14 @@ def write_monthly_pivot(
             end_date_str = m.end_time.strftime("%Y-%m-%d")
 
             formula = (
-                f"SUMPRODUCT(SUMIFS('For Tally'!{tally_cr_letter}:{tally_cr_letter}, "
-                f"'For Tally'!{tally_pivot_cat_letter}:{tally_pivot_cat_letter}, "
+                f"SUMPRODUCT(SUMIFS('{_SHEET_TALLY}'!{tally_cr_letter}:{tally_cr_letter}, "
+                f"'{_SHEET_TALLY}'!{tally_pivot_cat_letter}:{tally_pivot_cat_letter}, "
                 f"$A{new_row}, "
-                f"'For Tally'!{tally_val_date_letter}:{tally_val_date_letter}, "
+                f"'{_SHEET_TALLY}'!{tally_val_date_letter}:{tally_val_date_letter}, "
                 f'">={start_date_str}", '
-                f"'For Tally'!{tally_val_date_letter}:{tally_val_date_letter}, "
+                f"'{_SHEET_TALLY}'!{tally_val_date_letter}:{tally_val_date_letter}, "
                 f'"<={end_date_str}", '
-                f"'For Tally'!{tally_bank_letter}:{tally_bank_letter}, "
+                f"'{_SHEET_TALLY}'!{tally_bank_letter}:{tally_bank_letter}, "
                 f"$B$5:${tally_bank_end_letter}$5))"
             )
             ws.cell(new_row, 2 + i, f"={formula}")
@@ -1289,14 +1216,14 @@ def write_monthly_pivot(
         end_date_str = m.end_time.strftime("%Y-%m-%d")
 
         formula = (
-            f"SUMPRODUCT(SUMIFS('For Tally'!{tally_dr_letter}:{tally_dr_letter}, "
-            f"'For Tally'!{tally_pivot_cat_letter}:{tally_pivot_cat_letter}, "
+            f"SUMPRODUCT(SUMIFS('{_SHEET_TALLY}'!{tally_dr_letter}:{tally_dr_letter}, "
+            f"'{_SHEET_TALLY}'!{tally_pivot_cat_letter}:{tally_pivot_cat_letter}, "
             f"$A{new_row}, "
-            f"'For Tally'!{tally_val_date_letter}:{tally_val_date_letter}, "
+            f"'{_SHEET_TALLY}'!{tally_val_date_letter}:{tally_val_date_letter}, "
             f'">={start_date_str}", '
-            f"'For Tally'!{tally_val_date_letter}:{tally_val_date_letter}, "
+            f"'{_SHEET_TALLY}'!{tally_val_date_letter}:{tally_val_date_letter}, "
             f'"<={end_date_str}", '
-            f"'For Tally'!{tally_bank_letter}:{tally_bank_letter}, "
+            f"'{_SHEET_TALLY}'!{tally_bank_letter}:{tally_bank_letter}, "
             f"$B$5:${tally_bank_end_letter}$5))"
         )
         ws.cell(new_row, 2 + i, f"={formula}")
@@ -1347,7 +1274,7 @@ def write_colour_legend(wb: Workbook):
     Creates a 'Colour Legend' sheet listing category labels,
     sample background colours, and descriptions.
     """
-    ws = wb.create_sheet(title="Colour Legend")
+    ws = wb.create_sheet(title=_SHEET_LEGEND)
     ws.views.sheetView[0].showGridLines = True
 
     # Title
@@ -1369,102 +1296,13 @@ def write_colour_legend(wb: Workbook):
         )
         cell.border = _BORDER
 
+    # Legend groups come from config/colour_legend.json
+    legend_groups = get_colour_legend_config()
+    if not legend_groups:
+        raise ValueError("config/colour_legend.json is missing or empty")
     groups = [
-        (
-            "Income & Inflows",
-            [
-                ("Salary", "Salary Credit (Mphasis)"),
-                ("Bank Interest", "Interest earned on Savings accounts"),
-                ("Dividend Income", "Dividend payout from shares"),
-                ("Annuity Income", "Annuity credits (HDFC Life)"),
-                ("Income Tax Refund", "Income Tax Refund from Department"),
-                ("MF Redemption", "Inflows from selling Mutual Funds"),
-                ("Upwork Income", "Inward remittances from Upwork freelancing"),
-                ("Cash Deposit", "Cash deposits made at CDM / Branch"),
-                ("Freelance Income", "Freelance work escrow payouts"),
-                ("Cashback - BHIM", "Cashback rewards earned on BHIM app"),
-                ("Cashback - Kiwi", "Cashback rewards earned on Kiwi app"),
-                ("Refund - Wakefit", "Refund from Wakefit for online shopping"),
-            ],
-        ),
-        (
-            "Investments",
-            [
-                ("SIP", "Monthly Mutual Fund SIP payments"),
-                ("MF Investment", "Lumpsum Mutual Fund investments"),
-                ("Auto Sweep FD", "Sweep in/out between Savings and FD"),
-                ("Depository Credit", "CDSL credits / payouts"),
-                ("Zerodha Broking", "Payments/payouts associated with Zerodha"),
-                (
-                    "HDFC Securities - Settlement",
-                    "Settlement transfers to HDFC Securities",
-                ),
-            ],
-        ),
-        (
-            "Regular Outflows & Insurance",
-            [
-                ("Rent", "Rent payments to landlord"),
-                (
-                    "Life Insurance Premium",
-                    "Life insurance premium payments (HDFC Life)",
-                ),
-                ("Health Insurance", "Health insurance premium payments"),
-                ("Security Deposit", "Security deposit paid for rental home"),
-                ("Security Deposit Return", "Refund/return of security deposit"),
-            ],
-        ),
-        (
-            "Taxes & Bank Charges",
-            [
-                ("Advance Tax", "Advance tax payments"),
-                ("Income Tax Payment", "Income tax payments to CBDT"),
-                ("Bank Charges", "SMS charges, minimum balance fees, alert fees"),
-                ("Depository Charges", "CDSL / DP charges"),
-            ],
-        ),
-        (
-            "Family Transfers",
-            [
-                (
-                    "Transfer - <Family Member>",
-                    "Transfers to/from declared family members",
-                ),
-            ],
-        ),
-        (
-            "Self Transfers (Contra)",
-            [
-                (
-                    "Contra - <Account>",
-                    "Self-transfers between own declared bank accounts",
-                ),
-                ("Contra - Self", "Self-transfers between own accounts"),
-            ],
-        ),
-        (
-            "UPI Spend Categories",
-            [
-                ("UPI - Zomato", "Food ordering via Zomato"),
-                ("UPI - Swiggy", "Food / Instamart ordering via Swiggy"),
-                ("UPI - BigBasket", "Grocery shopping via BigBasket / Zepto / Blinkit"),
-                ("UPI - Amazon", "Online shopping via Amazon / Flipkart / Ajio"),
-                ("UPI - Ola", "Cab / auto booking via Ola / Uber / BluSmart"),
-                ("UPI - Netflix", "Subscriptions like Netflix, Spotify, Prime Video"),
-                ("UPI - CRED", "Payments made through CRED, PhonePe, Paytm"),
-                ("UPI - Apollo", "Medical expenses via Apollo / MedPlus / Wellness"),
-                ("UPI - IRCTC", "Train / flight bookings via IRCTC or IndiGo"),
-                ("UPI - Fuel", "Fuel purchases at HPCL / BPCL / IOCL pumps"),
-            ],
-        ),
-        (
-            "Generic Fallbacks & Suspense",
-            [
-                ("UPI Payment", "Generic outbound UPI transfers to individuals"),
-                ("UPI Receipt", "Generic inbound UPI transfers from individuals"),
-                ("What is this?", "Suspense items requiring review (Suspense)"),
-            ],
-        ),
+        (g["group"], [(i["label"], i["description"]) for i in g["items"]])
+        for g in legend_groups
     ]
 
     for grp_title, items in groups:

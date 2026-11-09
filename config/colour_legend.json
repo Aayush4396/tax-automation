@@ -1,0 +1,85 @@
+[
+  {
+    "group": "Income & Inflows",
+    "items": [
+      { "label": "Salary", "description": "Salary Credit (Mphasis)" },
+      { "label": "Bank Interest", "description": "Interest earned on Savings accounts" },
+      { "label": "Dividend Income", "description": "Dividend payout from shares" },
+      { "label": "Annuity Income", "description": "Annuity credits (HDFC Life)" },
+      { "label": "Income Tax Refund", "description": "Income Tax Refund from Department" },
+      { "label": "MF Redemption", "description": "Inflows from selling Mutual Funds" },
+      { "label": "Upwork Income", "description": "Inward remittances from Upwork freelancing" },
+      { "label": "Cash Deposit", "description": "Cash deposits made at CDM / Branch" },
+      { "label": "Freelance Income", "description": "Freelance work escrow payouts" },
+      { "label": "Cashback - BHIM", "description": "Cashback rewards earned on BHIM app" },
+      { "label": "Cashback - Kiwi", "description": "Cashback rewards earned on Kiwi app" },
+      { "label": "Refund - Wakefit", "description": "Refund from Wakefit for online shopping" }
+    ]
+  },
+  {
+    "group": "Investments",
+    "items": [
+      { "label": "SIP", "description": "Monthly Mutual Fund SIP payments" },
+      { "label": "MF Investment", "description": "Lumpsum Mutual Fund investments" },
+      { "label": "Auto Sweep FD", "description": "Sweep in/out between Savings and FD" },
+      { "label": "Depository Credit", "description": "CDSL credits / payouts" },
+      { "label": "Zerodha Broking", "description": "Payments/payouts associated with Zerodha" },
+      { "label": "HDFC Securities - Settlement", "description": "Settlement transfers to HDFC Securities" }
+    ]
+  },
+  {
+    "group": "Regular Outflows & Insurance",
+    "items": [
+      { "label": "Rent", "description": "Rent payments to landlord" },
+      { "label": "Life Insurance Premium", "description": "Life insurance premium payments (HDFC Life)" },
+      { "label": "Health Insurance", "description": "Health insurance premium payments" },
+      { "label": "Security Deposit", "description": "Security deposit paid for rental home" },
+      { "label": "Security Deposit Return", "description": "Refund/return of security deposit" }
+    ]
+  },
+  {
+    "group": "Taxes & Bank Charges",
+    "items": [
+      { "label": "Advance Tax", "description": "Advance tax payments" },
+      { "label": "Income Tax Payment", "description": "Income tax payments to CBDT" },
+      { "label": "Bank Charges", "description": "SMS charges, minimum balance fees, alert fees" },
+      { "label": "Depository Charges", "description": "CDSL / DP charges" }
+    ]
+  },
+  {
+    "group": "Family Transfers",
+    "items": [
+      { "label": "Transfer - <Family Member>", "description": "Transfers to/from declared family members" }
+    ]
+  },
+  {
+    "group": "Self Transfers (Contra)",
+    "items": [
+      { "label": "Contra - <Account>", "description": "Self-transfers between own declared bank accounts" },
+      { "label": "Contra - Self", "description": "Self-transfers between own accounts" }
+    ]
+  },
+  {
+    "group": "UPI Spend Categories",
+    "items": [
+      { "label": "UPI - Zomato", "description": "Food ordering via Zomato" },
+      { "label": "UPI - Swiggy", "description": "Food / Instamart ordering via Swiggy" },
+      { "label": "UPI - BigBasket", "description": "Grocery shopping via BigBasket / Zepto / Blinkit" },
+      { "label": "UPI - Amazon", "description": "Online shopping via Amazon / Flipkart / Ajio" },
+      { "label": "UPI - Ola", "description": "Cab / auto booking via Ola / Uber / BluSmart" },
+      { "label": "UPI - Netflix", "description": "Subscriptions like Netflix, Spotify, Prime Video" },
+      { "label": "UPI - CRED", "description": "Payments made through CRED, PhonePe, Paytm" },
+      { "label": "UPI - Apollo", "description": "Medical expenses via Apollo / MedPlus / Wellness" },
+      { "label": "UPI - IRCTC", "description": "Train / flight bookings via IRCTC or IndiGo" },
+      { "label": "UPI - Fuel", "description": "Fuel purchases at HPCL / BPCL / IOCL pumps" }
+    ]
+  },
+  {
+    "group": "Generic Fallbacks & Suspense",
+    "items": [
+      { "label": "UPI Payment", "description": "Generic outbound UPI transfers to individuals" },
+      { "label": "UPI Receipt", "description": "Generic inbound UPI transfers from individuals" },
+      { "label": "What is this?", "description": "Suspense items requiring review (Suspense)" }
+    ]
+  }
+]

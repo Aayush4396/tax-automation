@@ -1,0 +1,165 @@
+{
+  "_comment": "Defines how transactions are categorised on the Monthly Pivot sheet. Lookup order (DR): cc_payment_narrations > contra > narration_to_payment_category (exact) > head_to_payment_category > narration_contains_payment_category (substring, first hit wins) > default. Receipts follow the same order with the *_receipt_* keys. No Python changes are needed to add categories or map narrations.",
+
+  "contra_label_prefix": "Contra -",
+
+  "cc_payment_narrations": [
+    "Credit Card Bill Payment (CRED)",
+    "UPI - CRED",
+    "Credit Card Payment",
+    "Credit Card Bill Payment"
+  ],
+
+  "payment_categories": [
+    "Broadband & WiFi",
+    "Groceries & Household",
+    "Food & Dining",
+    "Rent",
+    "Travel & Commute",
+    "Fuel",
+    "Transport & Automotive",
+    "Healthcare & Medical",
+    "Life Insurance",
+    "Health Insurance",
+    "Subscriptions & Services",
+    "Utilities & Mobile",
+    "Shopping & Lifestyle",
+    "Entertainment & Leisure",
+    "Investments & Wealth",
+    "Bank & Depository Charges",
+    "General/Other Spends"
+  ],
+
+  "receipt_categories": [
+    "Salary",
+    "Freelance & Business Income",
+    "Dividend Income",
+    "Bank Interest",
+    "Investment Inflows (MF/Stocks)",
+    "Refunds & Reversals",
+    "Personal Inflows / Transfers"
+  ],
+
+  "default_payment_category": "General/Other Spends",
+  "default_receipt_category": "Personal Inflows / Transfers",
+  "contra_pivot_category": "Self-Transfer (Contra)",
+  "credit_card_pivot_category": "Credit Card Payment",
+
+  "head_to_payment_category": {
+    "Groceries": "Groceries & Household",
+    "Food & Dining": "Food & Dining",
+    "Rent": "Rent",
+    "Travel": "Travel & Commute",
+    "Fuel & Petrol": "Fuel",
+    "Transport": "Transport & Automotive",
+    "Healthcare": "Healthcare & Medical",
+    "Medical": "Healthcare & Medical",
+    "Life Insurance": "Life Insurance",
+    "Health Insurance": "Health Insurance",
+    "Subscriptions": "Subscriptions & Services",
+    "Utilities": "Utilities & Mobile",
+    "Shopping": "Shopping & Lifestyle",
+    "Entertainment": "Entertainment & Leisure",
+    "SIP": "Investments & Wealth",
+    "PPF Deposit": "Investments & Wealth",
+    "HDFC Securities": "Investments & Wealth",
+    "Mutual Funds": "Investments & Wealth",
+    "IPO": "Investments & Wealth",
+    "Investments": "Investments & Wealth",
+    "Bank Charges": "Bank & Depository Charges",
+    "Depository Charges": "Bank & Depository Charges"
+  },
+
+  "narration_to_payment_category": {
+    "Airtel WiFi": "Broadband & WiFi",
+    "UPI - DMart": "Groceries & Household",
+    "UPI - Fresh Produce": "Groceries & Household",
+    "UPI - Nandini Dairy": "Groceries & Household",
+    "UPI - Star Bazaar": "Groceries & Household",
+    "UPI - Zepto": "Groceries & Household",
+    "Food & Dining": "Food & Dining",
+    "UPI - District (Dining)": "Food & Dining",
+    "UPI - Swiggy": "Food & Dining",
+    "UPI - Zomato": "Food & Dining",
+    "Rent Payment (via CRED)": "Rent",
+    "UPI - IRCTC": "Travel & Commute",
+    "Toll / FASTag": "Transport & Automotive",
+    "Vehicle Service": "Transport & Automotive",
+    "UPI - MedPlus": "Healthcare & Medical",
+    "UPI - Pharmacy": "Healthcare & Medical",
+    "Life Insurance Premium": "Life Insurance",
+    "Premium Payment (ECS Return Charge)": "Life Insurance",
+    "UPI - Google Play": "Subscriptions & Services",
+    "UPI - Hotstar": "Subscriptions & Services",
+    "UPI - OpenAI": "Subscriptions & Services",
+    "Govt / Utility Payment": "Utilities & Mobile",
+    "Shopping - Jewellery": "Shopping & Lifestyle",
+    "UPI - Amazon": "Shopping & Lifestyle",
+    "UPI - Flipkart": "Shopping & Lifestyle",
+    "SBI PPF": "Investments & Wealth",
+    "HDFC Securities - Buy": "Investments & Wealth",
+    "Securities Settlement": "Investments & Wealth",
+    "MF Investment": "Investments & Wealth",
+    "INDmoney Investment": "Investments & Wealth",
+    "IPO - Billion Garages": "Investments & Wealth",
+    "IPO - JSW Cement": "Investments & Wealth",
+    "Bank Charges": "Bank & Depository Charges",
+    "Lounge Access Charge": "Bank & Depository Charges",
+    "Depository Charges": "Bank & Depository Charges"
+  },
+
+  "narration_contains_payment_category": [
+    ["Rent", "Rent"],
+    ["Fuel", "Fuel"],
+    ["SIP", "Investments & Wealth"]
+  ],
+
+  "head_to_receipt_category": {
+    "Salary": "Salary",
+    "Freelance Income": "Freelance & Business Income",
+    "Dividend Income": "Dividend Income",
+    "Bank Interest": "Bank Interest",
+    "Mutual Funds": "Investment Inflows (MF/Stocks)",
+    "CDSL": "Investment Inflows (MF/Stocks)",
+    "HDFC Securities": "Investment Inflows (MF/Stocks)"
+  },
+
+  "narration_to_receipt_category": {
+    "Salary": "Salary",
+    "Freelance Income": "Freelance & Business Income",
+    "Dividend Income": "Dividend Income",
+    "Bank Interest": "Bank Interest",
+    "MF Redemption": "Investment Inflows (MF/Stocks)",
+    "Depository Credit": "Investment Inflows (MF/Stocks)",
+    "HDFC Securities - Sell": "Investment Inflows (MF/Stocks)",
+    "HDFC Securities - Settlement": "Investment Inflows (MF/Stocks)",
+    "Refund - Wakefit": "Refunds & Reversals",
+    "Security Deposit Return": "Refunds & Reversals",
+    "UPI Reversal": "Refunds & Reversals",
+    "Income Tax Refund": "Refunds & Reversals",
+    "Cashback - BHIM": "Refunds & Reversals",
+    "Cashback - Kiwi": "Refunds & Reversals",
+    "SuperMoney (Rewards)": "Refunds & Reversals"
+  },
+
+  "narration_contains_receipt_category": [],
+
+  "cc_narration_to_pivot_category": {
+    "CC - Wifi": "Broadband & WiFi",
+    "CC - Groceries": "Groceries & Household",
+    "CC - Restaurants": "Food & Dining",
+    "CC - Travel": "Travel & Commute",
+    "CC - Fuel": "Fuel",
+    "CC - Automotive": "Transport & Automotive",
+    "CC - Healthcare": "Healthcare & Medical",
+    "CC - Services": "Subscriptions & Services",
+    "CC - Telecom": "Utilities & Mobile",
+    "CC - Utilities": "Utilities & Mobile",
+    "CC - Shopping": "Shopping & Lifestyle",
+    "CC - Entertainment": "Entertainment & Leisure",
+    "CC - Recreation": "Entertainment & Leisure",
+    "CC - Insurance": "Life Insurance",
+    "CC - Education": "Subscriptions & Services",
+    "CC - Other": "General/Other Spends"
+  }
+}

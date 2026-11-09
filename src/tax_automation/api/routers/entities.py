@@ -12,6 +12,7 @@ from fastapi import APIRouter, HTTPException, status
 from tax_automation.config_loader import (
     CONFIG_DIR,
     get_entity_config,
+    get_exporter_theme_config,
     resolve_input_dir,
     resolve_output_dir,
 )
@@ -98,6 +99,11 @@ def create_entity(body: CreateEntityRequest) -> EntityResponse:
             f"Use PATCH /entities/{eid} to update.",
         )
 
+    theme_cfg = get_exporter_theme_config()
+    default_sheet_names = theme_cfg.get(
+        "default_output_sheet_names",
+        ["For Tally", "Conso", "Bank Summary", "Monthly Pivot", "Guidelines"],
+    )
     norm_name = re.sub(r"\s+", r"\\s*", body.display_name.upper())
     profile_data: dict[str, Any] = {
         "$schema": "../schemas/entity.json",
@@ -109,13 +115,7 @@ def create_entity(body: CreateEntityRequest) -> EntityResponse:
         "family_members": [],
         "rent": {"landlords": [], "vpas": [], "keywords": []},
         "custom_rules": [],
-        "output_sheet_names": [
-            "For Tally",
-            "Conso",
-            "Bank Summary",
-            "Monthly Pivot",
-            "Guidelines",
-        ],
+        "output_sheet_names": list(default_sheet_names),
         "accounts": [],
     }
 
