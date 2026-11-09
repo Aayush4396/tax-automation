@@ -183,3 +183,49 @@ def get_declarative_common_rules() -> list[dict[str, Any]]:
         return []
     with open(r_file, "r", encoding="utf-8") as f:
         return json.load(f)
+
+
+def get_scoring_config() -> dict[str, Any]:
+    """Loads numeric scoring thresholds from config/scoring.json.
+
+    Contains bank identification weights, confidence band thresholds, and
+    default confidence values for synthesized rules.  All magic numbers that
+    were previously baked into Python source code are now read from here.
+    """
+    s_file = CONFIG_DIR / "scoring.json"
+    if not s_file.exists():
+        return {}
+    with open(s_file, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def get_pivot_category_config() -> dict[str, Any]:
+    """Loads pivot category definitions from config/pivot_category_map.json.
+
+    Contains:
+    - ``payment_categories``: ordered list of payment row labels for the Monthly Pivot
+    - ``receipt_categories``: ordered list of receipt row labels
+    - ``head_to_payment_category``: account_head → pivot category for DR rows
+    - ``narration_to_payment_category``: narration label → pivot category for DR rows
+    - ``head_to_receipt_category``: account_head → pivot category for CR rows
+    - ``narration_to_receipt_category``: narration label → pivot category for CR rows
+    - ``contra_label_prefix``: string prefix that identifies contra labels (default "Contra -")
+    - ``cc_payment_narrations``: narration labels that map to "Credit Card Payment"
+    """
+    p_file = CONFIG_DIR / "pivot_category_map.json"
+    if not p_file.exists():
+        return {}
+    with open(p_file, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def get_colour_legend_config() -> list[dict[str, Any]]:
+    """Loads the colour legend group definitions from config/colour_legend.json.
+
+    Returns a list of group dicts: ``[{"group": "...", "items": [{"label": "...", "description": "..."}]}]``
+    """
+    l_file = CONFIG_DIR / "colour_legend.json"
+    if not l_file.exists():
+        return []
+    with open(l_file, "r", encoding="utf-8") as f:
+        return json.load(f)

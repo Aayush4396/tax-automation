@@ -16,6 +16,7 @@ from openpyxl import load_workbook, Workbook
 
 from tax_automation.config_loader import (
     get_entity_config,
+    get_exporter_theme_config,
     resolve_entity_bank_registry,
     resolve_input_dir,
     resolve_output_dir,
@@ -112,7 +113,7 @@ def classify_transaction(
     cr_val = safe_float(cr)
 
     # Load assembled rules for this entity and bank
-    bank_rules, common_rules = build_rule_chain(entity_id, bank_key)
+    bank_rules, main_common_rules, fallback_rules = build_rule_chain(entity_id, bank_key)
 
     # 1. Apply bank & dynamic entity rules (high priority)
     for rule in bank_rules:
@@ -123,9 +124,8 @@ def classify_transaction(
         except Exception:
             continue
 
-    # 2. Apply common rules (excluding generic UPI fallback rules)
-    fallback_cutoff = max(0, len(common_rules) - 3)
-    for rule in common_rules[:fallback_cutoff]:
+    # 2. Apply main common rules (all non-fallback rules)
+    for rule in main_common_rules:
         try:
             label, head, fn, conf = rule
             if fn(p, dr_val, cr_val):
@@ -133,14 +133,14 @@ def classify_transaction(
         except Exception:
             continue
 
-    # 3. Merchant detection for UPI transactions
+    # 3. Merchant detection for UPI transactions (runs between main and fallback rules)
     if _UPI_PAT.search(p):
         result = detect_merchant(p)
         if result:
             return result
 
-    # 4. Generic UPI rules
-    for rule in common_rules[fallback_cutoff:]:
+    # 4. Generic UPI / fallback rules (is_fallback: true in rules_common.json)
+    for rule in fallback_rules:
         try:
             label, head, fn, conf = rule
             if fn(p, dr_val, cr_val):
@@ -148,7 +148,7 @@ def classify_transaction(
         except Exception:
             continue
 
-    # 5. Fallback classification
+    # 5. Absolute fallback — no rule matched at all
     return "What is this?", "Suspense", 0.0
 
 
@@ -170,8 +170,11 @@ def process_entity_narration(
         Path to the generated output file
     """
     config = get_entity_config(entity_id)
+    theme_cfg = get_exporter_theme_config()
     bank_registry = resolve_entity_bank_registry(entity_id)
-    output_sheet_names = set(config.get("output_sheet_names", []))
+    output_sheet_names = set(config.get("output_sheet_names", [])) | set(
+        theme_cfg.get("default_output_sheet_names", [])
+    )
 
     entity_name = config.get("display_name", entity_id.title())
 
@@ -187,20 +190,29 @@ def process_entity_narration(
                 resolve_input_dir(entity_id, fy, "bank_statements"),
                 resolve_output_dir(entity_id, fy),
             ]
+            globs = theme_cfg.get(
+                "input_search_globs",
+                [
+                    "All Bank Statements*.xlsx",
+                    "All_Bank_Statements*.xlsx",
+                    "*.xlsx",
+                    "*.xls",
+                ],
+            )
+            exclusions = theme_cfg.get(
+                "output_filename_exclusions",
+                ["Consolidated_Bank_Ledger", "narrated_ledger"],
+            )
             for s_dir in search_dirs:
                 if not s_dir.exists():
                     continue
-                matches = (
-                    list(s_dir.glob("All Bank Statements*.xlsx"))
-                    + list(s_dir.glob("All_Bank_Statements*.xlsx"))
-                    + list(s_dir.glob("*.xlsx"))
-                    + list(s_dir.glob("*.xls"))
-                )
+                matches: list[Path] = []
+                for g in globs:
+                    matches.extend(s_dir.glob(g))
                 valid_matches = [
                     m
                     for m in matches
-                    if "Consolidated_Bank_Ledger" not in m.name
-                    and "narrated_ledger" not in m.name
+                    if not any(ex in m.name for ex in exclusions)
                     and not m.name.startswith("~$")
                     and m.stat().st_size > 1000
                 ]
@@ -301,7 +313,9 @@ def process_entity_narration(
     all_df = pd.concat(bank_ledgers, ignore_index=True)
     all_df["DR"] = pd.to_numeric(all_df["DR"], errors="coerce").fillna(0.0)
     all_df["CR"] = pd.to_numeric(all_df["CR"], errors="coerce").fillna(0.0)
-    all_df = assign_pivot_categories(all_df)
+    all_df = assign_pivot_categories(
+        all_df, entity_overrides=config.get("pivot_overrides")
+    )
 
     # Detect duplicates
     dup_key = all_df[["TX_Date", "DR", "CR", "Auto_Narration", "Bank_Key"]].copy()

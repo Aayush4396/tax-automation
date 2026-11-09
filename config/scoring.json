@@ -1,0 +1,28 @@
+{
+  "_comment": "Central configuration for all numeric thresholds used by the pipeline. Change values here to tune behaviour without editing Python code.",
+
+  "bank_identification": {
+    "_comment": "Weights and thresholds used by bank_identifier.py to score which bank a worksheet belongs to.",
+    "meta_weight": 0.60,
+    "header_weight": 0.40,
+    "min_threshold": 0.55,
+    "header_boost_min_header_score": 0.80,
+    "header_boost_min_meta_score": 0.20,
+    "header_boost_floor": 0.70
+  },
+
+  "confidence_bands": {
+    "_comment": "Thresholds used by exporter.py to colour-code rows and write the legend. 'high' >= threshold = green, 'medium_low' <= conf < 'high' = amber, below 'medium_low' = light-red.",
+    "high": 0.85,
+    "medium_low": 0.60
+  },
+
+  "synthesized_rule_defaults": {
+    "_comment": "Default confidence values for dynamically synthesized rules. Can be overridden per-entity by adding the matching key to the entity JSON (e.g. 'contra_confidence': 0.95).",
+    "contra_confidence": 0.92,
+    "self_transfer_confidence": 0.88,
+    "family_transfer_confidence": 0.90,
+    "rent_confidence": 0.90
+  }
+}
+

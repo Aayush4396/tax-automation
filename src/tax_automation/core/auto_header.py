@@ -3,7 +3,7 @@
 auto_header.py
 ==============
 Scans top N rows of a statement worksheet to dynamically locate the header row.
-Keyword lists are loaded dynamically from config/header_keywords.json.
+Keyword lists and the scan limit are loaded from config/header_keywords.json.
 """
 
 from __future__ import annotations
@@ -41,12 +41,27 @@ _DEFAULT_AMT_KEYS = {
     "closing balance",
 }
 
-_DATE_KEYS = set(_cfg.get("date_keywords", [])) or _DEFAULT_DATE_KEYS
-_AMT_KEYS = set(_cfg.get("amount_keywords", [])) or _DEFAULT_AMT_KEYS
+# Use config values when present; fall back to in-code defaults.
+# Defensive: handle null values in the JSON (e.g. "date_keywords": null).
+_raw_date = _cfg.get("date_keywords") or []
+_raw_amt = _cfg.get("amount_keywords") or []
+_DATE_KEYS = set(_raw_date) if _raw_date else _DEFAULT_DATE_KEYS
+_AMT_KEYS = set(_raw_amt) if _raw_amt else _DEFAULT_AMT_KEYS
+
+# Max rows to scan for the header — configurable per deployment
+_MAX_SCAN_ROWS: int = int(_cfg.get("max_scan_rows", 40))
 
 
-def find_header_row(rows: list, max_scan: int = 40) -> int:
-    """Finds header row index by scanning first max_scan rows."""
+def find_header_row(rows: list, max_scan: int | None = None) -> int:
+    """Finds header row index by scanning first max_scan rows.
+
+    ``max_scan`` defaults to the value in ``config/header_keywords.json``
+    (key ``max_scan_rows``, default 40) so callers that don't pass the
+    argument automatically pick up any tuned value from config.
+    """
+    if max_scan is None:
+        max_scan = _MAX_SCAN_ROWS
+
     best_idx = 0
     best_score = -1
 
@@ -58,15 +73,9 @@ def find_header_row(rows: list, max_scan: int = 40) -> int:
             continue
 
         score = 0
-        has_date = any(
-            c in _DATE_KEYS or any(dk in c for dk in ("date", "txn date", "tran date"))
-            for c in cells
-        )
-        has_amt = any(
-            c in _AMT_KEYS
-            or any(ak in c for ak in ("debit", "credit", "withdrawal", "deposit"))
-            for c in cells
-        )
+        # Use config-driven keyword sets exclusively — no inline hardcoding.
+        has_date = any(any(dk in c for dk in _DATE_KEYS) or c in _DATE_KEYS for c in cells)
+        has_amt = any(any(ak in c for ak in _AMT_KEYS) or c in _AMT_KEYS for c in cells)
 
         if has_date:
             score += 2

@@ -9,16 +9,25 @@ Scoring model:
   meta_score   = fraction of bank's meta_signals found (case-insensitive)
                  anywhere in the metadata text (rows above the header row)
   header_score = fraction of bank's header_signals found in the header row columns
-  final_score  = 0.60 * meta_score + 0.40 * header_score
+  final_score  = meta_weight * meta_score + header_weight * header_score
 
-Identification threshold: 0.55
+All numeric thresholds are loaded from config/scoring.json so they can be
+tuned without editing Python code.
 """
 
 from __future__ import annotations
 
-_META_WEIGHT = 0.60
-_HEADER_WEIGHT = 0.40
-_MIN_THRESHOLD = 0.55
+from tax_automation.config_loader import get_scoring_config
+
+_scoring = get_scoring_config().get("bank_identification", {})
+
+# Weights — configurable via config/scoring.json
+_META_WEIGHT: float = float(_scoring.get("meta_weight", 0.60))
+_HEADER_WEIGHT: float = float(_scoring.get("header_weight", 0.40))
+_MIN_THRESHOLD: float = float(_scoring.get("min_threshold", 0.55))
+_BOOST_MIN_HEADER: float = float(_scoring.get("header_boost_min_header_score", 0.80))
+_BOOST_MIN_META: float = float(_scoring.get("header_boost_min_meta_score", 0.20))
+_BOOST_FLOOR: float = float(_scoring.get("header_boost_floor", 0.70))
 
 
 def identify_bank(
@@ -99,9 +108,9 @@ def identify_bank(
             final_score = header_score if header_score > 0 else meta_score
         else:
             final_score = _META_WEIGHT * meta_score + _HEADER_WEIGHT * header_score
-            # If headers are a strong match (>= 80%), ensure high confidence
-            if header_score >= 0.80 and meta_score >= 0.20:
-                final_score = max(final_score, 0.70)
+            # If headers are a strong match, ensure a minimum confidence floor
+            if header_score >= _BOOST_MIN_HEADER and meta_score >= _BOOST_MIN_META:
+                final_score = max(final_score, _BOOST_FLOOR)
 
         if final_score > best_score:
             best_score = final_score

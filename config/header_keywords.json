@@ -1,4 +1,5 @@
 {
+  "max_scan_rows": 40,
   "date_keywords": [
     "date", "txn date", "tran date", "transaction date", "value date",
     "value dt", "srl no", "sl. no.", "sl no"
