@@ -1,7 +1,9 @@
 {
   "bank_key": "huf",
   "display_name": "HUF Bank Account",
-  "rules_module": "tax_automation.rules.banks.huf",
+  "rules_module": null,
+  "alias_tokens": ["\\bHUF\\b", "\\bH\\.U\\.F\\.\\b"],
+  "rules": [],
   "meta_signals": [
     "HUF",
     "OpTransactionHistory"

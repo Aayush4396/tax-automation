@@ -9,6 +9,11 @@ Rule tuple format: (label, account_head, match_fn(p, dr, cr) -> bool, confidence
 
 Priority: top → bottom, first match wins.
 The final rule is always the fallback: "What is this?"
+
+Fallback rules (those with ``"is_fallback": true`` in the JSON) are compiled
+separately into ``FALLBACK_RULES`` so the pipeline can insert merchant detection
+between the main rules and the fallback rules without relying on a fragile
+``len(rules) - 3`` offset.
 """
 
 from __future__ import annotations
@@ -92,6 +97,18 @@ def _compile_declarative_rule(r_dict: dict) -> tuple:
     return (label, head, match_fn, conf)
 
 
+_all_common_rule_dicts = get_declarative_common_rules()
+
+# Main rules: everything that is NOT flagged as a fallback
 RULES_COMMON: list[tuple] = [
-    _compile_declarative_rule(r) for r in get_declarative_common_rules()
+    _compile_declarative_rule(r)
+    for r in _all_common_rule_dicts
+    if not r.get("is_fallback", False)
+]
+
+# Fallback rules: generic UPI / "What is this?" — evaluated AFTER merchant detection
+FALLBACK_RULES: list[tuple] = [
+    _compile_declarative_rule(r)
+    for r in _all_common_rule_dicts
+    if r.get("is_fallback", False)
 ]

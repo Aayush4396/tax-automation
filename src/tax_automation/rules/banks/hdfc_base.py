@@ -3,13 +3,14 @@
 rules_hdfc.py
 =============
 HDFC Bank-specific narration rules. Applied BEFORE common rules.
+
+Note: Account-specific overrides (e.g. HDFC Securities settlement linked to a
+specific savings account number) belong in the entity's ``custom_rules`` config,
+not here.  This file contains only rules that apply to ALL HDFC accounts.
 """
 
 from __future__ import annotations
 import re
-
-# HDFC savings account number linked to HDFC Securities
-_HSL_ACNO = "50200085415108"
 
 RULES_HDFC: list[tuple] = [
     # ── HDFC Securities: BUY (NET PI = Pay-In to broker) ─────────────────
@@ -28,14 +29,11 @@ RULES_HDFC: list[tuple] = [
         and cr > 0,
         0.97,
     ),
-    # ── HDFC Securities: Fund Transfer / Settlement ───────────────────────
+    # ── HDFC Securities: Fund Transfer / Settlement (name-based only) ────
     (
         "HDFC Securities - Settlement",
         "HDFC Securities",
-        lambda p, dr, cr: (
-            bool(re.search(r"HDFC\s*SECURITIES\s*LTD", p, re.IGNORECASE))
-            or (_HSL_ACNO in p and p.startswith("FT-"))
-        ),
+        lambda p, dr, cr: bool(re.search(r"HDFC\s*SECURITIES\s*LTD", p, re.IGNORECASE)),
         0.93,
     ),
     # ── BSE/ICCL Settlement (Indian Clearing Corporation Ltd) ─────────────
@@ -212,34 +210,6 @@ RULES_HDFC: list[tuple] = [
         "HDFC Securities",
         lambda p, dr, cr: bool(re.search(r"HDBFSS", p, re.IGNORECASE)),
         0.80,
-    ),
-    # ── JSW Cement IPO (ASBA / demat settlement) ──────────────────────────────
-    (
-        "IPO - JSW Cement",
-        "Equities",
-        lambda p, dr, cr: bool(re.search(r"JSWCEMENTG", p, re.IGNORECASE)) and dr > 0,
-        0.92,
-    ),
-    # ── Tata Technologies IPO ──────────────────────────────────────────────
-    (
-        "IPO - Tata Tech",
-        "Equities",
-        lambda p, dr, cr: bool(re.search(r"TATAG", p, re.IGNORECASE)) and dr > 0,
-        0.92,
-    ),
-    # ── JSW Infrastructure IPO ──────────────────────────────────────────────
-    (
-        "IPO - JSW Infra",
-        "Equities",
-        lambda p, dr, cr: bool(re.search(r"JSINFRA", p, re.IGNORECASE)) and dr > 0,
-        0.92,
-    ),
-    # ── Aeroflex IPO ──────────────────────────────────────────────
-    (
-        "IPO - Aeroflex",
-        "Equities",
-        lambda p, dr, cr: bool(re.search(r"AEROFLEXG", p, re.IGNORECASE)) and dr > 0,
-        0.92,
     ),
     # ── Lounge Access Charge (Travel Club / POS) ──────────────────────────
     (

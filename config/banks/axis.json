@@ -1,7 +1,59 @@
 {
   "bank_key": "axis",
   "display_name": "Axis Bank",
-  "rules_module": "tax_automation.rules.banks.axis",
+  "rules_module": null,
+  "alias_tokens": ["\\bAXIS\\b", "\\bUTIB\\b"],
+  "rules": [
+    {
+      "label": "Auto Sweep FD",
+      "account_head": "Auto Sweep FD",
+      "pattern": "AUTOSWEEP|SWEEP\\s*TRF|REV\\s*SWEEP",
+      "direction": "ANY",
+      "confidence": 0.95
+    },
+    {
+      "label": "Bank Charges",
+      "account_head": "Bank Charges",
+      "pattern": "Chrgs|Charge|Alert\\s*Fee|Min\\s*Bal|ISAQ|SMS\\s*Alert|Annual\\s*Fee|Chgs|GST\\s*ON",
+      "direction": "DR",
+      "confidence": 0.88
+    },
+    {
+      "label": "Bank Interest",
+      "account_head": "Bank Interest",
+      "pattern": "Int\\.Pd|SB:",
+      "direction": "CR",
+      "confidence": 0.93
+    },
+    {
+      "label": "SIP",
+      "account_head": "SIP",
+      "pattern": "ACH\\s*D[- ]|ECS\\s*D\\b",
+      "direction": "DR",
+      "confidence": 0.85
+    },
+    {
+      "label": "Dividend Income",
+      "account_head": "Dividend Income",
+      "pattern": "ACH\\s*C[- ]|ECS\\s*C\\b",
+      "direction": "CR",
+      "confidence": 0.82
+    },
+    {
+      "label": "Cheque",
+      "account_head": "Transfer",
+      "pattern": "\\bCLG\\b|\\bCHEQUE\\b|\\bCHQ\\b|\\bCTS\\b",
+      "direction": "ANY",
+      "confidence": 0.80
+    },
+    {
+      "label": "MF Redemption",
+      "account_head": "Mutual Funds",
+      "pattern": "\\bMF\\b|MUTUAL\\s*FUND|CAMS|KARVY|KFINTECH|INVESCO\\s*MF|AXIS\\s*MF|SBI\\s*MF|HDFC\\s*MF|MIRAE|PPFAS",
+      "direction": "CR",
+      "confidence": 0.82
+    }
+  ],
   "meta_signals": [
     "UTIB",
     "SRL NO",

@@ -495,20 +495,23 @@
     "account_head": "Personal",
     "pattern": "\\bUPI[/ -]|UPIOUT/",
     "direction": "DR",
-    "confidence": 0.55
+    "confidence": 0.55,
+    "is_fallback": true
   },
   {
     "label": "UPI Receipt",
     "account_head": "Personal",
     "pattern": "\\bUPI[/ -]|UPIIN/",
     "direction": "CR",
-    "confidence": 0.55
+    "confidence": 0.55,
+    "is_fallback": true
   },
   {
     "label": "What is this?",
     "account_head": "Suspense",
     "pattern": ".*",
     "direction": "ANY",
-    "confidence": 0.0
+    "confidence": 0.0,
+    "is_fallback": true
   }
 ]

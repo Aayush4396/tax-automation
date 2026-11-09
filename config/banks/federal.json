@@ -1,7 +1,45 @@
 {
   "bank_key": "federal",
   "display_name": "Federal Bank (Jupiter)",
-  "rules_module": "tax_automation.rules.banks.federal",
+  "rules_module": null,
+  "alias_tokens": ["\\bFEDERAL\\b", "\\bFDRL\\b", "\\bJUPITER\\b"],
+  "rules": [
+    {
+      "label": "Bank Interest",
+      "account_head": "Bank Interest",
+      "pattern": "SBINT:",
+      "direction": "CR",
+      "confidence": 0.96
+    },
+    {
+      "label": "MF Redemption",
+      "account_head": "Mutual Funds",
+      "pattern": "NFT/NAVI\\s*REDEMPTION|NFT/.*REDEMPTION",
+      "direction": "CR",
+      "confidence": 0.93
+    },
+    {
+      "label": "MF Investment",
+      "account_head": "Investments",
+      "pattern": "NFT/\\s*NEOSIEXEDDD|NFT/\\s*(?:INVEST|SIP)",
+      "direction": "DR",
+      "confidence": 0.88
+    },
+    {
+      "label": "Misc Income",
+      "account_head": "Misc Income",
+      "pattern": "^IFN/",
+      "direction": "CR",
+      "confidence": 0.60
+    },
+    {
+      "label": "Internal Transfer",
+      "account_head": "Transfer",
+      "pattern": "Dr Operative A/c",
+      "direction": "ANY",
+      "confidence": 0.82
+    }
+  ],
   "meta_signals": [
     "FDRL",
     "Federal Bank",

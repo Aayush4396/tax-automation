@@ -1,7 +1,17 @@
 {
   "bank_key": "boi",
   "display_name": "Bank of India",
-  "rules_module": "tax_automation.rules.banks.boi",
+  "rules_module": null,
+  "alias_tokens": ["\\bBOI\\b", "\\bBKID\\b", "BANK\\s*OF\\s*INDIA"],
+  "rules": [
+    {
+      "label": "Bank Interest",
+      "account_head": "Bank Interest",
+      "pattern": "SBInt\\.Pd",
+      "direction": "CR",
+      "confidence": 0.95
+    }
+  ],
   "meta_signals": [
     "BKID",
     "BOI",

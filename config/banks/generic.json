@@ -2,6 +2,8 @@
   "bank_key": "generic",
   "display_name": "Generic Bank Statement",
   "rules_module": null,
+  "alias_tokens": [],
+  "rules": [],
   "meta_signals": [],
   "header_signals": [
     "Date",

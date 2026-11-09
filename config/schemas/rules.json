@@ -1,59 +1,50 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Rules Configuration Schema",
-  "description": "Schema for transaction classification rules",
-  "type": "object",
-  "properties": {
-    "rules": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string",
-            "description": "Human-readable label for the rule"
-          },
-          "head": {
-            "type": "string",
-            "description": "Account head for the transaction"
-          },
-          "pattern": {
-            "type": "string",
-            "description": "Regular expression pattern to match transaction particulars"
-          },
-          "min_dr": {
-            "type": "number",
-            "description": "Minimum debit amount for the rule to apply"
-          },
-          "max_dr": {
-            "type": "number",
-            "description": "Maximum debit amount for the rule to apply"
-          },
-          "min_cr": {
-            "type": "number",
-            "description": "Minimum credit amount for the rule to apply"
-          },
-          "max_cr": {
-            "type": "number",
-            "description": "Maximum credit amount for the rule to apply"
-          },
-          "confidence": {
-            "type": "number",
-            "minimum": 0,
-            "maximum": 1,
-            "description": "Confidence score for the rule (0-1)"
-          }
-        },
-        "required": [
-          "label",
-          "head",
-          "pattern",
-          "confidence"
-        ]
+  "title": "Declarative Rule Schema",
+  "description": "Schema for declarative transaction classification rules (used in rules_common.json, bank JSON rules, and entity custom_rules)",
+  "definitions": {
+    "ruleItem": {
+      "type": "object",
+      "required": ["label", "account_head"],
+      "properties": {
+        "_comment": { "type": "string" },
+        "label": { "type": "string", "description": "Human-readable narration label" },
+        "account_head": { "type": "string", "description": "Accounting ledger / tax head" },
+        "layer": { "type": "string", "enum": ["entity", "common"], "default": "entity" },
+        "pattern": { "type": "string", "description": "Case-insensitive regex matched against narration" },
+        "patterns_all": { "type": "array", "items": { "type": "string" }, "description": "All regex patterns must match" },
+        "exclude_pattern": { "type": "string", "description": "If matched, rule is skipped" },
+        "direction": { "type": "string", "enum": ["DR", "CR", "dr", "cr", "ANY", "any", "both"], "default": "ANY" },
+        "exact_amount": { "type": "number" },
+        "exact_dr": { "type": "number" },
+        "exclude_exact_dr": { "type": "number" },
+        "min_dr": { "type": "number" },
+        "max_dr": { "type": "number" },
+        "dr_in": { "type": "array", "items": { "type": "number" } },
+        "exact_cr": { "type": "number" },
+        "exclude_exact_cr": { "type": "number" },
+        "min_cr": { "type": "number" },
+        "max_cr": { "type": "number" },
+        "cr_in": { "type": "array", "items": { "type": "number" } },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1, "default": 0.90 },
+        "is_fallback": { "type": "boolean", "default": false, "description": "Evaluated after UPI merchant lookup" }
       }
     }
   },
-  "required": [
-    "rules"
+  "oneOf": [
+    {
+      "type": "array",
+      "items": { "$ref": "#/definitions/ruleItem" }
+    },
+    {
+      "type": "object",
+      "properties": {
+        "rules": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/ruleItem" }
+        }
+      },
+      "required": ["rules"]
+    }
   ]
 }

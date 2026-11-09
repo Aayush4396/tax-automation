@@ -2,6 +2,8 @@
   "bank_key": "icici",
   "display_name": "ICICI Bank",
   "rules_module": null,
+  "alias_tokens": ["\\bICICI\\b", "\\bICIC\\b"],
+  "rules": [],
   "meta_signals": [
     "ICICI BANK",
     "ICIC",

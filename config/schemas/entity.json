@@ -109,9 +109,22 @@
           "account_id": { "type": "string" },
           "sheet_name": { "type": "string" },
           "display_name": { "type": "string" },
-          "meta_signals_extra": { "type": "array", "items": { "type": "string" } }
+          "meta_signals_extra": { "type": "array", "items": { "type": "string" } },
+          "exclude_patterns": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Regexes that stop this account from being matched as a Contra target (e.g. broker/AMC names that contain the bank name)"
+          }
         }
       }
+    },
+    "contra_confidence": { "type": "number", "description": "Confidence for synthesized Contra - <account> rules (default 0.92)" },
+    "self_transfer_confidence": { "type": "number", "description": "Confidence for the generic self-transfer rule (default 0.88)" },
+    "family_transfer_confidence": { "type": "number", "description": "Confidence for synthesized family transfer rules (default 0.90)" },
+    "rent_confidence": { "type": "number", "description": "Confidence for the synthesized rent rule (default 0.90)" },
+    "pivot_overrides": {
+      "type": "object",
+      "description": "Entity-specific Monthly Pivot category overrides (narration_to_payment_category, head_to_payment_category, narration_to_receipt_category, head_to_receipt_category)"
     }
   }
 }

@@ -21,55 +21,77 @@ from tax_automation.config_loader import (
     get_bank_schema,
     get_entity_config,
 )
-from tax_automation.rules.common_base import RULES_COMMON, _compile_declarative_rule
+from tax_automation.rules.common_base import (
+    RULES_COMMON,
+    FALLBACK_RULES,
+    _compile_declarative_rule,
+)
 
 _BANK_RULES_CACHE: dict[str, list[tuple]] = {}
 
-# Standard bank alias tokens used for dynamic Contra synthesis
-_BANK_ALIAS_TOKENS: dict[str, list[str]] = {
-    "sbi": [r"\bSBI\b", r"\bSBIN\b", r"STATE\s*BANK\s*OF\s*INDIA", r"STATE\s*BANK"],
-    "kotak": [r"\bKOTAK\b", r"\bKKBK\b"],
-    "hdfc": [r"\bHDFC\b"],
-    "axis": [r"\bAXIS\b", r"\bUTIB\b"],
-    "boi": [r"\bBOI\b", r"\bBKID\b", r"BANK\s*OF\s*INDIA"],
-    "federal": [r"\bFEDERAL\b", r"\bFDRL\b", r"\bJUPITER\b"],
-    "sbm": [r"\bSBM\b", r"\bSTCB\b"],
-    "icici": [r"\bICICI\b", r"\bICIC\b"],
-}
+
+def _get_bank_alias_tokens(bank_key: str) -> list[str]:
+    """Returns alias token regex patterns for a bank, loaded from the bank's schema JSON.
+
+    Each bank config file declares an ``alias_tokens`` array.  This replaces
+    the former hard-coded ``_BANK_ALIAS_TOKENS`` dict so that adding a new bank
+    never requires a Python code change — only a config file update.
+    """
+    try:
+        schema = get_bank_schema(bank_key)
+        tokens = schema.get("alias_tokens")
+        if tokens and isinstance(tokens, list):
+            return tokens
+    except Exception:
+        pass
+    # Graceful fallback: match the bare bank key (better than nothing)
+    return [re.escape(bank_key)]
 
 
 def load_bank_rules(bank_key: str, rules_module: str | None = None) -> list[tuple]:
-    """Loads bank base classification rules dynamically without hardcoded maps.
+    """Loads bank base classification rules dynamically from JSON config or Python module.
 
-    If rules_module is not specified, resolves it directly from the bank's schema JSON.
+    Priority:
+    1. Declarative ``"rules"`` array in ``config/banks/<bank>.json`` (compiled via ``_compile_declarative_rule``).
+    2. Optional Python module specified by ``rules_module`` (or fallback ``tax_automation.rules.banks.<bank>``
+       only if ``"rules"`` is not present in the JSON schema).
     """
     key = bank_key.lower()
-    if key in _BANK_RULES_CACHE:
+    if key in _BANK_RULES_CACHE and rules_module is None:
         return _BANK_RULES_CACHE[key]
 
-    module_name = rules_module
-    if not module_name:
-        schema = get_bank_schema(key)
-        module_name = schema.get("rules_module")
+    schema = get_bank_schema(key)
+    rules: list[tuple] = []
 
-    if not module_name:
-        # Fallback convention
+    # 1. Load declarative rules from bank JSON schema
+    declarative_rules = schema.get("rules")
+    has_declarative_key = "rules" in schema and isinstance(declarative_rules, list)
+    if has_declarative_key:
+        for r_dict in declarative_rules:
+            try:
+                rules.append(_compile_declarative_rule(r_dict))
+            except Exception:
+                continue
+
+    # 2. Load optional Python module rules if explicitly configured or if no declarative key exists
+    module_name = rules_module or schema.get("rules_module")
+    if not module_name and not has_declarative_key:
         module_name = f"tax_automation.rules.banks.{key}"
 
-    try:
-        mod = importlib.import_module(module_name)
-        rules = []
-        # Look for RULES_<NAME> attribute
-        for var_name in dir(mod):
-            if var_name.startswith("RULES_") and isinstance(
-                getattr(mod, var_name), list
-            ):
-                rules = getattr(mod, var_name)
-                break
-    except (ImportError, AttributeError):
-        rules = []
+    if module_name:
+        try:
+            mod = importlib.import_module(module_name)
+            for var_name in dir(mod):
+                if var_name.startswith("RULES_") and isinstance(
+                    getattr(mod, var_name), list
+                ):
+                    rules.extend(getattr(mod, var_name))
+                    break
+        except (ImportError, AttributeError):
+            pass
 
-    _BANK_RULES_CACHE[key] = rules
+    if rules_module is None:
+        _BANK_RULES_CACHE[key] = rules
     return rules
 
 
@@ -80,6 +102,10 @@ def build_dynamic_contra_rules(
 
     Matches transactions containing self-identity (self_patterns / self_vpas)
     and target bank tokens.
+
+    Confidence values are read from the entity config (``contra_confidence`` and
+    ``self_transfer_confidence``) so they can be tuned per-entity without code
+    changes.
     """
     accounts = entity_config.get("accounts", [])
     if not accounts or not isinstance(accounts, list):
@@ -102,6 +128,24 @@ def build_dynamic_contra_rules(
 
     self_regexes = [re.compile(p, re.IGNORECASE) for p in all_self_strs]
 
+    # Confidence values configurable per entity; fall back to scoring.json or safe defaults
+    from tax_automation.config_loader import get_scoring_config
+    synth_defaults = get_scoring_config().get("synthesized_rule_defaults", {})
+    contra_conf = float(
+        entity_config.get(
+            "contra_confidence", synth_defaults.get("contra_confidence", 0.92)
+        )
+    )
+    self_xfer_conf = float(
+        entity_config.get(
+            "self_transfer_confidence",
+            synth_defaults.get("self_transfer_confidence", 0.88),
+        )
+    )
+
+    from tax_automation.config_loader import get_pivot_category_config
+    contra_prefix = get_pivot_category_config().get("contra_label_prefix", "Contra -").strip()
+
     contra_rules = []
     current_key = current_account_key.lower()
 
@@ -115,7 +159,7 @@ def build_dynamic_contra_rules(
         tgt_disp = acc.get("display_name", tgt_bank.upper())
 
         # Build bank tokens to match target account
-        bank_tokens = list(_BANK_ALIAS_TOKENS.get(tgt_bank, [tgt_bank]))
+        bank_tokens = list(_get_bank_alias_tokens(tgt_bank))
         # Include account digits if specific (e.g. "0333", "1227")
         acc_digits = re.findall(r"\d{3,}", tgt_acc_id)
         for d in acc_digits:
@@ -123,20 +167,28 @@ def build_dynamic_contra_rules(
 
         bank_regexes = [re.compile(t, re.IGNORECASE) for t in bank_tokens]
 
+        # Optional per-account exclusions (e.g. "HDFC SECURITIES" must not be
+        # treated as a transfer to the HDFC savings account). Declared in the
+        # entity's accounts[] entry as "exclude_patterns": [regex, ...].
+        exclude_regexes = [
+            re.compile(t, re.IGNORECASE) for t in acc.get("exclude_patterns", [])
+        ]
+
         # Match function: narration has self-identity AND target bank token
-        def make_contra_matcher(s_regs, b_regs):
+        def make_contra_matcher(s_regs, b_regs, x_regs):
             return lambda p, dr, cr: (
                 any(sr.search(p) for sr in s_regs)
                 and any(br.search(p) for br in b_regs)
+                and not any(xr.search(p) for xr in x_regs)
             )
 
-        rule_label = f"Contra - {tgt_disp}"
+        rule_label = f"{contra_prefix} {tgt_disp}"
         contra_rules.append(
             (
                 rule_label,
                 tgt_acc_id,
-                make_contra_matcher(self_regexes, bank_regexes),
-                0.92,
+                make_contra_matcher(self_regexes, bank_regexes, exclude_regexes),
+                contra_conf,
             )
         )
 
@@ -156,10 +208,10 @@ def build_dynamic_contra_rules(
 
     contra_rules.append(
         (
-            "Contra - Self Transfer",
+            f"{contra_prefix} Self Transfer",
             "Contra",
             make_generic_self_matcher(),
-            0.88,
+            self_xfer_conf,
         )
     )
 
@@ -170,11 +222,14 @@ def build_dynamic_family_rules(entity_config: dict[str, Any]) -> list[tuple]:
     """Dynamically synthesizes transfer rules for declared family members.
 
     Zero hardcoding in common rules: each taxpayer declares relatives in their config.
+    The confidence value is read from ``family_transfer_confidence`` in entity config
+    (default 0.90) so it can be tuned per-entity without code changes.
     """
     family = entity_config.get("family_members", [])
     if not family or not isinstance(family, list):
         return []
 
+    family_conf = float(entity_config.get("family_transfer_confidence", 0.90))
     rules = []
     for member in family:
         name = member.get("name", "").strip()
@@ -192,14 +247,18 @@ def build_dynamic_family_rules(entity_config: dict[str, Any]) -> list[tuple]:
                 f"Transfer - {name}",
                 head,
                 make_family_matcher(regexes),
-                0.90,
+                family_conf,
             )
         )
     return rules
 
 
 def build_dynamic_rent_rules(entity_config: dict[str, Any]) -> list[tuple]:
-    """Dynamically synthesizes rent classification rules from entity configuration."""
+    """Dynamically synthesizes rent classification rules from entity configuration.
+
+    The confidence value is read from ``rent_confidence`` in entity config
+    (default 0.90) so it can be tuned per-entity without code changes.
+    """
     rent = entity_config.get("rent")
     if not rent or not isinstance(rent, dict):
         return []
@@ -220,11 +279,12 @@ def build_dynamic_rent_rules(entity_config: dict[str, Any]) -> list[tuple]:
             token_patterns.append(t)
 
     regexes = [re.compile(t, re.IGNORECASE) for t in token_patterns]
+    rent_conf = float(entity_config.get("rent_confidence", 0.90))
 
     def rent_matcher(p: str, dr: float, cr: float) -> bool:
         return dr > 0 and any(r.search(p) for r in regexes)
 
-    return [("Rent", "Rent", rent_matcher, 0.90)]
+    return [("Rent", "Rent", rent_matcher, rent_conf)]
 
 
 def build_dynamic_custom_rules(
@@ -252,8 +312,20 @@ def build_dynamic_custom_rules(
     return rules
 
 
-def build_rule_chain(entity_id: str, bank_key: str) -> tuple[list[tuple], list[tuple]]:
+def build_rule_chain(
+    entity_id: str, bank_key: str
+) -> tuple[list[tuple], list[tuple], list[tuple]]:
     """Builds the full runtime rule chain for an entity and bank account.
+
+    Returns a 3-tuple:
+      - ``bank_rules``: entity-custom + rent + contra + family + bank-base rules
+      - ``main_common_rules``: entity common-layer rules + universal common rules
+        (excludes fallback rules — these run AFTER merchant detection)
+      - ``fallback_rules``: generic UPI / "What is this?" rules (``is_fallback: true``)
+
+    This separation means the pipeline can insert merchant detection between
+    main_common_rules and fallback_rules without relying on a fragile
+    ``len(rules) - 3`` offset.
 
     Layer 1: Entity custom rules, layer "entity" (exact amounts, specific overrides)
     Layer 2: Dynamic rent rules
@@ -261,7 +333,7 @@ def build_rule_chain(entity_id: str, bank_key: str) -> tuple[list[tuple], list[t
     Layer 4: Dynamic family member transfer rules
     Layer 5: Bank base rules
     Layer 6: Entity custom rules, layer "common"
-    Layer 7: Universal common rules
+    Layer 7: Universal common rules (main, then fallback)
     """
     entity_cfg = {}
     try:
@@ -284,7 +356,10 @@ def build_rule_chain(entity_id: str, bank_key: str) -> tuple[list[tuple], list[t
         custom_rules + rent_rules + contra_rules + family_rules + bank_base
     )
 
-    # Universal common rules, preceded by entity common-layer rules
-    full_common_rules = entity_common_rules + RULES_COMMON
+    # Universal common rules, preceded by entity common-layer rules.
+    # FALLBACK_RULES (generic UPI / "What is this?") are returned separately
+    # so the pipeline can insert merchant detection before them.
+    full_main_common = entity_common_rules + RULES_COMMON
+    full_fallback = FALLBACK_RULES
 
-    return full_bank_rules, full_common_rules
+    return full_bank_rules, full_main_common, full_fallback

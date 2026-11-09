@@ -58,6 +58,50 @@
       "confidence": 0.90
     },
     {
+      "_comment": "HDFC Securities settlement via FT- transfers from linked savings account 50200085415108",
+      "label": "HDFC Securities - Settlement",
+      "account_head": "HDFC Securities",
+      "layer": "entity",
+      "patterns_all": ["^FT-", "50200085415108"],
+      "confidence": 0.93
+    },
+    {
+      "_comment": "IPO applications - JSW Cement",
+      "label": "IPO - JSW Cement",
+      "account_head": "Equities",
+      "layer": "entity",
+      "pattern": "JSWCEMENTG",
+      "direction": "DR",
+      "confidence": 0.92
+    },
+    {
+      "_comment": "IPO applications - Tata Technologies",
+      "label": "IPO - Tata Tech",
+      "account_head": "Equities",
+      "layer": "entity",
+      "pattern": "TATAG",
+      "direction": "DR",
+      "confidence": 0.92
+    },
+    {
+      "_comment": "IPO applications - JSW Infrastructure",
+      "label": "IPO - JSW Infra",
+      "account_head": "Equities",
+      "layer": "entity",
+      "pattern": "JSINFRA",
+      "direction": "DR",
+      "confidence": 0.92
+    },
+    {
+      "_comment": "IPO applications - Aeroflex",
+      "label": "IPO - Aeroflex",
+      "account_head": "Equities",
+      "layer": "entity",
+      "pattern": "AEROFLEXG",
+      "direction": "DR",
+      "confidence": 0.92
+    },
+    {
       "label": "Contra - SBI",
       "account_head": "SBI 1227",
       "layer": "common",
@@ -102,6 +146,17 @@
     }
   ],
   "output_sheet_names": ["For Tally", "Conso", "Bank Summary", "Monthly Pivot", "Guidelines"],
+  "pivot_overrides": {
+    "narration_to_payment_category": {
+      "IPO - Billion Garages": "Investments & Wealth",
+      "IPO - JSW Cement": "Investments & Wealth"
+    },
+    "narration_to_receipt_category": {
+      "Refund - Wakefit": "Refunds & Reversals",
+      "Cashback - Kiwi": "Refunds & Reversals",
+      "SuperMoney (Rewards)": "Refunds & Reversals"
+    }
+  },
   "accounts": [
     {
       "account_key": "hdfc",

@@ -1,7 +1,165 @@
 {
   "bank_key": "hdfc",
   "display_name": "HDFC Bank",
-  "rules_module": "tax_automation.rules.banks.hdfc_base",
+  "rules_module": null,
+  "alias_tokens": ["\\bHDFC\\b"],
+  "rules": [
+    {
+      "label": "HDFC Securities - Buy",
+      "account_head": "HDFC Securities",
+      "pattern": "NET\\s*PI\\s*TO\\s*HSL",
+      "direction": "DR",
+      "confidence": 0.97
+    },
+    {
+      "label": "HDFC Securities - Sell",
+      "account_head": "HDFC Securities",
+      "pattern": "NET\\s*PO\\s*FROM\\s*HSL",
+      "direction": "CR",
+      "confidence": 0.97
+    },
+    {
+      "label": "HDFC Securities - Settlement",
+      "account_head": "HDFC Securities",
+      "pattern": "HDFC\\s*SECURITIES\\s*LTD",
+      "direction": "ANY",
+      "confidence": 0.93
+    },
+    {
+      "label": "BSE Settlement",
+      "account_head": "HDFC Securities",
+      "pattern": "INDIAN\\s*CLEARING\\s*CORP|ICCL|UTIB0000004.*CLEARING",
+      "direction": "CR",
+      "confidence": 0.93
+    },
+    {
+      "label": "Bank Charges",
+      "account_head": "Bank Charges",
+      "pattern": "ISAQMC|INSTAALERTCHG|SMS\\s*ALERT|Annual\\s*Fee|CHRGS|MIN\\s*BAL|Chgs\\s*Incl|MICR\\s*CHG|STAMP\\s*DUTY|MIR\\d+|ISAQ",
+      "direction": "DR",
+      "confidence": 0.90
+    },
+    {
+      "label": "Depository Charges",
+      "account_head": "Depository Charges",
+      "pattern": "DEPOSITORY\\s*CHARGES|DEMAT\\s*CHG|DP\\s*CHR[GS]",
+      "direction": "DR",
+      "confidence": 0.93
+    },
+    {
+      "label": "SIP",
+      "account_head": "SIP",
+      "pattern": "ACH\\s*D[- ]+TP\\s*ACH\\s*INDIANESIGN|INDIANESIGN",
+      "direction": "DR",
+      "confidence": 0.95
+    },
+    {
+      "label": "SIP",
+      "account_head": "SIP",
+      "pattern": "BILLDK|BILLDKINDIAN|NACHINDIANCLEARING",
+      "direction": "DR",
+      "confidence": 0.90
+    },
+    {
+      "label": "Life Insurance Premium",
+      "account_head": "Life Insurance",
+      "pattern": "ACH\\s*D[- ]+HDFCLIFE|ACH\\s*D[- ].*HDFCLIFE",
+      "direction": "DR",
+      "confidence": 0.95
+    },
+    {
+      "label": "Life Insurance Premium",
+      "account_head": "Life Insurance",
+      "pattern": "HDFCSTANDARDLIFE|HDFCLIFE|HDFC\\s*STANDARD\\s*LIFE|HDFC\\s*LIFE|HLIC[-_ ]*INST",
+      "direction": "DR",
+      "confidence": 0.90
+    },
+    {
+      "label": "Annuity Income",
+      "account_head": "Annuity",
+      "pattern": "HDFCLIFE\\s*CENTR",
+      "direction": "CR",
+      "confidence": 0.95
+    },
+    {
+      "label": "Health Insurance",
+      "account_head": "Health Insurance",
+      "pattern": "CARE\\s*HEALTH|RELIGARE|STAR\\s*HEALTH|NIVA\\s*BUPA|MAX\\s*BUPA|MAXBUPA|BAJAJ\\s*ALLIANZ",
+      "direction": "DR",
+      "confidence": 0.92
+    },
+    {
+      "label": "Dividend Income",
+      "account_head": "Dividend Income",
+      "pattern": "^ACH\\s*C[- ]",
+      "direction": "CR",
+      "confidence": 0.88
+    },
+    {
+      "label": "Dividend Income",
+      "account_head": "Dividend Income",
+      "pattern": "\\bDIV\\d*\\b|\\bDIVIDEND\\b|\\s+DIV\\d+",
+      "direction": "CR",
+      "confidence": 0.85
+    },
+    {
+      "label": "MF Redemption",
+      "account_head": "Mutual Funds",
+      "pattern": "INVESCO\\s*MF|PPFAS|MIRAE|SBI\\s*MF|HDFC\\s*MF|AXIS\\s*MF|CAMS|KFIN",
+      "direction": "CR",
+      "confidence": 0.87
+    },
+    {
+      "label": "Misc Income",
+      "account_head": "Misc Income",
+      "pattern": "^IMPS",
+      "direction": "CR",
+      "exact_dr": 0.0,
+      "confidence": 0.55
+    },
+    {
+      "label": "Internal Transfer",
+      "account_head": "Transfer",
+      "pattern": "-TPT-",
+      "direction": "ANY",
+      "confidence": 0.80
+    },
+    {
+      "label": "MF Redemption",
+      "account_head": "Mutual Funds",
+      "pattern": "NSE\\s*CLEARING|MFSS\\s*SETTLEMENT|NSE\\s*MFSS",
+      "direction": "CR",
+      "confidence": 0.90
+    },
+    {
+      "label": "Securities Settlement",
+      "account_head": "HDFC Securities",
+      "pattern": "HDBFSS",
+      "direction": "ANY",
+      "confidence": 0.80
+    },
+    {
+      "label": "Lounge Access Charge",
+      "account_head": "Bank Charges",
+      "pattern": "TRAVEL\\s*CLUB\\s*LOUN|LOUNGE\\s*ACCESS|LOUNGE\\s*VISIT",
+      "direction": "ANY",
+      "confidence": 0.80
+    },
+    {
+      "label": "IPO Application",
+      "account_head": "Equities",
+      "pattern": "TATACAPG|HDFCBANKIPOG|SMBCG|BAJAJHFG|BHARATIHWNG|KFIN\\s*IPO|LINKINTIME.*IPO|IPOREFUND|ASBAREFUND|\\bIPO\\b.*REFUND|UPI[/-]IPO|/ASBA|ASBA/|ASBA\\s*BLOCK|ASBA\\s*UNBLOCK|\\bIPO\\b",
+      "direction": "DR",
+      "confidence": 0.92
+    },
+    {
+      "label": "IPO Refund",
+      "account_head": "Equities",
+      "pattern": "TATACAPG|IPOREFUND|ASBAREFUND|IPO.*REFUND|REFUND.*IPO|ASBA\\s*UNBLOCK",
+      "direction": "CR",
+      "confidence": 0.92
+    }
+  ],
   "meta_signals": [
     "HDFC BANK",
     "Withdrawal Amt",

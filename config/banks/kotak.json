@@ -1,7 +1,144 @@
 {
   "bank_key": "kotak",
   "display_name": "Kotak Mahindra Bank",
-  "rules_module": "tax_automation.rules.banks.kotak_base",
+  "rules_module": null,
+  "alias_tokens": ["\\bKOTAK\\b", "\\bKKBK\\b"],
+  "rules": [
+    {
+      "label": "Bank Interest",
+      "account_head": "Bank Interest",
+      "pattern": "Int\\.Pd[:.]|INTEREST\\s*PAID|INT\\s*PD\\b",
+      "direction": "ANY",
+      "confidence": 0.95
+    },
+    {
+      "label": "Premium Payment (ECS Return Charge)",
+      "account_head": "Life Insurance",
+      "pattern": "Chrg:\\s*ECS\\s*Return.*HDFC\\s*Life|ECS\\s*Return.*HDFCLife",
+      "direction": "DR",
+      "confidence": 0.93
+    },
+    {
+      "label": "Bank Charges",
+      "account_head": "Bank Charges",
+      "pattern": "^Chrg:|Chgs:|Charges|Annual\\s*Fee|SMS\\s*Alert|Min\\s*Bal|GST\\s*ON",
+      "direction": "ANY",
+      "confidence": 0.88
+    },
+    {
+      "label": "Auto Sweep FD",
+      "account_head": "Auto Sweep FD",
+      "pattern": "^\\s*TRANS\\s*$",
+      "direction": "ANY",
+      "confidence": 0.75
+    },
+    {
+      "label": "MF Investment",
+      "account_head": "Investments",
+      "pattern": "iccl",
+      "direction": "DR",
+      "confidence": 0.90
+    },
+    {
+      "label": "Zerodha Broking",
+      "account_head": "Zerodha Broking Limited",
+      "pattern": "ZERODHA",
+      "exclude_pattern": "NACH[- ]MUT[- ]DR|ICCL",
+      "direction": "ANY",
+      "confidence": 0.92
+    },
+    {
+      "label": "SIP",
+      "account_head": "SIP",
+      "pattern": "NACH[- ]MUT[- ]DR",
+      "direction": "DR",
+      "confidence": 0.96
+    },
+    {
+      "label": "MF Investment",
+      "account_head": "Investments",
+      "pattern": "PG\\s+(?:INDIAN\\s+CLEARING|FOR\\s+\\w+|INVESTMENT)",
+      "direction": "DR",
+      "confidence": 0.88
+    },
+    {
+      "label": "Dividend Income",
+      "account_head": "Dividend Income",
+      "pattern": "NACH[- ]ECS[- ]CR",
+      "direction": "CR",
+      "confidence": 0.93
+    },
+    {
+      "label": "Dividend Income",
+      "account_head": "Dividend Income",
+      "pattern": "NACH[- ]10[- ]CR[- ]",
+      "direction": "CR",
+      "confidence": 0.93
+    },
+    {
+      "label": "Dividend Income",
+      "account_head": "Dividend Income",
+      "pattern": "\\bDIV\\b|\\bDIVIDEND\\b|\\bIDIV\\d*\\b|FNLDIV|INTDIV|\\bNACH-ECS-CR\\b|\\bNACH-10-CR\\b",
+      "direction": "ANY",
+      "confidence": 0.85
+    },
+    {
+      "label": "Cash Withdrawal",
+      "account_head": "Cash",
+      "pattern": "^ATL/|^ATW/|CASH\\s*WITHD|CWDR",
+      "direction": "DR",
+      "confidence": 0.92
+    },
+    {
+      "label": "Card Purchase",
+      "account_head": "Personal",
+      "pattern": "^PCD/",
+      "direction": "DR",
+      "confidence": 0.88
+    },
+    {
+      "label": "Credit Card Payment",
+      "account_head": "Personal",
+      "pattern": "^MB:PAID\\s*CARD|CREDIT\\s*CARD\\s*PAY",
+      "direction": "DR",
+      "confidence": 0.90
+    },
+    {
+      "label": "Depository Credit",
+      "account_head": "CDSL",
+      "pattern": "CENTRAL\\s*DEPOSITORY|CDSL|NSDL\\s*DEPOS",
+      "direction": "CR",
+      "confidence": 0.90
+    },
+    {
+      "label": "MF Refund / Reversal",
+      "account_head": "Mutual Funds",
+      "pattern": "PG\\s+RETURN|RETURN\\s+NK",
+      "direction": "ANY",
+      "confidence": 0.80
+    },
+    {
+      "label": "IMPS Receipt",
+      "account_head": "Personal",
+      "pattern": "^Recd:IMPS|^IMPS\\s*IN",
+      "direction": "CR",
+      "confidence": 0.72
+    },
+    {
+      "label": "IPO Application",
+      "account_head": "Equities",
+      "pattern": "Billionbrains\\s*Garage|BILLIONBRAINS",
+      "direction": "DR",
+      "confidence": 0.95
+    },
+    {
+      "label": "UPI Reversal",
+      "account_head": "Personal",
+      "pattern": "^REV[-/]UPI|UPI_CRADJ",
+      "direction": "ANY",
+      "confidence": 0.88
+    }
+  ],
   "meta_signals": [
     "Cust. Reln. No.",
     "Account Statement",

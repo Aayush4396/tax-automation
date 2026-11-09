@@ -1,7 +1,17 @@
 {
   "bank_key": "sbm",
   "display_name": "SBM Bank",
-  "rules_module": "tax_automation.rules.banks.sbm",
+  "rules_module": null,
+  "alias_tokens": ["\\bSBM\\b", "\\bSTCB\\b"],
+  "rules": [
+    {
+      "label": "Bank Interest",
+      "account_head": "Bank Interest",
+      "pattern": "Int\\.Pd|INTEREST\\s*PAID",
+      "direction": "CR",
+      "confidence": 0.97
+    }
+  ],
   "meta_signals": [
     "STCB",
     "SBM",
