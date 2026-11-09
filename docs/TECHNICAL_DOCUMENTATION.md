@@ -1,60 +1,73 @@
 # Technical Architecture & Pipeline Documentation
 
-This document provides a technical specification of the **Tax Automation System**, including its architectural design, internal components, data transformations, and input/output contracts at each stage of execution.
+This document provides the complete technical specification of the **Tax Automation System (`v2.0`)**, including its 100% config-driven architecture, internal pipeline stages, 8-tier dynamic rule compilation, Indian Taxation & Tally nomenclature, and data contracts.
 
 ---
 
 ## Table of Contents
 
-1. [System Architecture](#1-system-architecture)
+1. [System Architecture & Config Dependency Graph](#1-system-architecture--config-dependency-graph)
 2. [Stage-by-Stage Pipeline Lifecycle](#2-stage-by-stage-pipeline-lifecycle)
    - [Stage 1: Multi-Format Ingestion & Statement Consolidation](#stage-1-multi-format-ingestion--statement-consolidation)
    - [Stage 2: Bank Fingerprinting & Auto-Header Detection](#stage-2-bank-fingerprinting--auto-header-detection)
-   - [Stage 3: Dynamic Rule Compilation & Transaction Classification](#stage-3-dynamic-rule-compilation--transaction-classification)
+   - [Stage 3: 8-Tier Dynamic Rule Compilation & Transaction Classification](#stage-3-8-tier-dynamic-rule-compilation--transaction-classification)
    - [Stage 4: Master Ledger Assembly & Multi-Sheet Excel Export](#stage-4-master-ledger-assembly--multi-sheet-excel-export)
-   - [Stage 5: Validation Diagnostics & Contra Reconciliation](#stage-5-validation-diagnostics--contra-reconciliation)
-3. [Data Specifications & Schemas](#3-data-specifications--schemas)
-   - [Entity Profile Configuration Schema](#entity-profile-configuration-schema)
-   - [Reusable Bank Schema Specification](#reusable-bank-schema-specification)
-   - [Consolidation Map Specification](#consolidation-map-specification)
+   - [Stage 5: Validation Diagnostics & Human Review Loop](#stage-5-validation-diagnostics--human-review-loop)
+3. [Declarative Configuration Schemas](#3-declarative-configuration-schemas)
+   - [Entity Profile Configuration Schema (`config/entities/*.json`)](#entity-profile-configuration-schema-configentitiesjson)
+   - [Reusable Bank Schema Specification (`config/banks/*.json`)](#reusable-bank-schema-specification-configbanksjson)
+   - [Consolidation Map Specification (`config/consolidation/*.json`)](#consolidation-map-specification-configconsolidationjson)
    - [Internal Normalized DataFrame Contract](#internal-normalized-dataframe-contract)
 4. [Module Responsibility Matrix](#4-module-responsibility-matrix)
 
 ---
 
-## 1. System Architecture
+## 1. System Architecture & Config Dependency Graph
 
-The Tax Automation System follows a decoupled, declarative, and stateless pipeline pattern. The core engine is packaged under `src/tax_automation/` with zero entity-specific hardcoding in source code. All taxpayer-specific rules and configurations reside in declarative JSON files.
+The Tax Automation System follows a decoupled, declarative, and stateless pipeline pattern. Every rule, bank schema, alias token, scoring threshold, pivot category, and worksheet layout resides in JSON files under `config/` and is loaded via `src/tax_automation/config_loader.py`.
 
 ```mermaid
-graph TD
-    API["FastAPI / Pipeline Entrypoint<br/>(tax_automation.api)"] --> ConfigLoader["Config Loader<br/>(config_loader.py)"]
-    
-    subgraph ConfigLayer ["Declarative Configuration Layer"]
-        EntityCfg["Entity Profiles<br/>(config/entities/*.json)"]
-        BankSchemas["Bank Schemas<br/>(config/banks/*.json)"]
-        CommonRules["Universal Rules<br/>(config/rules_common.json)"]
-        ConsoMaps["Consolidation Maps<br/>(config/consolidation/*.json)"]
-        Schemas["JSON Schemas<br/>(config/schemas/*.json)"]
+flowchart LR
+    subgraph Configs["Declarative JSON Configurations (config/)"]
+        C_ENT["config/entities/{entity}.json\n(Accounts, Family, Rent, Custom Rules)"]
+        C_CON["config/consolidation/{entity}_{fy}.json\n(File -> Sheet Map & Password Env Vars)"]
+        C_BNK["config/banks/{bank}.json\n(Signals, Columns, Alias Tokens, Bank Rules)"]
+        C_COM["config/rules_common.json\n(Universal & Fallback Rules)"]
+        C_MER["config/merchants.json\n(100+ UPI Merchant Keywords)"]
+        C_CC["config/cc_categories.json\n(CC Categories, Overrides & PDF Regexes)"]
+        C_SCR["config/scoring.json\n(Fingerprinting Weights & Confidence Bands)"]
+        C_PIV["config/pivot_category_map.json\n(Monthly Cash Flow Pivot Mappings)"]
+        C_THM["config/exporter_theme.json\n(Sheet Names, Colours, Hidden Columns)"]
+        C_LEG["config/colour_legend.json\n(Classification Legend Groups)"]
     end
-    
-    ConfigLoader --> EntityCfg
-    ConfigLoader --> BankSchemas
-    ConfigLoader --> CommonRules
-    ConfigLoader --> ConsoMaps
 
-    API --> Stage1["Stage 1: Consolidator<br/>(consolidators/generic_consolidator.py)"]
-    API --> Stage2["Stage 2: Ingestion & Identification<br/>(core/auto_header.py, core/bank_identifier.py)"]
-    API --> Stage3["Stage 3: Dynamic Rule Compiler<br/>(rules/loader.py)"]
-    API --> Stage4["Stage 4: Exporter & Pivot Engine<br/>(exporters/exporter.py)"]
-    API --> Stage5["Stage 5: Diagnostic Toolsuite<br/>(tools/check_contras.py, api/routers/diagnostics.py)"]
+    subgraph Engine["Core Python Pipeline (src/tax_automation/)"]
+        P_CON["Stage 1: Consolidator\ngeneric_consolidator.py"]
+        P_ID["Stage 2: Fingerprinting\nauto_header.py + bank_identifier.py"]
+        P_RUL["Stage 3: Rule Compiler & Classifier\nloader.py + narration.py"]
+        P_EXP["Stage 4: Workbook Exporter\nexporter.py"]
+        P_DIA["Stage 5: Diagnostics\ncheck_contras.py + parse_narration_stats.py"]
+    end
 
-    Stage1 -->|"Raw Statements (PDF, XLS, CSV)"| PreConso["Consolidated Statements<br/>(consolidated_statements.xlsx)"]
-    PreConso --> Stage2
-    Stage2 --> Stage3
-    Stage3 --> Stage4
-    Stage4 --> MasterOut["Master Excel Ledger<br/>(narrated_ledger.xlsx)"]
-    MasterOut --> Stage5
+    C_CON --> P_CON
+    C_ENT --> P_ID
+    C_BNK --> P_ID
+    C_SCR --> P_ID
+
+    C_ENT --> P_RUL
+    C_BNK --> P_RUL
+    C_COM --> P_RUL
+    C_MER --> P_RUL
+    C_CC --> P_RUL
+    C_SCR --> P_RUL
+
+    C_PIV --> P_EXP
+    C_THM --> P_EXP
+    C_LEG --> P_EXP
+    C_SCR --> P_EXP
+
+    C_THM --> P_DIA
+    C_PIV --> P_DIA
 ```
 
 ---
@@ -64,11 +77,11 @@ graph TD
 ```mermaid
 sequenceDiagram
     autonumber
-    actor User as Taxpayer / Client
+    actor User as Taxpayer / CA
     participant API as FastAPI / Pipeline
     participant Stage1 as Stage 1: Consolidator
     participant Stage2 as Stage 2: Bank Fingerprinter
-    participant Stage3 as Stage 3: Dynamic Rule Compiler
+    participant Stage3 as Stage 3: 8-Tier Classifier
     participant Stage4 as Stage 4: Ledger Exporter
     participant Stage5 as Stage 5: Diagnostics
 
@@ -79,317 +92,145 @@ sequenceDiagram
         Stage1-->>API: consolidated_statements.xlsx
     end
     
-    API->>Stage2: Identify sheets & header offsets
-    Stage2-->>API: Extracted DataFrame per account
+    API->>Stage2: Identify header rows & fingerprint bank sheets
+    Stage2-->>API: Standardized DataFrame per bank account
     
-    API->>Stage3: Compile runtime rule chain & classify rows
-    Stage3-->>API: Narrated transactions (DR, CR, Head, Conf)
+    API->>Stage3: Compile 8-tier rule chain & classify transactions
+    Stage3-->>API: Narrated rows (Auto_Narration, Account_Head, Confidence, Pivot_Category)
     
-    API->>Stage4: Assemble master workbook
+    API->>Stage4: Write master workbook (Tally Vouchers, Combined Bank Book, Bank Summary, Monthly Cash Flow Pivot, Classification Legend)
     Stage4-->>API: narrated_ledger.xlsx
     
-    API->>Stage5: check_contras(eid, fy)
-    Stage5-->>User: Contra symmetry report & master ledger
+    API->>Stage5: Verify Contra symmetry & confidence stats
+    Stage5-->>User: Audit report & master ledger
 ```
 
 ---
 
 ### Stage 1: Multi-Format Ingestion & Statement Consolidation
 
-#### Purpose
-Merges disparate statement files across multiple banks and accounts for an entity into a single, multi-sheet Excel file. It handles password decryption in memory without persisting credentials or unprotected files to disk.
-
-#### Input
-- **Source Statements**: Placed in `data/<entity_id>/<FY>/input/bank_statements/`.
-  - Supported formats: `.xlsx`, `.xls` (BIFF8 OLE and modern), `.csv`, `.pdf` (tabular text and vector extracts).
-- **Consolidation Mapping**: `config/consolidation/<entity_id>_<fy>.json`.
-  - Maps source filename to destination sheet name and environment variable holding the decryption password.
-- **Secrets**: Environment variables loaded from `.env` (e.g., `ENTITY_SBI_PASSWORD`).
-
-#### Processing Mechanics
-1. **Format Detection & Decryption**:
-   - **Encrypted Excel (`.xls`, `.xlsx`)**: Decrypted in-memory via `msoffcrypto.OfficeFile(f).decrypt(io.BytesIO())` using the environment password.
-   - **PDF Statements**: Decrypted in-memory with `pdfplumber.open(filepath, password=...)`. Table cells and column positions are extracted via bounding-box algorithms. Metadata rows (account holder, branch) from the first page are extracted to preserve bank header signals.
-   - **CSV**: Ingested via `pandas.read_csv` with fallback encoding detection (`utf-8`, `latin1`).
-2. **Sheet Aggregation**: Writes each ingested dataset into a dedicated worksheet named according to the consolidation map (e.g., `HDFC 1001`, `SBI 2002`).
-
-#### Output
-- **File**: `data/<entity_id>/<FY>/output/consolidated_statements.xlsx`
-- **Structure**: An Excel workbook where each tab contains raw extracted statement rows for a single bank account.
-
-```mermaid
-flowchart LR
-    PDF["Encrypted PDF<br/>Statement"] --> InMemPDF["pdfplumber<br/>(In-Memory Decrypt)"]
-    XLS["Encrypted Excel<br/>Statement"] --> InMemXLS["msoffcrypto<br/>(In-Memory Decrypt)"]
-    CSV["Bank CSV<br/>Statement"] --> ReadCSV["pandas<br/>read_csv"]
-
-    InMemPDF --> SheetBuilder["openpyxl<br/>Workbook Builder"]
-    InMemXLS --> SheetBuilder
-    ReadCSV --> SheetBuilder
-
-    SheetBuilder --> Out["consolidated_statements.xlsx"]
-```
+- **Module**: `src/tax_automation/consolidators/generic_consolidator.py`
+- **Input**: Raw files in `data/<entity_id>/<FY>/input/bank_statements/` + mapping in `config/consolidation/<entity_id>_<fy>.json`.
+- **Mechanics**:
+  1. **Encrypted Excel (`.xls`, `.xlsx`)**: Decrypted in-memory via `msoffcrypto.OfficeFile(f).decrypt(io.BytesIO())` using the environment variable specified in `password_env_var`.
+  2. **PDF Statements (`.pdf`)**: Decrypted in-memory with `pdfplumber.open(filepath, password=...)`, extracting first-page metadata lines followed by tabular rows.
+  3. **CSV & Legacy BIFF8/OLE Excel**: Automatically detects OLE headers (`\xd0\xcf\x11\xe0`) and routes to `xlrd` or `openpyxl` accordingly.
+- **Output**: `data/<entity_id>/<FY>/output/consolidated_statements.xlsx` (one worksheet per bank account).
 
 ---
 
 ### Stage 2: Bank Fingerprinting & Auto-Header Detection
 
-#### Purpose
-Identifies which bank schema applies to each worksheet in the consolidated workbook, and accurately locates the tabular data header row amidst variable bank header notes and disclaimer blocks.
-
-#### Input
-- Raw rows from each worksheet in `consolidated_statements.xlsx`.
-- Runtime bank registry resolved via `config_loader.resolve_entity_bank_registry(entity_id)`.
-- Reusable bank schemas from `config/banks/*.json`.
-
-#### Processing Mechanics
-1. **Header Row Discovery (`core/auto_header.py`)**:
-   - Scans the first 40 rows of each sheet.
-   - Evaluates keyword density against expected column headers (e.g., *Date*, *Particulars*, *Narration*, *Debit*, *Credit*, *Withdrawal*, *Deposit*, *Balance*, *Chq/Ref No*).
-   - Returns zero-based `header_row_index`.
-2. **Bank Identification (`core/bank_identifier.py`)**:
-   - Searches metadata cells (rows before header) and header text for known institution signals:
-     - *HDFC Bank*: `HDFC BANK`, `Statement of accounts`, `Withdrawal Amt`
-     - *State Bank of India*: `State Bank of India`, `REGULAR SB CHQ`, `Drawing Power`
-     - *Axis Bank*: `UTIB`, `AXIS`, `PARTICULARS`, `SRL NO`
-     - *Kotak Mahindra*: `Cust. Reln. No.`, `Account Statement`, `KKBK`
-     - *Federal Bank*: `Neo Banking`, `Jupiter`, `FDRL`
-     - *Bank of India*: `BKID`, `Bank of India`, `Cr/Dr`
-   - Computes weighted score against declared entity accounts. Resolves ambiguous matches using account number suffixes (e.g., `meta_signals_extra: ["1001"]`).
-
-#### Output
-- Matched `bank_key` (e.g., `hdfc`, `sbi`, `axis`).
-- Standardized `pd.DataFrame` containing transaction records with mapped column names:
-  - `col_date`, `col_particulars`, `col_dr`, `col_cr`, `col_balance`, `col_ref`, `col_value_date`.
+- **Modules**: `src/tax_automation/core/auto_header.py` and `src/tax_automation/core/bank_identifier.py`
+- **Configs**: `config/header_keywords.json`, `config/scoring.json`, and `config/banks/*.json`
+- **Mechanics**:
+  1. **Header Row Discovery (`find_header_row`)**: Scans the first `max_scan_rows` (40) rows of a worksheet for the first row containing at least one date keyword and one amount keyword from `config/header_keywords.json`.
+  2. **Weighted Bank Scoring (`identify_bank`)**: Scores each account in the entity's merged bank registry using weights from `config/scoring.json`:
+     - **With preamble (`header_row_idx > 0`)**: `0.60 * meta_score + 0.40 * header_score` (plus a `0.30` sheet-name match bonus).
+     - **Without preamble (`header_row_idx == 0`)**: `1.00 * header_score`.
+     - Accepts the highest-scoring account if `score >= acceptance_threshold` (`0.55`).
 
 ---
 
-### Stage 3: Dynamic Rule Compilation & Transaction Classification
+### Stage 3: 8-Tier Dynamic Rule Compilation & Transaction Classification
 
-#### Purpose
-Translates transaction particular strings into standardized narrative labels and accounting heads, scoring each with a classification confidence rating between `0.00` and `1.00`.
-
-#### Input
-- Normalized row fields: `Particulars` (string), `DR` (float), `CR` (float).
-- Entity configuration `config/entities/<entity_id>.json`.
-- Universal rules `config/rules_common.json`.
-- Bank base rules `src/tax_automation/rules/banks/<bank_key>_base.py`.
-
-#### Rule Compilation & Priority Hierarchy
-
-The dynamic compiler (`rules/loader.py`) synthesizes rules at runtime in strict precedence order:
+- **Modules**: `src/tax_automation/rules/loader.py`, `src/tax_automation/rules/common_base.py`, `src/tax_automation/pipeline/narration.py`
+- **Configs**: `config/entities/*.json`, `config/banks/*.json`, `config/rules_common.json`, `config/merchants.json`, `config/scoring.json`
 
 ```mermaid
-graph TD
-    Row["Transaction Row<br/>(Particulars, DR, CR)"] --> Tier1
-
-    subgraph EvaluationHierarchy ["Rule Evaluation Hierarchy (Highest to Lowest Priority)"]
-        Tier1["Tier 1: Declarative Custom Rules<br/>(e.g., FnF settlement, specific salary bonuses)"]
-        Tier2["Tier 2: Contra Self-Transfer Rules<br/>(Synthesized from entity declared accounts)"]
-        Tier3["Tier 3: Family Member Transfer Rules<br/>(Synthesized from entity family_members)"]
-        Tier4["Tier 4: Rent & Landlord Rules<br/>(Synthesized from entity rent config)"]
-        Tier5["Tier 5: Bank-Specific Rules<br/>(e.g., auto-sweep, bank charges, interest)"]
-        Tier6["Tier 6: Universal Indian Merchant & Banking Rules<br/>(60+ merchant, utility, tax patterns)"]
-        Tier7["Tier 7: Regex Fallbacks<br/>(UPI P2P, ATM, Unknown)"]
-    end
-
-    Tier1 -->|"Match Found"| Result["Return (Auto_Narration, Account_Head, Confidence)"]
-    Tier1 -->|"No Match"| Tier2
-    Tier2 -->|"Match Found"| Result
-    Tier2 -->|"No Match"| Tier3
-    Tier3 -->|"Match Found"| Result
-    Tier3 -->|"No Match"| Tier4
-    Tier4 -->|"Match Found"| Result
-    Tier4 -->|"No Match"| Tier5
-    Tier5 -->|"Match Found"| Result
-    Tier5 -->|"No Match"| Tier6
-    Tier6 -->|"Match Found"| Result
-    Tier6 -->|"No Match"| Tier7
-    Tier7 --> Result
+flowchart TD
+    START(["Raw Transaction Row\n(Particulars, DR, CR, Entity, Bank)"]) --> HEAL["Normalize Whitespace & Line Breaks"]
+    HEAL --> T1{"Tier 1: Entity Custom Rules\n(layer = 'entity')"}
+    T1 -- Match --> HIT(["Return (Label, Account_Head, Confidence)"])
+    T1 -- No Match --> T2{"Tier 2: Synthesized Rent Rules\n(entity.rent landlords/VPAs/keywords & DR > 0)"}
+    T2 -- Match --> HIT
+    T2 -- No Match --> T3{"Tier 3: Synthesized Contra Rules\n(Self Identity + Target Bank Alias Tokens\nminus Account exclude_patterns)"}
+    T3 -- Match --> HIT
+    T3 -- No Match --> T4{"Tier 4: Synthesized Family Rules\n(entity.family_members regexes)"}
+    T4 -- Match --> HIT
+    T4 -- No Match --> T5{"Tier 5: Bank Declarative Rules\n(config/banks/{bank}.json -> rules[])"}
+    T5 -- Match --> HIT
+    T5 -- No Match --> T6{"Tier 6: Entity Common Rules + Universal Common Rules\n(entity layer='common' + config/rules_common.json non-fallback)"}
+    T6 -- Match --> HIT
+    T6 -- No Match --> T7{"Tier 7: UPI Merchant Lookup\n(If UPI pattern -> config/merchants.json)"}
+    T7 -- Match --> HIT
+    T7 -- No Match --> T8{"Tier 8: Fallback Rules\n(config/rules_common.json is_fallback=true)"}
+    T8 -- "UPI DR/CR (conf 0.55)" --> HIT_UPI(["Return ('UPI Payment' / 'UPI Receipt',\n'Drawings & Personal', 0.55)"])
+    T8 -- "Catch-all '.*' (conf 0.0)" --> HIT_SUSP(["Return ('Unclassified - Pending Review',\n'Suspense A/c (Pending Review)', 0.0)"])
 ```
 
-#### Rule Synthesis Mechanics
-- **Contra Rules**: For every declared account in `accounts`, the compiler generates bidirectional transfer matching rules using account IDs, bank keys, and last-4 digits (e.g., `TO HDFC 1001` labeled as `Contra - HDFC 1001`, head `Contra`).
-- **Family Rules**: Every declared member in `family_members` generates regex rules tagged with their configured relationship head (e.g., `Family - Spouse`).
-- **Rent Rules**: Landlord names, VPAs, and rent keywords compile into debit rules tagged `Rent Expense`.
-
-#### Output
-For each row, generates:
-- `Auto_Narration`: Human-readable label (e.g., *Swiggy*, *Electricity Bill*, *Contra - SBI 2002*, *Salary*).
-- `Account_Head`: Categorical accounting head (e.g., *Food & Dining*, *Utilities*, *Contra*, *Salary*).
-- `Confidence`: Float from `0.00` to `1.00`.
+#### Declarative Rule Compiler (`_compile_declarative_rule`)
+Every rule in `config/rules_common.json`, `config/banks/*.json`, and `config/entities/*.json` supports:
+- `label`: Standardized narration label
+- `account_head`: Indian Taxation / Tally ledger head
+- `pattern`: Case-insensitive regex (any match)
+- `patterns_all`: Array of regexes (all must match)
+- `exclude_pattern`: Regex that disqualifies the rule if matched
+- `direction`: `"DR"`, `"CR"`, or `"ANY"`
+- `exact_amount`, `exact_dr`, `exact_cr`, `min_dr`, `max_dr`, `min_cr`, `max_cr`, `dr_in`, `cr_in`, `exclude_exact_dr`, `exclude_exact_cr`: Numeric filters
+- `confidence`: Float (`0.00–1.00`)
+- `is_fallback`: Boolean (`true` places the rule in `FALLBACK_RULES`, evaluated after UPI merchant detection)
 
 ---
 
 ### Stage 4: Master Ledger Assembly & Multi-Sheet Excel Export
 
-#### Purpose
-Consolidates narrated records from all individual bank accounts, builds accounting timelines, performs duplicate detection, aggregates balance summaries, and renders a formatted Excel workbook.
-
-#### Input
-- List of classified DataFrames across all processed bank accounts.
-- Entity metadata (`display_name`, `pan`, `fy`).
-
-#### Generated Worksheets Specification
-
-```mermaid
-graph LR
-    BankDFs["Classified Bank DataFrames"] --> MasterConcat["Concatenate & Chrono Sort"]
-    
-    MasterConcat --> W1["Individual Bank Tabs<br/>(HDFC 1001, SBI 2002...)"]
-    MasterConcat --> W2["For Tally Tab<br/>(Single-entry import sheet)"]
-    MasterConcat --> W3["Conso Tab<br/>(Unified master chronology)"]
-    MasterConcat --> W4["Bank Summary Tab<br/>(Institutional balances)"]
-    MasterConcat --> W5["Monthly Pivot Tab<br/>(Category expense matrix)"]
-    MasterConcat --> W6["Colour Legend Tab<br/>(Audit confidence key)"]
-
-    W1 --> Export["narrated_ledger.xlsx"]
-    W2 --> Export
-    W3 --> Export
-    W4 --> Export
-    W5 --> Export
-    W6 --> Export
-```
-
-1. **Individual Bank Tabs**: Formatted transaction tables preserving original institutional row orders with added `Auto_Narration`, `Account_Head`, and `Confidence` columns.
-2. **For Tally**: Single-entry accounting format with normalized date formats (`YYYY-MM-DD`), debit amounts, credit amounts, and clean ledger heads suitable for direct Tally XML mapping.
-3. **Conso (Master Ledger)**: Chronological union of all transactions across all accounts, sorted by transaction date.
-4. **Bank Summary**: Financial institution ledger summary listing:
-   - Account ID & Bank Name
-   - Opening Balance (first recorded balance of the FY)
-   - Total Deposits (CR Sum)
-   - Total Withdrawals (DR Sum)
-   - Closing Balance (last recorded balance of the FY)
-   - Net Inflow / Outflow
-5. **Monthly Pivot**: Two-dimensional cross-tabulation matrix:
-   - Rows: Accounting Heads / Categories (e.g., *Food*, *Utilities*, *Travel*, *Investments*).
-   - Columns: Financial Year Months (April through March).
-   - Values: Sum of debit expenses.
-6. **Colour Legend**: Visual audit key for Excel cells colored by confidence tiers:
-   - **Green (`>= 0.85`)**: High confidence automated match.
-   - **Yellow (`0.70 - 0.84`)**: Moderate confidence heuristic match.
-   - **Light Red (`< 0.70`)**: Flagged for human review / manual verification.
-
-#### Output
-- **File**: `data/<entity_id>/<FY>/output/narrated_ledger.xlsx`
+- **Module**: `src/tax_automation/exporters/exporter.py`
+- **Configs**: `config/exporter_theme.json`, `config/pivot_category_map.json`, `config/colour_legend.json`, `config/scoring.json`
+- **Generated Worksheets**:
+  1. **Per-Bank Tabs** (`HDFC 5413`, `SBI 1227`, etc.): Individual bank ledgers with a top horizontal colour legend and 3-tier confidence cell colouring.
+  2. **`Tally Vouchers`**: Consolidated, chronologically sorted single-entry ledger across all accounts with `Review Remarks` and `Pivot Category` columns.
+  3. **`Combined Bank Book`**: Unified running ledger across all banks with top `SUBTOTAL(9, ...)` formulas.
+  4. **`Bank Summary`**: Dynamic `SUMIFS` narration summary, Opening & Closing Balance reconciliation per account, and `COUNTIF`/`COUNTIFS` Confidence Band distribution.
+  5. **`Monthly Cash Flow Pivot`**: Interactive month-by-month Cash Flow matrix with **Bank Filter Toggles** (`TRUE`/`FALSE` dropdowns in Row 4) separating:
+     - **Payments / Expenses (Bank + CC)** — including a dedicated **`Suspense / Pending Human Review`** row
+     - **Receipts / Income (Bank)** — including a dedicated **`Suspense / Pending Human Review`** row
+     - **Self-Transfers (Contra)**
+  6. **`Classification Legend`**: Complete visual audit guide built from `config/colour_legend.json`.
 
 ---
 
-### Stage 5: Validation Diagnostics & Contra Reconciliation
+### Stage 5: Validation Diagnostics & Human Review Loop
 
-#### Purpose
-Executes mathematical reconciliation tests to verify that internal transfers match, detect potential duplicate charges, and ensure confidence scores meet audit thresholds.
-
-#### Diagnostics Architecture
-
-```mermaid
-flowchart TD
-    Ledger["narrated_ledger.xlsx"] --> ContraCheck["check_contras.py"]
-    Ledger --> ConfCheck["check_narration_results.py"]
-
-    ContraCheck --> FilterContras["Extract all rows where<br/>Account_Head == 'Contra'"]
-    FilterContras --> MatchPairs["Pair Account A Debits with<br/>Account B Credits by (Date, Amount)"]
-    MatchPairs --> NetDiff{"Total Contra DR ==<br/>Total Contra CR?"}
-
-    NetDiff -->|"Difference == 0.00"| Pass["PASS: Contras Balanced & Symmetric"]
-    NetDiff -->|"Difference != 0.00"| Fail["FAIL: Asymmetric Transfers Flagged"]
-
-    ConfCheck --> ConfStats["Calculate % Transactions<br/>with Confidence >= 0.85"]
-    ConfStats --> AuditReport["Print Audit Summary Report"]
-```
-
-#### Verification Checks
-1. **Contra Symmetry Verification (`tools/check_contras.py`)**:
-   - Isolates all transactions classified as `Contra`.
-   - Computes: `Total_Contra_DR - Total_Contra_CR`.
-   - Verifies that every money transfer leaving Account A has an equivalent receiving credit in Account B within the same entity.
-2. **Confidence Score Analysis (`tools/check_narration_results.py`)**:
-   - Aggregates confidence ratings across all bank sheets.
-   - Outputs match rate percentage and transaction count breakdown.
+- **Modules**: `src/tax_automation/tools/check_contras.py`, `src/tax_automation/tools/parse_narration_stats.py`, `src/tax_automation/tools/parse_all_stats.py`, `src/tax_automation/api/routers/diagnostics.py`
+- **Checks**:
+  1. **Contra Symmetry (`check_contras.py`)**: Scans all bank sheets for labels starting with `contra_label_prefix` (`"Contra -"`) and verifies `abs(Total_DR - Total_CR) < 1.00`.
+  2. **Confidence Distribution (`parse_narration_stats.py`)**: Computes High (`>= 0.85`), Medium (`0.60–0.84`), and Low (`< 0.60`) classification counts and percentages.
+  3. **Human Review (`Unclassified - Pending Review`)**: Unclear transactions land in `Suspense A/c (Pending Review)` and aggregate on the `Suspense / Pending Human Review` row of the Monthly Cash Flow Pivot so a human reviewer or CA can either add a declarative JSON rule or note a clarification in the `Review Remarks` column.
 
 ---
 
-## 3. Data Specifications & Schemas
+## 3. Declarative Configuration Schemas
 
-### Entity Profile Configuration Schema
-Defined in `config/schemas/entity.json`:
+### Entity Profile Configuration Schema (`config/entities/*.json`)
+Validated against `config/schemas/entity.json`:
+- `entity_id`, `display_name`, `pan`
+- `self_patterns`, `self_vpas`
+- `contra_confidence`, `self_transfer_confidence`, `family_transfer_confidence`, `rent_confidence` (optional per-entity confidence overrides)
+- `family_members[]`: `{ "name", "relationship", "account_head", "patterns" }`
+- `rent`: `{ "landlords", "vpas", "keywords" }`
+- `custom_rules[]`: Declarative rules with `"layer": "entity"` (Tier 1) or `"layer": "common"` (Tier 6)
+- `pivot_overrides`: Optional entity-specific overrides for `narration_to_payment_category`, `head_to_payment_category`, `narration_to_receipt_category`, `head_to_receipt_category`
+- `accounts[]`: `{ "account_key", "bank", "account_id", "sheet_name", "display_name", "meta_signals_extra", "exclude_patterns" }`
 
+### Reusable Bank Schema Specification (`config/banks/*.json`)
 ```json
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "type": "object",
-  "required": ["entity_id", "display_name", "accounts"],
-  "properties": {
-    "entity_id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
-    "display_name": { "type": "string" },
-    "pan": { "type": "string" },
-    "self_patterns": { "type": "array", "items": { "type": "string" } },
-    "self_vpas": { "type": "array", "items": { "type": "string" } },
-    "family_members": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["name", "patterns", "account_head"],
-        "properties": {
-          "name": { "type": "string" },
-          "relationship": { "type": "string" },
-          "patterns": { "type": "array", "items": { "type": "string" } },
-          "account_head": { "type": "string" }
-        }
-      }
-    },
-    "rent": {
-      "type": "object",
-      "properties": {
-        "landlords": { "type": "array", "items": { "type": "string" } },
-        "vpas": { "type": "array", "items": { "type": "string" } },
-        "keywords": { "type": "array", "items": { "type": "string" } }
-      }
-    },
-    "custom_rules": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["label", "account_head"],
-        "properties": {
-          "label": { "type": "string" },
-          "account_head": { "type": "string" },
-          "pattern": { "type": "string" },
-          "exact_amount": { "type": "number" },
-          "direction": { "type": "string", "enum": ["DR", "CR", "dr", "cr", "ANY", "any", "both"] },
-          "confidence": { "type": "number" }
-        }
-      }
-    },
-    "accounts": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["account_key", "bank", "account_id", "sheet_name"],
-        "properties": {
-          "account_key": { "type": "string" },
-          "bank": { "type": "string" },
-          "account_id": { "type": "string" },
-          "sheet_name": { "type": "string" },
-          "display_name": { "type": "string" },
-          "meta_signals_extra": { "type": "array", "items": { "type": "string" } }
-        }
-      }
-    }
-  }
-}
-```
-
----
-
-### Reusable Bank Schema Specification
-Located in `config/banks/<bank_key>.json` (e.g., `hdfc.json`, `sbi.json`, `kotak.json`):
-
-```json
-{
+  "bank_key": "sbi",
   "display_name": "State Bank of India",
-  "meta_signals": ["State Bank of India", "Current Account", "Drawing Power"],
-  "header_signals": ["Txn Date", "Description", "Debit", "Credit", "Balance"],
+  "rules_module": null,
+  "alias_tokens": ["\\bSBI\\b", "\\bSBIN\\b", "STATE\\s*BANK\\s*OF\\s*INDIA", "STATE\\s*BANK"],
+  "rules": [
+    {
+      "label": "PPF Deposit",
+      "account_head": "Deduction u/s 80C - PPF",
+      "pattern": "SBIYA.*PPF|INB.*PPF|\\bPPF\\b",
+      "direction": "DR",
+      "confidence": 0.88
+    }
+  ],
+  "meta_signals": ["State Bank of India", "Drawing Power", "REGULAR SB CHQ", "SBIN"],
+  "header_signals": ["Txn Date", "Ref No./Cheque No.", "Debit", "Credit"],
   "col_date": ["Txn Date", "Date"],
   "col_particulars": ["Details", "Description"],
   "col_narration_h": "Narration",
@@ -397,72 +238,64 @@ Located in `config/banks/<bank_key>.json` (e.g., `hdfc.json`, `sbi.json`, `kotak
   "col_cr": "Credit",
   "col_balance": "Balance",
   "col_ref": ["Ref No./Cheque No.", "Ref No/Cheque No"],
-  "col_value_date": "Value Date",
-  "rules_module": "tax_automation.rules.banks.sbi_base"
+  "col_value_date": "Value Date"
 }
 ```
 
----
-
-### Consolidation Map Specification
-Located in `config/consolidation/<entity_id>_<fy>.json`:
-
+### Consolidation Map Specification (`config/consolidation/*.json`)
 ```json
 {
-  "entity": "demo_entity",
+  "entity": "aayush",
   "fy": "FY26",
-  "output_filename": "All Bank Statements Demo FY26.xlsx",
   "files": [
     {
-      "filename": "HDFC_Statement_1001.xls",
-      "sheet_name": "HDFC 1001",
+      "filename": "HDFC_Statement_5413.xls",
+      "sheet_name": "HDFC 5413",
       "password_env_var": null
     },
     {
-      "filename": "SBI_Statement_2002.xlsx",
-      "sheet_name": "SBI 2002",
-      "password_env_var": "ENTITY_SBI_PASSWORD"
+      "filename": "SBI_Statement_1227.xlsx",
+      "sheet_name": "SBI 1227",
+      "password_env_var": "AAYUSH_SBI_PASSWORD"
     }
   ]
 }
 ```
 
----
-
 ### Internal Normalized DataFrame Contract
-
-During Stage 3 and Stage 4, all transaction records are represented with the following schema:
 
 | Column | Type | Description |
 | :--- | :--- | :--- |
-| `TX_Date` | `datetime.date` / `str` | Normalized transaction booking date. |
-| `Value_Date` | `datetime.date` / `str` | Value clearing date (optional). |
-| `Particulars` | `str` | Raw transaction string from bank statement. |
-| `Auto_Narration` | `str` | Classified human-readable label (e.g., *Swiggy*, *Contra - SBI 2002*). |
-| `Account_Head` | `str` | Categorical ledger head (e.g., *Food & Dining*, *Contra*, *Salary*). |
-| `Confidence` | `float` | Quality rating from `0.00` to `1.00`. |
-| `DR` | `float` | Withdrawal amount (numeric float, `>= 0.0`). |
-| `CR` | `float` | Deposit amount (numeric float, `>= 0.0`). |
-| `Balance` | `float` / `str` | Account balance following the transaction. |
-| `Ref` | `str` | Cheque, UTR, or transaction reference number. |
-| `Bank_Key` | `str` | Identifier of the bank institution (e.g., `hdfc`). |
-| `Bank_Display`| `str` | Human-readable bank name (e.g., `HDFC Bank Savings`). |
-| `Account_ID` | `str` | Unique account designator (e.g., `HDFC 1001`). |
+| `TX_Date` | `datetime.date` / `str` | Transaction booking date |
+| `Value_Date` | `datetime.date` / `str` | Value clearing date |
+| `Particulars` | `str` | Raw transaction narration from statement |
+| `Auto_Narration` | `str` | Classified narration label (e.g., `Salary`, `Contra - HDFC Bank`, `Unclassified - Pending Review`) |
+| `Account_Head` | `str` | Standardized Indian Tax / Tally ledger head (e.g., `Income from Salary`, `Suspense A/c (Pending Review)`) |
+| `Confidence` | `float` | Rule confidence score (`0.00–1.00`) |
+| `DR` | `float` | Debit / withdrawal amount (`>= 0.0`) |
+| `CR` | `float` | Credit / deposit amount (`>= 0.0`) |
+| `Balance` | `float` / `str` | Running balance after transaction |
+| `Ref` | `str` | Cheque / UTR / reference number |
+| `Bank_Key` | `str` | Bank key (`hdfc`, `sbi`, `kotak`, etc.) |
+| `Bank_Display` | `str` | Human-readable bank name |
+| `Account_ID` | `str` | Account identifier (`HDFC 5413`, `SBI 1227`) |
+| `Pivot_Category` | `str` | Assigned Monthly Cash Flow Pivot category |
+| `Duplicate` | `str` | `"⚠ Possible Duplicate"` or `""` |
 
 ---
 
 ## 4. Module Responsibility Matrix
 
-| Module | Location | Primary Responsibility | Key Functions / Classes |
-| :--- | :--- | :--- | :--- |
-| **API Service** | `src/tax_automation/api/` | FastAPI REST application, endpoints, routers, file streaming, and diagnostics. | `create_app()`, `lifespan`, routers |
-| **Config Loader** | `src/tax_automation/config_loader.py` | Validates JSON profiles, bank schemas, and path resolution. | `resolve_entity_bank_registry()`, `resolve_input_dir()`, `resolve_output_dir()` |
-| **Auto Header** | `src/tax_automation/core/auto_header.py` | Detects variable tabular header row index in raw sheets. | `find_header_row()` |
-| **Bank Identifier** | `src/tax_automation/core/bank_identifier.py` | Fingerprints bank institution and maps account identity. | `identify_bank()` |
-| **Merchant Parser** | `src/tax_automation/core/merchants.py` | UPI regex and commercial merchant extraction. | `detect_merchant()`, `parse_upi_string()` |
-| **Consolidator** | `src/tax_automation/consolidators/generic_consolidator.py` | Decrypts and merges multi-format files into single workbook. | `consolidate_entity_statements()`, `decrypt_excel()` |
-| **Rule Compiler** | `src/tax_automation/rules/loader.py` | Dynamically compiles contra, family, rent, and custom rule chains. | `build_rule_chain()` |
-| **Narration Pipeline** | `src/tax_automation/pipeline/narration.py` | Drives row classification and combines per-bank DataFrames. | `process_entity_narration()`, `get_col_value()` |
-| **Consolidation Pipeline** | `src/tax_automation/pipeline/consolidation.py` | Orchestrates Stage 1 execution from high-level pipeline. | `consolidate_entity()` |
-| **Exporter** | `src/tax_automation/exporters/exporter.py` | Formats Excel workbooks, Tally sheets, summaries, and pivots. | `write_for_tally()`, `write_conso()`, `write_bank_summary()`, `write_monthly_pivot()` |
-| **Diagnostics** | `src/tax_automation/tools/check_contras.py` | Reconciles inter-account contra transfers across accounts. | `verify_contras()` |
+| Module | Location | Primary Responsibility |
+| :--- | :--- | :--- |
+| **API Service** | `src/tax_automation/api/` | FastAPI REST service (`/entities`, `/files`, `/pipeline`, `/diagnostics`). |
+| **Config Loader** | `src/tax_automation/config_loader.py` | Loads all 10 JSON config families, merges entity bank registries, resolves paths & `.env` secrets. |
+| **Auto Header** | `src/tax_automation/core/auto_header.py` | Detects tabular header row index using `config/header_keywords.json`. |
+| **Bank Identifier** | `src/tax_automation/core/bank_identifier.py` | Scores bank worksheets using weights and thresholds from `config/scoring.json`. |
+| **Merchant Parser** | `src/tax_automation/core/merchants.py` | Matches UPI strings against `config/merchants.json`. |
+| **CC Parser** | `src/tax_automation/core/parse_cc.py` | Parses Credit Card PDF statements using regexes and categories from `config/cc_categories.json`. |
+| **Consolidator** | `src/tax_automation/consolidators/generic_consolidator.py` | Decrypts in-memory and merges `.xlsx`, `.xls`, `.csv`, and `.pdf` statements. |
+| **Rule Compiler** | `src/tax_automation/rules/loader.py` | Compiles the 8-tier rule chain (`bank_rules`, `main_common_rules`, `fallback_rules`). |
+| **Narration Pipeline** | `src/tax_automation/pipeline/narration.py` | Orchestrates header detection, bank fingerprinting, classification, pivot mapping, and export. |
+| **Exporter** | `src/tax_automation/exporters/exporter.py` | Writes colour-coded bank tabs, `Tally Vouchers`, `Combined Bank Book`, `Bank Summary`, `Monthly Cash Flow Pivot`, and `Classification Legend`. |
+| **Diagnostics** | `src/tax_automation/tools/` | Verifies Contra balance symmetry (`check_contras.py`) and confidence stats (`parse_narration_stats.py`). |

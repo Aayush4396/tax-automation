@@ -1,288 +1,284 @@
 # Tax Automation System
 
-**Automated Financial Statement Consolidation, Transaction Classification, and Tax Ledger Accounting Engine.**
+**100% Config-Driven Financial Statement Consolidation, 8-Tier Transaction Classification, and Indian Taxation & Tally Ledger Engine.**
 
 ---
 
 ## Product Overview
 
-The **Tax Automation System** is an end-to-end accounting and tax-preparation platform designed for taxpayers, family offices, and accounting professionals. It automates the ingestion of raw, multi-format bank statements (PDF, Excel, CSV), resolves cryptic banking and UPI transactions into human-readable accounting heads, balances inter-account transfers, and generates audit-ready Excel ledgers formatted for immediate tax filing and Tally ingestion.
+The **Tax Automation System** is an end-to-end accounting and Indian tax-preparation platform designed for taxpayers, family offices, and Chartered Accountants (CAs). It automates the ingestion of raw, multi-format bank and credit card statements (`.xlsx`, `.xls`, `.csv`, encrypted `.pdf`), resolves cryptic banking and UPI narrations into standardized Indian Income Tax & Tally accounting heads, reconciles inter-account self-transfers (`Contra`), isolates unclear transactions into a dedicated **`Suspense / Pending Human Review`** workflow, and generates formula-driven Excel workbooks ready for tax filing and Tally import.
 
-Designed around a **zero-code, plug-and-play architecture**, any individual or family entity can be onboarded in seconds through declarative profiles without modifying Python source code.
-
----
-
-## Business Problem & Value Proposition
-
-### The Challenge
-Personal and business tax filings in India are encumbered by fragmented financial data:
-- **Cryptic Narrations**: Banking portals record transactions with opaque references (e.g., `UPI/CR/0000000000/MERCHANT/BANK/1234567`, `NEFT-N12345-TRANSFER`).
-- **Contra & Self-Transfer Distortion**: Transfers between personal bank accounts often get miscalculated as taxable income or deductible expenses.
-- **Related-Party Complexity**: Routine funds transferred among family members, dependents, or entities (e.g., HUF accounts) require dedicated bookkeeping.
-- **Format Inconsistency**: Each financial institution (HDFC, SBI, Axis, Kotak, Federal, etc.) uses proprietary column structures, date formats, and password encryption schemes.
-
-### The Solution
-Tax Automation standardizes and automates this workflow:
-- **Automated Ingestion**: Directly ingests XLS, XLSX, CSV, and encrypted PDF statements.
-- **Context-Aware Classification**: Accurately labels merchants, utility providers, salary credits, investments, and routine living expenses using a dual rule compiler.
-- **Contra Symmetry Engine**: Pairs debit and credit legs of self-transfers across accounts to prevent double-counting.
-- **Standardized Reporting**: Exports a comprehensive, color-coded master ledger featuring Tally-compatible outputs, multi-account timelines, and monthly category pivots.
+Built around a **100% zero-code, declarative JSON architecture**, adding or updating a taxpayer entity, bank, classification rule, merchant keyword, or Monthly Pivot category requires **zero changes to Python source code**.
 
 ---
 
-## Key Capabilities
+## High-Level Architecture & Data Flow
 
-- **Zero-Code Taxpayer Onboarding**: Command-line generator scaffolds new entity profiles and directory structures automatically.
-- **Preconfigured Banking Schemas**: Out-of-the-box column definitions and signal recognizers for major Indian banks (HDFC, SBI, Kotak, Axis, Bank of India, Federal Bank, SBM Bank, HUF, ICICI, and generic fallbacks).
-- **Dynamic Rule Compilation**: Synthesizes custom contra rules, family transfers, rent payments, and taxpayer-specific rules at runtime.
-- **Universal Merchant Dictionary**: Built-in normalization for 60+ common Indian digital commerce, payment gateway, and investment transaction patterns.
-- **In-Memory Credential Handling**: Encrypted bank statements are decrypted in-memory using environment variables without writing unencrypted data or passwords to disk.
-- **Privacy by Design**: All processing runs locally on your machine. Financial data is strictly ignored by version control to guarantee zero data leakage.
+```mermaid
+flowchart TD
+    subgraph Inputs["Raw Inputs (data/{entity}/{FY}/input/)"]
+        RAW_BANK["bank_statements/\n(.xlsx, .xls, .csv, .pdf)"]
+        ENV_FILE[".env\n(Statement Passwords)"]
+    end
 
----
+    subgraph Stage1["Stage 1: Multi-Format Consolidation"]
+        DEC["In-Memory Decryption\n(msoffcrypto / pdfplumber)"]
+        NORM["Tab Extraction & Normalization\n(generic_consolidator.py)"]
+        CONSO_XLSX["data/{entity}/{FY}/output/\nconsolidated_statements.xlsx"]
+    end
 
-## Operational Guide: How to Use
+    subgraph Stage2["Stage 2: Auto-Header & Bank Fingerprinting"]
+        HDR["Header Row Detection\n(auto_header.py + header_keywords.json)"]
+        FING["Weighted Bank Scoring\n(bank_identifier.py + scoring.json)"]
+    end
 
-No Python coding is required to operate the system for any entity.
+    subgraph Stage3["Stage 3: 8-Tier Classification Engine"]
+        CHAIN["Dynamic Rule Chain Assembly\n(rules/loader.py)"]
+        CLASS["Transaction Classifier\n(pipeline/narration.py)"]
+        PIV_MAP["Pivot Category Assignment\n(exporter.py + pivot_category_map.json)"]
+    end
 
-### 1. Initial Setup
+    subgraph Stage4["Stage 4: Master Tax Workbook Export"]
+        OUT_XLSX["data/{entity}/{FY}/output/\nnarrated_ledger.xlsx"]
+        TAB_BANK["Per-Bank Sheets\n(e.g. HDFC 5413, SBI 1227)"]
+        TAB_TALLY["Tally Vouchers\n(All banks, date-sorted)"]
+        TAB_CONSO["Combined Bank Book\n(Subtotals & running ledger)"]
+        TAB_SUM["Bank Summary\n(Narration SUMIFS, Balances, Confidence)"]
+        TAB_PIV["Monthly Cash Flow Pivot\n(Payments, Receipts, Contras, Suspense Review)"]
+        TAB_LEG["Classification Legend\n(Tax & Tally Reference)"]
+    end
 
-Ensure [Python 3.10+](https://www.python.org/downloads/) is installed.
+    subgraph Stage5["Stage 5: Diagnostics & Human Audit"]
+        DIAG_CON["Contra Symmetry Verification\n(check_contras.py)"]
+        DIAG_CONF["Confidence Band Breakdown\n(parse_narration_stats.py)"]
+        HUMAN["Human / CA Review of\n'Unclassified - Pending Review'"]
+    end
 
-```bash
-# Clone the repository
-git clone https://github.com/Aayush4396/tax-automation.git
-cd tax-automation
-
-# Set up virtual environment
-python -m venv .venv
-
-# Activate environment:
-# Windows PowerShell:
-.venv\Scripts\Activate.ps1
-# Linux / macOS:
-source .venv/bin/activate
-
-# Install dependencies and package
-pip install -r requirements.txt
-pip install -e .
+    RAW_BANK --> DEC
+    ENV_FILE --> DEC
+    DEC --> NORM --> CONSO_XLSX
+    CONSO_XLSX --> HDR --> FING --> CHAIN --> CLASS --> PIV_MAP --> OUT_XLSX
+    OUT_XLSX --> TAB_BANK & TAB_TALLY & TAB_CONSO & TAB_SUM & TAB_PIV & TAB_LEG
+    OUT_XLSX --> DIAG_CON & DIAG_CONF & HUMAN
 ```
 
 ---
 
-### 2. Launching the API Service
+## 8-Tier Classification Priority Engine
 
-Start the local FastAPI server using the PowerShell startup script or uvicorn:
+Every transaction row flows through `classify_transaction()` (`src/tax_automation/pipeline/narration.py`), which evaluates an 8-tier rule chain compiled at runtime (`src/tax_automation/rules/loader.py`). **First match wins:**
 
-```powershell
-# Quick start via PowerShell script:
-.\scripts\start_api.ps1
-
-# Or run directly via uvicorn:
-python -m uvicorn tax_automation.api.main:app --port 8000 --reload
-```
-
-- **Interactive Swagger UI**: [http://localhost:8000/docs](http://localhost:8000/docs)
-- **ReDoc Documentation**: [http://localhost:8000/redoc](http://localhost:8000/redoc)
-- **Liveness Probe**: `GET http://localhost:8000/health`
-
----
-
-### 3. Entity Onboarding
-
-Initialize a new taxpayer entity via the REST API or by creating a declarative JSON file:
-
-```bash
-# Via REST API:
-curl -X POST "http://localhost:8000/entities" \
-  -H "Content-Type: application/json" \
-  -d '{"entity_id": "demo_entity", "display_name": "Sample Taxpayer", "pan": "XXXXX0000X", "fy": "FY26"}'
-```
-
-This scaffolds:
-- `config/entities/demo_entity.json` (declarative configuration)
-- `data/demo_entity/FY26/input/bank_statements/` (raw statement input directory)
-- `data/demo_entity/FY26/output/` (generated report directory)
+| Tier | Rule Layer | Source Configuration | Confidence | Purpose & Examples |
+| :---: | :--- | :--- | :---: | :--- |
+| **1** | **Entity Custom Rules (`layer: "entity"`)** | `config/entities/{entity}.json` → `custom_rules` | `0.90–0.99` | Exact salary amounts, linked demat account numbers, specific IPO application codes |
+| **2** | **Synthesized Rent Rules** | `config/entities/{entity}.json` → `rent` | `0.90` | Outbound payments (`DR > 0`) matching declared landlord names, VPAs, or rent keywords |
+| **3** | **Synthesized Contra Rules** | `config/entities/{entity}.json` → `accounts` + `self_patterns` + `config/banks/{bank}.json` → `alias_tokens` | `0.88–0.92` | Self-transfers between own declared bank accounts (`Contra - State Bank of India`), respecting per-account `exclude_patterns` |
+| **4** | **Synthesized Family Rules** | `config/entities/{entity}.json` → `family_members` | `0.90` | Transfers to/from declared parents, spouse, siblings, or HUF (`Transfer - Sunita Gupta`) |
+| **5** | **Declarative Bank Rules** | `config/banks/{bank}.json` → `rules` | `0.80–0.97` | Bank-specific narration codes (`NET PI TO HSL`, `NACH-MUT-DR`, `SBIYA...PPF`, `AUTOSWEEP`) |
+| **6** | **Entity Common + Universal Rules** | `config/rules_common.json` (`is_fallback != true`) | `0.70–0.97` | Universal Indian banking patterns (Salary, Advance Tax, Dividends, CDSL, Zerodha, IRCTC, FASTag) |
+| **7** | **UPI Merchant Dictionary** | `config/merchants.json` | `0.65–0.85` | 100+ UPI merchant keywords (`swiggy`, `zomato`, `bigbasket`, `amazon`, `apollo`, `bescom`, `cred`) |
+| **8** | **Fallbacks & Pending Review** | `config/rules_common.json` (`is_fallback: true`) | `0.55` / `0.00` | Generic `UPI Payment` / `UPI Receipt` (`0.55`), or **`Unclassified - Pending Review`** (`Suspense A/c (Pending Review)`, `0.00`) |
 
 ---
 
-### 4. Bank Account Configuration
+## Standardized Indian Taxation & Tally Nomenclature
 
-Open `config/entities/demo_entity.json` to declare the taxpayer's bank accounts. Assign standard bank types (`hdfc`, `sbi`, `kotak`, `axis`, `boi`, `federal`, `sbm`, `icici`, `generic`):
-
-```json
-"accounts": [
-  {
-    "account_key": "hdfc",
-    "bank": "hdfc",
-    "account_id": "HDFC 1001",
-    "sheet_name": "HDFC 1001",
-    "display_name": "HDFC Bank Savings",
-    "meta_signals_extra": ["1001"]
-  },
-  {
-    "account_key": "sbi",
-    "bank": "sbi",
-    "account_id": "SBI 2002",
-    "sheet_name": "SBI 2002",
-    "display_name": "State Bank of India",
-    "meta_signals_extra": ["2002"]
-  }
-]
-```
-
-*(Optional: Declare family members, rent keywords, or landlord VPAs in the same file to enable automatic relationship tagging.)*
-
----
-
-### 5. Statement Processing
-
-1. Place downloaded bank statement files into the entity's input folder:
-   ```text
-   data/demo_entity/FY26/input/bank_statements/
-   ```
-   *(Or upload directly via `POST /files/{entity_id}/{fy}/upload`)*
-
-2. Trigger the pipeline via REST API:
-   ```bash
-   # One-shot Consolidation + Narration Processing:
-   curl -X POST "http://localhost:8000/pipeline/demo_entity/FY26/run-all"
-   ```
-
-   *Alternatively, call programmatically via Python:*
-   ```python
-   from tax_automation.pipeline.consolidation import consolidate_entity
-   from tax_automation.pipeline.narration import process_entity_narration
-
-   consolidate_entity("demo_entity", "FY26")
-   process_entity_narration("demo_entity", "FY26")
-   ```
-
----
-
-### 6. Reviewing Financial Deliverables & Diagnostics
-
-The master ledger is generated at:
-```text
-data/demo_entity/FY26/output/narrated_ledger.xlsx
-```
-Download directly via `GET /files/demo_entity/FY26/ledger`.
-
-Run automated contra-balance and classification diagnostics:
-```bash
-# Via REST API:
-curl "http://localhost:8000/diagnostics/demo_entity/FY26/contras"
-curl "http://localhost:8000/diagnostics/demo_entity/FY26/narration-stats"
-curl "http://localhost:8000/diagnostics/demo_entity/FY26/bank-summary"
-```
+| Transaction Nature | Narration Label (`Auto_Narration`) | Tally / Tax Account Head (`Account_Head`) | Monthly Cash Flow Pivot Category |
+| :--- | :--- | :--- | :--- |
+| **Salary Credits** | `Salary` | `Income from Salary` | `Salary` |
+| **Savings A/c Interest** | `Bank Interest` | `Interest on Savings A/c (80TTA)` | `Bank Interest` |
+| **Dividends & CDSL Credits** | `Dividend Income` / `Depository Credit` | `Dividend Income (IFOS)` | `Dividend Income` / `Investment Inflows (MF/Stocks)` |
+| **Pension / Annuity** | `Annuity Income` | `Annuity / Pension Income` | `Personal Inflows / Transfers` |
+| **Freelance / Consulting** | `Upwork Income` / `Freelance Income` | `Professional Receipts (44ADA)` | `Freelance & Business Income` |
+| **Cashbacks & Rewards** | `Cashback - BHIM` / `Cashback - Kiwi` / `Misc Income` | `Other Receipts (IFOS)` | `Refunds & Reversals` |
+| **PPF Contributions** | `PPF Deposit` | `Deduction u/s 80C - PPF` | `Investments & Wealth` |
+| **Life Insurance (LIC/HDFC)** | `Life Insurance Premium` | `Deduction u/s 80C - Life Insurance` | `Life Insurance` |
+| **Medical Insurance** | `Health Insurance` | `Deduction u/s 80D - Health Insurance` | `Health Insurance` |
+| **Mutual Fund SIP / Lumpsum / Redeem** | `SIP` / `MF Investment` / `MF Redemption` | `Mutual Fund Investments` | `Investments & Wealth` / `Investment Inflows (MF/Stocks)` |
+| **Stock Broker Settlements** | `Zerodha Broking` / `HDFC Securities - Buy/Sell` | `Equity & Broker Settlement` | `Investments & Wealth` / `Investment Inflows (MF/Stocks)` |
+| **IPO Applications & Refunds** | `IPO Application` / `IPO Refund` | `Equity & Capital Market` | `Investments & Wealth` / `Investment Inflows (MF/Stocks)` |
+| **Direct Taxes & Refunds** | `Advance Tax` / `Income Tax Refund` | `Income Tax & Advance Tax` | `General/Other Spends` / `Refunds & Reversals` |
+| **Inter-Bank Own Transfers** | `Contra - <Bank Name>` | `<Target Account ID>` (e.g. `SBI 1227`) | `Self-Transfer (Contra)` |
+| **Family / HUF Transfers** | `Transfer - <Family Member>` | `<Family Member Name>` | `General/Other Spends` / `Personal Inflows / Transfers` |
+| **Personal UPI Spends** | `UPI Payment` / `UPI Receipt` | `Drawings & Personal` | `General/Other Spends` / `Personal Inflows / Transfers` |
+| **Unclear / Needs Review** | **`Unclassified - Pending Review`** | **`Suspense A/c (Pending Review)`** | **`Suspense / Pending Human Review`** |
 
 ---
 
 ## Delivered Workbooks & Financial Reports
 
-The generated Excel workbook contains structured worksheets tailored for audit and filing:
+The generated workbook (`data/<entity>/<FY>/output/narrated_ledger.xlsx`) contains live Excel formulas (`SUMIFS`, `SUMPRODUCT`, `COUNTIF`, `SUBTOTAL`) across structured worksheets:
 
 | Worksheet | Purpose & Description |
 | :--- | :--- |
-| **For Tally** | Standardized, single-entry accounting sheet ready for Tally XML import or direct CA ledger entry. |
-| **Conso** | Master chronological audit trail merging all transactions across all accounts with running balances. |
-| **Bank Summary** | Institutional summary listing Opening Balance, Total Debits, Total Credits, and Closing Balance per bank. |
-| **Monthly Pivot** | Matrix breakdown of monthly expenditures aggregated by accounting head and category. |
-| **Bank Tabs** | Dedicated worksheets for each individual account (`HDFC 1001`, `SBI 2002`, etc.) with classification tags. |
-| **Colour Legend** | Visual reference key explaining confidence scoring tiers and flag statuses. |
+| **Per-Bank Tabs** (`HDFC 5413`, `SBI 1227`, etc.) | Colour-coded bank ledgers with a top category legend and 3-tier confidence cell colouring (`>= 0.85` Green, `0.60–0.84` Amber, `< 0.60` Red). |
+| **`Tally Vouchers`** | Standardized, chronologically sorted single-entry ledger across all accounts with `Review Remarks` and `Pivot Category` columns. |
+| **`Combined Bank Book`** | Unified running ledger across all banks with top `SUBTOTAL` formulas. |
+| **`Bank Summary`** | Live `SUMIFS` narration summary (Total Credit & Total Debit per label), Opening & Closing Balance reconciliation per account, and Confidence Band statistics. |
+| **`Monthly Cash Flow Pivot`** | Interactive month-by-month Cash Flow matrix with **Bank Filter Toggles** (`TRUE`/`FALSE` dropdowns) separating Payments/Expenses, Receipts/Income, Self-Transfers (`Contra`), and **`Suspense / Pending Human Review`**. |
+| **`Credit Card Book`** | Optional itemised Credit Card statement sheet with monthly subtotals and category totals. |
+| **`Classification Legend`** | Visual audit reference listing all narration labels, colour fills, and Indian Income Tax descriptions. |
 
 ---
 
-## Convenience Runners & Startup Scripts
+## User Flows
 
-- **Start FastAPI Service (Windows PowerShell)**:
-  ```powershell
-  .\scripts\start_api.ps1
-  ```
-- **Run Unit Tests (Full 29-test Suite)**:
-  ```powershell
-  .venv\Scripts\python -m unittest discover -s src/tax_automation/tests
-  ```
+### 1. Routine Financial Year Processing (Existing Entity)
 
----
-
-## Credential & Encryption Management
-
-For statements secured by bank passwords (e.g., statement PDFs/Excels):
-1. Add passwords to your local `.env` file:
+1. **Place Raw Statements**: Drop downloaded bank statements (`.xlsx`, `.xls`, `.csv`, `.pdf`) into `data/<entity>/<FY>/input/bank_statements/`.
+2. **Update Consolidation Map**: Map filenames to worksheet names and optional password env vars in `config/consolidation/<entity>_<fy>.json`.
+3. **Run Pipeline**:
    ```bash
-   ENTITY_SBI_PASSWORD="YOUR_PASSWORD_HERE"
+   # Via REST API:
+   curl -X POST "http://localhost:8000/pipeline/aayush/FY26/run-all"
    ```
-2. Reference the variable name in `config/consolidation/<entity>_<fy>.json`:
+   Or via Python:
+   ```python
+   from tax_automation.pipeline.consolidation import consolidate_entity
+   from tax_automation.pipeline.narration import process_entity_narration
+
+   consolidate_entity("aayush", "FY26")
+   process_entity_narration("aayush", "FY26")
+   ```
+4. **Verify Diagnostics**:
+   ```bash
+   curl "http://localhost:8000/diagnostics/aayush/FY26/contras"
+   curl "http://localhost:8000/diagnostics/aayush/FY26/narration-stats"
+   ```
+
+### 2. Human-in-the-Loop Review (`Unclassified - Pending Review`)
+
+```mermaid
+flowchart LR
+    A["Open narrated_ledger.xlsx"] --> B["Check 'Monthly Cash Flow Pivot'\nLook at 'Suspense / Pending Human Review' row"]
+    B --> C["Filter 'Tally Vouchers' sheet by:\nNarration = 'Unclassified - Pending Review'\nor Confidence < 0.60"]
+    C --> D{"Recurring pattern\nor one-off?"}
+    D -- "UPI Merchant" --> E["Add keyword to\nconfig/merchants.json"]
+    D -- "Universal Pattern" --> F["Add rule to\nconfig/rules_common.json"]
+    D -- "Entity-Specific" --> G["Add to config/entities/{entity}.json\n(custom_rules / rent / family_members)"]
+    D -- "One-Off Clarification" --> H["Record note in 'Review Remarks' column\nfor CA / Tally entry"]
+    E & F & G --> I["Re-run Pipeline\nSuspense total drops to 0"]
+```
+
+### 3. Onboarding a Brand-New Taxpayer Entity (Zero Code Changes)
+
+1. **Scaffold via API** (or create `config/entities/<entity_id>.json`):
+   ```bash
+   curl -X POST "http://localhost:8000/entities" \
+     -H "Content-Type: application/json" \
+     -d '{"entity_id": "demo_entity", "display_name": "Sample Taxpayer", "pan": "XXXXX0000X", "fy": "FY26"}'
+   ```
+2. **Declare Identity, Accounts, Family & Rent** in `config/entities/demo_entity.json`:
    ```json
    {
-     "filename": "Bank_Statement.xlsx",
-     "sheet_name": "SBI",
-     "password_env_var": "ENTITY_SBI_PASSWORD"
+     "entity_id": "demo_entity",
+     "display_name": "Sample Taxpayer",
+     "self_patterns": ["SAMPLE\\s*TAXPAYER"],
+     "self_vpas": ["sample@upi"],
+     "family_members": [
+       {
+         "name": "Spouse Name",
+         "relationship": "Spouse",
+         "account_head": "Spouse Name",
+         "patterns": ["SPOUSE\\s*NAME"]
+       }
+     ],
+     "rent": {
+       "landlords": ["LANDLORD NAME"],
+       "vpas": [],
+       "keywords": ["\\bRENT\\b"]
+     },
+     "custom_rules": [],
+     "accounts": [
+       {
+         "account_key": "hdfc",
+         "bank": "hdfc",
+         "account_id": "HDFC 1001",
+         "sheet_name": "HDFC 1001",
+         "display_name": "HDFC Bank",
+         "meta_signals_extra": ["1001"],
+         "exclude_patterns": ["HDFC\\s*SECURITIES"]
+       }
+     ]
    }
    ```
-Statements are decrypted in-memory during extraction. Credentials and decrypted files are never persisted to disk or external services.
+3. **Create Consolidation Map** at `config/consolidation/demo_entity_fy26.json` and run the pipeline.
 
----
+### 4. Onboarding a Brand-New Bank (Zero Code Changes)
 
-## Security, Privacy & Compliance Governance
+Create `config/banks/<bank_key>.json` with `meta_signals`, `header_signals`, column mappings, `alias_tokens` (used for automatic Contra synthesis), and declarative `rules`:
 
-- **100% Local Execution**: All computations occur locally. No financial records, PII, or balances leave your machine.
-- **Repository Isolation**: Pre-configured `.gitignore` rules prevent `.xlsx`, `.xls`, `.pdf`, `.csv`, and `.log` files from being staged or committed.
-- **Stateless Operation**: Does not require external database connections or cloud credentials.
-
----
-
-## Technical Specifications & Architecture
-
-For a comprehensive deep-dive into internal pipeline stages, data flow transformations, DataFrame contracts, and Mermaid architecture diagrams, see:
-👉 **[Technical Architecture & Pipeline Documentation](docs/TECHNICAL_DOCUMENTATION.md)**
-
-```text
-tax-automation/
-├── src/tax_automation/
-│   ├── api/                    # FastAPI server (routers, schemas, deps, lifespan)
-│   ├── config_loader.py        # Schema validation, path resolution, bank registry
-│   ├── core/                   # Header detection, bank fingerprinting, merchant signals, safe parsing
-│   ├── consolidators/          # In-memory decryptor & multi-sheet consolidator
-│   ├── rules/                  # Dynamic rule compiler & bank-specific rules
-│   ├── pipeline/               # Narration classification & statement pipelines
-│   ├── exporters/              # Master Excel ledger, Tally formatting, pivot tables
-│   ├── tools/                  # Diagnostics: check_contras, narration_stats
-│   └── tests/                  # 29 automated unit & integration tests
-├── config/
-│   ├── entities/               # Taxpayer profiles (declarative JSON configs + custom rules + pivot overrides)
-│   ├── banks/                  # Reusable bank schemas + declarative bank rules + alias tokens (hdfc, sbi, kotak, etc.)
-│   ├── consolidation/          # Multi-statement file-to-sheet maps
-│   ├── schemas/                # JSON Schema specifications (entity.json, rules.json)
-│   ├── rules_common.json       # Universal Indian merchant/banking rules (with is_fallback flags)
-│   ├── merchants.json          # UPI merchant keyword dictionary
-│   ├── pivot_category_map.json # Monthly Pivot row categories & narration/head mappings
-│   ├── colour_legend.json      # Workbook Colour Legend group definitions
-│   ├── exporter_theme.json     # Palette, column renames, output sheet names, input globs
-│   ├── scoring.json            # Bank ID scoring weights & confidence band thresholds
-│   └── header_keywords.json    # Auto-header scan limit & date/amount keywords
-├── data/                       # Local data hierarchy (gitignored financial data)
-│   ├── <entity_id>/<FY>/
-│   │   ├── input/bank_statements/
-│   │   └── output/
-│   └── README.md
-└── scripts/
-    └── start_api.ps1           # 1-click FastAPI startup script
+```json
+{
+  "bank_key": "pnb",
+  "display_name": "Punjab National Bank",
+  "rules_module": null,
+  "alias_tokens": ["\\bPNB\\b", "\\bPUNB\\b", "PUNJAB\\s*NATIONAL\\s*BANK"],
+  "rules": [
+    {
+      "label": "Bank Interest",
+      "account_head": "Interest on Savings A/c (80TTA)",
+      "pattern": "INT\\.PD|INTEREST\\s*CREDIT",
+      "direction": "CR",
+      "confidence": 0.95
+    }
+  ],
+  "meta_signals": ["PUNJAB NATIONAL BANK", "PUNB"],
+  "header_signals": ["Transaction Date", "Withdrawal", "Deposit", "Balance"],
+  "col_date": "Transaction Date",
+  "col_particulars": "Narration",
+  "col_narration_h": "Narration",
+  "col_dr": "Withdrawal",
+  "col_cr": "Deposit",
+  "col_balance": "Balance",
+  "col_ref": "Cheque No.",
+  "col_value_date": null
+}
 ```
 
-### Verification & Testing Suite
+---
+
+## Configuration File Reference ("Where Do I Edit What?")
+
+| Goal | JSON File to Edit |
+| :--- | :--- |
+| Add/edit a taxpayer entity, bank accounts, family members, landlords, or custom rules | `config/entities/<entity>.json` |
+| Map raw bank statement files and password env vars for a Financial Year | `config/consolidation/<entity>_<fy>.json` |
+| Add a new bank or modify bank-specific rules, header signals, or alias tokens | `config/banks/<bank>.json` |
+| Add a universal classification rule across all entities and banks | `config/rules_common.json` |
+| Add a new UPI merchant keyword (`swiggy`, `zepto`, `bescom`, etc.) | `config/merchants.json` |
+| Customize Monthly Cash Flow Pivot categories or narration/head mappings | `config/pivot_category_map.json` |
+| Rename Excel worksheet tabs, column headers (`Review Remarks`), hidden columns, or colours | `config/exporter_theme.json` |
+| Update the `Classification Legend` worksheet groups and descriptions | `config/colour_legend.json` |
+| Adjust bank identification weights or High/Medium/Low confidence thresholds | `config/scoring.json` |
+| Configure Credit Card categories, merchant overrides, or PDF regex patterns | `config/cc_categories.json` |
+
+---
+
+## Setup, API & Verification
 
 ```bash
-# Execute unit test suite
+# 1. Create and activate virtual environment
+python -m venv .venv
+# Windows PowerShell:
+.venv\Scripts\Activate.ps1
+# Linux / macOS:
+source .venv/bin/activate
+
+# 2. Install dependencies and package
+pip install -r requirements.txt
+pip install -e .
+
+# 3. Start FastAPI server (Swagger UI at http://localhost:8000/docs)
+python -m uvicorn tax_automation.api.main:app --port 8000 --reload
+
+# 4. Run unit test suite (33 tests) & code quality checks
 python -m unittest discover -s src/tax_automation/tests
-
-# Verify formatting compliance (Black)
-black --check src
-
-# Verify code quality & standards (Flake8)
 flake8 src --max-line-length=88
+black --check src
 ```
+
+For deep-dive technical specifications and DataFrame contracts, see **[Technical Architecture & Pipeline Documentation](docs/TECHNICAL_DOCUMENTATION.md)**.
 
 ---
 
