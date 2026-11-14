@@ -242,3 +242,17 @@ def bank_summary(entity_id: str, fy: str) -> BankSummaryResponse:
     clean_rows = [{k: _clean(v) for k, v in row.items()} for row in rows]
 
     return BankSummaryResponse(entity_id=eid, fy=f, rows=clean_rows)
+
+
+@router.get(
+    "/transfers/{fy}",
+    summary="Reconcile transfers between configured entities with available ledgers",
+)
+def reconcile_entity_transfers(fy: str, days: int = 3) -> dict:
+    """Return proposed one-to-one pairs and classification/coverage exceptions."""
+    from tax_automation.tools.reconcile_transfers import reconcile
+
+    try:
+        return reconcile(fy.upper(), days=days)
+    except (ValueError, FileNotFoundError) as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc

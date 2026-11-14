@@ -1,5 +1,12 @@
 [
   {
+    "label": "MF Redemption",
+    "account_head": "Mutual Fund Investments",
+    "pattern": "\\bMUTUAL\\s*FUND\\b.*\\b(?:RED|REDEMPTION)\\b",
+    "direction": "CR",
+    "confidence": 0.93
+  },
+  {
     "label": "SIP",
     "account_head": "Mutual Fund Investments",
     "pattern": "INDIANESIGN",
@@ -159,8 +166,9 @@
   },
   {
     "label": "Cash Withdrawal",
+    "pre_identity": true,
     "account_head": "Cash",
-    "pattern": "ATW[-/]|ATM\\s*CASH|CWDR|CASH\\s*WITHD|^ATL/|^ATW/",
+    "pattern": "ATW[-/]|ATM[- /\\s]*(?:CASH|WDL|WITHDRAWAL)|CWDR|CASH\\s*WITHD|^ATL/|^ATW/",
     "direction": "DR",
     "confidence": 0.92
   },

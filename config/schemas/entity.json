@@ -25,6 +25,7 @@
       "type": "string",
       "description": "Permanent Account Number (optional)"
     },
+    "identity_aliases": { "type": "array", "items": { "type": "string" } },
     "self_patterns": {
       "type": "array",
       "items": { "type": "string" },
@@ -43,6 +44,7 @@
         "required": ["name", "patterns", "account_head"],
         "properties": {
           "name": { "type": "string" },
+          "identity_aliases": { "type": "array", "items": { "type": "string" } },
           "relationship": { "type": "string" },
           "patterns": { "type": "array", "items": { "type": "string" } },
           "account_head": { "type": "string" }
@@ -109,6 +111,12 @@
           "account_id": { "type": "string" },
           "sheet_name": { "type": "string" },
           "display_name": { "type": "string" },
+          "account_number": {
+            "type": "string", "pattern": "^[0-9]{9,}$",
+            "description": "Full account number for reconciliation; never a suffix"
+          },
+          "vpas": { "type": "array", "items": { "type": "string" } },
+          "sheet_aliases": { "type": "array", "items": { "type": "string" } },
           "meta_signals_extra": { "type": "array", "items": { "type": "string" } },
           "exclude_patterns": {
             "type": "array",

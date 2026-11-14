@@ -1,5 +1,6 @@
 {
   "bank_key": "hdfc",
+  "ifsc_prefixes": ["HDFC"],
   "display_name": "HDFC Bank",
   "rules_module": null,
   "alias_tokens": ["\\bHDFC\\b"],

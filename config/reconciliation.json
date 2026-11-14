@@ -1,0 +1,33 @@
+{
+  "non_transfer_patterns": [
+    "\\bACH\\s*D[- ]",
+    "\\b(?:SIP|MUTUAL\\s*FUND|INSURANCE\\s*PREMIUM)\\b",
+    "\\bATM\\b|\\bATW[-/]|\\bATL/|\\bCWDR\\b|\\bCASH\\s*WITHD"
+  ],
+  "purpose_patterns": {
+    "repayment": "\\bREPAYMENT\\b|\\b(?:MONEY|MNY|M)\\s*(?:RETURN|RTN|RTRN)\\b",
+    "gift": "\\bGIFT\\b",
+    "investment": "\\bSIP\\b|\\bMUTUAL\\s*FUND\\b"
+  },
+  "incompatible_purposes": [
+    [
+      "repayment",
+      "gift"
+    ],
+    [
+      "investment",
+      "repayment"
+    ]
+  ],
+  "narration_reference_patterns": [
+    "(?<![A-Z0-9])[A-Z]{4}[A-Z0-9]{0,2}[0-9]{10,}(?![A-Z0-9])",
+    "(?<![A-Z0-9])[0-9]{12}(?![A-Z0-9])"
+  ],
+  "transfer_pattern": "\\b(?:NEFT|IMPS|UPI|INB|TPT|TPFT|IFT|TRF|TFR|TRANSFER)\\b",
+  "counterparty_bank_patterns": [
+    {
+      "direction": "DR",
+      "pattern": "NEFT\\s*DR-([A-Z]{4})0[A-Z0-9]{6}"
+    }
+  ]
+}

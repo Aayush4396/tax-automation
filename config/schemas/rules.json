@@ -10,6 +10,7 @@
         "_comment": { "type": "string" },
         "label": { "type": "string", "description": "Human-readable narration label" },
         "account_head": { "type": "string", "description": "Accounting ledger / tax head" },
+        "pre_identity": { "type": "boolean", "default": false },
         "layer": { "type": "string", "enum": ["entity", "common"], "default": "entity" },
         "pattern": { "type": "string", "description": "Case-insensitive regex matched against narration" },
         "patterns_all": { "type": "array", "items": { "type": "string" }, "description": "All regex patterns must match" },

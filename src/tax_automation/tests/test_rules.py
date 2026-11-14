@@ -164,6 +164,17 @@ class TestRulesEngine(unittest.TestCase):
         self.assertTrue(match_fn("NEFT TEST PERSON HDFC 5413", 1000.0, 0.0))
         self.assertFalse(match_fn("NEFT TEST PERSON HDFC SECURITIES LTD", 1000.0, 0.0))
 
+    def test_generic_mutual_fund_redemption_requires_credit_and_explicit_text(self):
+        from tax_automation.pipeline.narration import classify_transaction
+
+        text = "FT- SAMPLE MUTUAL FUND RED A/C - RED - SETTLEMENT"
+        self.assertEqual(
+            classify_transaction(text, 0, 12345, "aayush", "hdfc")[0], "MF Redemption"
+        )
+        self.assertNotEqual(
+            classify_transaction(text, 12345, 0, "aayush", "hdfc")[0], "MF Redemption"
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

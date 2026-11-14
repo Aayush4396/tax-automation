@@ -62,3 +62,10 @@ dist/
 .env.development
 .env.test
 .env.production
+# Local reconciliation reports contain financial transactions
+data/reconciliation/
+
+data/**/consolidation_manifest.json
+
+data/**/reviewed_corrections.json
+data/**/correction_application_audit.json

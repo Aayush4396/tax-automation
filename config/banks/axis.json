@@ -1,5 +1,6 @@
 {
   "bank_key": "axis",
+  "ifsc_prefixes": ["UTIB"],
   "display_name": "Axis Bank",
   "rules_module": null,
   "alias_tokens": ["\\bAXIS\\b", "\\bUTIB\\b"],

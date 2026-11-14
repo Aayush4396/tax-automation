@@ -15,6 +15,7 @@ Assembles runtime classification rules combining:
 from __future__ import annotations
 import importlib
 import re
+from tax_automation.core.person_identity import entity_identities, identity_matches
 from typing import Any
 
 from tax_automation.config_loader import (
@@ -122,6 +123,11 @@ def build_dynamic_contra_rules(
         return []
 
     self_regexes = [re.compile(p, re.IGNORECASE) for p in all_self_strs]
+    identities = entity_identities(entity_config)
+    identities["self"]["patterns"] = all_self_strs
+
+    def only_self(text):
+        return identity_matches(text, identities) == {"self"}
 
     # Confidence values configurable per entity; fall back to scoring.json
     from tax_automation.config_loader import get_scoring_config
@@ -182,7 +188,7 @@ def build_dynamic_contra_rules(
         # Match function: narration has self-identity AND target bank token
         def make_contra_matcher(s_regs, b_regs, x_regs):
             return lambda p, dr, cr: (
-                any(sr.search(p) for sr in s_regs)
+                only_self(p)
                 and any(br.search(p) for br in b_regs)
                 and not any(xr.search(p) for xr in x_regs)
             )
@@ -208,7 +214,13 @@ def build_dynamic_contra_rules(
 
     def make_generic_self_matcher():
         return lambda p, dr, cr: bool(
-            self_xfer_pat.search(p) or any(r.search(p) for r in upi_self_pats)
+            (
+                self_xfer_pat.search(p)
+                and not any(
+                    k.startswith("family:") for k in identity_matches(p, identities)
+                )
+            )
+            or (only_self(p) and any(r.search(p) for r in upi_self_pats))
         )
 
     contra_rules.append(
@@ -236,22 +248,26 @@ def build_dynamic_family_rules(entity_config: dict[str, Any]) -> list[tuple]:
 
     family_conf = float(entity_config.get("family_transfer_confidence", 0.90))
     rules = []
-    for member in family:
+    identities = entity_identities(entity_config)
+    for index, member in enumerate(family):
         name = member.get("name", "").strip()
         if not name:
             continue
         head = member.get("account_head", name)
-        pats = member.get("patterns", [name])
-        regexes = [re.compile(p, re.IGNORECASE) for p in pats]
 
-        def make_family_matcher(regs):
-            return lambda p, dr, cr: any(r.search(p) for r in regs)
+        def make_family_matcher(key):
+            def matches(p, dr, cr):
+                resolved = identity_matches(p, identities)
+                relatives = {k for k in resolved if k.startswith("family:")}
+                return relatives == {key}
+
+            return matches
 
         rules.append(
             (
                 f"Transfer - {name}",
                 head,
-                make_family_matcher(regexes),
+                make_family_matcher(f"family:{index}"),
                 family_conf,
             )
         )
@@ -351,23 +367,39 @@ def build_rule_chain(
 
     # Bank base rules
     account = next(
-        (a for a in entity_cfg.get("accounts", [])
-         if a["account_key"].lower() == bank_key.lower()), None
+        (
+            a
+            for a in entity_cfg.get("accounts", [])
+            if a["account_key"].lower() == bank_key.lower()
+        ),
+        None,
     )
     bank_type = account.get("bank", bank_key) if account else bank_key
     bank_base = load_bank_rules(bank_type)
 
-    # Assemble bank-level rules (evaluated before common rules)
+    # Structural cash rules must win before identity-based transfer synthesis.
+    common = get_declarative_common_rules()
+    if any(r.get("pre_identity") and r.get("is_fallback") for r in common):
+        raise ValueError("pre_identity rules cannot be fallback rules")
+    structural_rules = [
+        _compile_declarative_rule(r) for r in common if r.get("pre_identity")
+    ]
     full_bank_rules = (
-        custom_rules + rent_rules + contra_rules + family_rules + bank_base
+        structural_rules
+        + custom_rules
+        + rent_rules
+        + contra_rules
+        + family_rules
+        + bank_base
     )
 
     # Universal common rules, preceded by entity common-layer rules.
     # FALLBACK_RULES (generic UPI / "What is this?") are returned separately
     # so the pipeline can insert merchant detection before them.
-    common = get_declarative_common_rules()
     full_main_common = entity_common_rules + [
-        _compile_declarative_rule(r) for r in common if not r.get("is_fallback")
+        _compile_declarative_rule(r)
+        for r in common
+        if not r.get("is_fallback") and not r.get("pre_identity")
     ]
     full_fallback = [
         _compile_declarative_rule(r) for r in common if r.get("is_fallback")
