@@ -8,6 +8,7 @@ applies dynamic & bank rule chains, and generates the master Excel ledger.
 
 from __future__ import annotations
 import re
+import json
 from pathlib import Path
 from typing import Any, Tuple
 
@@ -172,6 +173,13 @@ def process_entity_narration(
     Returns:
         Path to the generated output file
     """
+    from tax_automation.core.reviewed_corrections import (
+        load_corrections,
+        apply_corrections,
+    )
+
+    corrections = load_corrections(entity_id, fy)
+    correction_audit = []
     config = get_entity_config(entity_id)
     theme_cfg = get_exporter_theme_config()
     bank_registry = resolve_entity_bank_registry(entity_id)
@@ -264,6 +272,29 @@ def process_entity_narration(
             str(c).strip() if c is not None else "" for c in sheet_rows[hdr_idx]
         ]
 
+        df_sheet = pd.DataFrame(sheet_rows[hdr_idx + 1 :], columns=header_vals)
+        # Some statements use one Amount column plus a direction column. The
+        # direction occurrence is explicit because balance signs may repeat it.
+        if (
+            bank_cfg.get("col_amount") in header_vals
+            and bank_cfg.get("col_direction") in header_vals
+            and not all(bank_cfg.get(k) in header_vals for k in ("col_dr", "col_cr"))
+        ):
+            direction_positions = [
+                i for i, c in enumerate(header_vals) if c == bank_cfg["col_direction"]
+            ]
+            occurrence = bank_cfg.get("direction_column_occurrence", 0)
+            direction = df_sheet.iloc[:, direction_positions[occurrence]].astype(str)
+            direction = direction.str.strip().str.upper()
+            amounts = df_sheet[bank_cfg["col_amount"]].map(safe_float)
+            dated = df_sheet[bank_cfg["col_date"]].notna()
+            invalid = dated & (amounts != 0) & ~direction.isin(["DR", "CR"])
+            if invalid.any():
+                raise ValueError(f"Sheet {sheet_name}: invalid amount direction")
+            df_sheet[bank_cfg["col_dr"]] = amounts.where(direction == "DR", 0)
+            df_sheet[bank_cfg["col_cr"]] = amounts.where(direction == "CR", 0)
+            header_vals = list(df_sheet.columns)
+
         for field in ("col_date", "col_particulars", "col_dr", "col_cr"):
             mapping = bank_cfg.get(field)
             if mapping is None and field in ("col_dr", "col_cr"):
@@ -273,13 +304,6 @@ def process_entity_narration(
                 raise ValueError(
                     f"Sheet {sheet_name!r}: missing column {field}: {mapping}"
                 )
-
-        # Extract data rows
-        start_row_idx = hdr_idx + 1
-        data_rows = sheet_rows[start_row_idx:]
-        df_sheet = pd.DataFrame(
-            data_rows, columns=header_vals[: len(sheet_rows[hdr_idx])]
-        )
 
         # Apply classification to each row
         rule_chain = build_rule_chain(entity_id, bank_key)
@@ -312,6 +336,7 @@ def process_entity_narration(
                 }
             )
 
+        correction_audit.extend(apply_corrections(records, corrections))
         df_narrated = pd.DataFrame(records, columns=NARRATED_COLUMNS)
         write_bank_sheet(
             wb_out,
@@ -320,6 +345,12 @@ def process_entity_narration(
             bank_cfg.get("display_name", sheet_name),
         )
         bank_ledgers.append(df_narrated)
+
+    for correction in corrections:
+        if sum(a["id"] == correction["id"] for a in correction_audit) != 1:
+            raise ValueError(
+                f"Reviewed correction {correction['id']} is stale/ambiguous"
+            )
 
     if not bank_ledgers:
         print("Warning: No valid bank sheets identified.")
@@ -361,5 +392,9 @@ def process_entity_narration(
     # Save output to single deterministic destination
     output_path.parent.mkdir(parents=True, exist_ok=True)
     wb_out.save(output_path)
+    if correction_audit:
+        (output_path.parent / "correction_application_audit.json").write_text(
+            json.dumps(correction_audit, indent=2), encoding="utf-8"
+        )
     print(f"[OK] Narration successfully saved to {output_path}")
     return output_path

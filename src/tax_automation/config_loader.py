@@ -135,6 +135,7 @@ def resolve_entity_bank_registry(entity_id: str) -> dict[str, dict[str, Any]]:
             )
             merged["sheet_name"] = acc.get("sheet_name", acc_key.title())
             merged["bank_type"] = bank_type
+            merged["sheet_aliases"] = acc.get("sheet_aliases", [])
             merged["account_signals"] = acc.get("meta_signals_extra", [])
 
             # Extend metadata signals with account-specific branch/id signals

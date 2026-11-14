@@ -78,16 +78,20 @@ def identify_bank(
     )
 
     # Explicit consolidation sheet names are authoritative account bindings.
-    exact = [key for key, cfg in bank_registry.items()
-             if sheet_name and
-             cfg.get("sheet_name", "").casefold() == sheet_name.casefold()]
+    exact = [
+        key
+        for key, cfg in bank_registry.items()
+        if sheet_name and cfg.get("sheet_name", "").casefold() == sheet_name.casefold()
+    ]
     if len(exact) == 1:
         return exact[0], 1.0
     if len(exact) > 1:
         return "unknown", 0.0
-    specific = [key for key, cfg in bank_registry.items()
-                if any(str(sig).lower() in meta_text
-                       for sig in cfg.get("account_signals", []))]
+    specific = [
+        key
+        for key, cfg in bank_registry.items()
+        if any(str(sig).lower() in meta_text for sig in cfg.get("account_signals", []))
+    ]
     if len(specific) == 1:
         return specific[0], 1.0
 
