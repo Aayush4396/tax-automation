@@ -301,3 +301,87 @@ For deep-dive technical specifications and DataFrame contracts, see **[Technical
 ## License
 
 MIT License. Free to use for personal, family office, and commercial accounting workflows.
+
+
+## Cross-entity transfer reconciliation
+
+Run the read-only diagnostic against existing narrated ledgers:
+
+```powershell
+python -m tax_automation.tools.reconcile_transfers --fy FY26
+```
+
+Open `data/reconciliation/FY26/transfer_reconciliation.html` to filter proposed
+matches, classification exceptions, ambiguous candidates and missing counterparts.
+The companion JSON contains full source file, sheet and row evidence. These local
+reports contain private transactions and are excluded from Git.
+
+The API also exposes `GET /diagnostics/transfers/FY26?days=3`.
+Use CLI `--entities aayush ajay sunita` to restrict profiles, `--days` to change the
+posting-date window, and `--output` to choose a report directory.
+
+Matching requires exact amounts, opposite directions, a date gap within the
+window, and raw identity/account evidence. It separates inter-entity transfers
+from self-transfers between different accounts. Shared references have highest
+priority, then full configured accounts/VPAs, then narration identity alone.
+Identity-only pairs are marked `provisional`, even if both labels agree.
+Higher-tier ties remain unresolved; lower-tier evidence cannot break them.
+Matched entries are removed from weaker candidate lists before exceptions are
+reported. Existing classifications alone never establish a match.
+
+Policy lives in `config/reconciliation.json`: reference extraction patterns,
+non-transfer description exclusions, recognized purposes/incompatible purpose
+pairs, and direction-specific counterparty bank parsing. Banks can declare
+`ifsc_prefixes` in `config/banks/<bank>.json`. Only configured, structurally
+recognized bank codes reject a destination; arbitrary mentions of a bank in text
+do not identify an account. Description checks use patterns, not unrestricted
+natural-language understanding. Reference conflicts are handled conservatively;
+bank formats with different local references may need a parser policy extension.
+
+Accounts optionally declare a full `account_number` (at least nine digits),
+`vpas`, and `sheet_aliases`. Masked suffixes never identify an owner or generate
+rules. Exact sheet names/aliases bind accounts; a bare bank-named legacy tab can
+bind only when the profile has exactly one account at that bank. Duplicate or
+unresolved identities remain unbound. Separate legal entities such as HUFs should
+have separate profiles. Family members can declare `entity_id` for explicit links.
+
+Exception statuses distinguish `multiple_plausible_counterparts`,
+`counterparty_account_unavailable` (a full identifier identifies a missing account),
+`counterparty_coverage_incomplete` (missing configured accounts or date coverage),
+`no_matching_entry`, `self_transfer_no_counterpart`, and
+`rejected_weaker_candidates` (lookalikes, not confirmed family transfers).
+Coverage is a warning based on observed rows; it does not prove that statements
+are complete within their first/last transaction dates.
+
+The HTML report separates scopes and exposes evidence and rejection reasons.
+The companion JSON includes the matching-policy snapshot and
+`proposed_corrections`: original classification, suggested classification,
+source/counterpart row IDs, evidence and `applied: false`. No source files or
+classification rules are changed. Review proposals against source statements;
+`matched_classification_agrees` checks accounting labels for consistency, not tax
+treatment. Legacy date errors are not repaired by reconciliation. Transactions
+without recognizable identity or full account/VPA evidence on either side may
+remain undiscovered. Reports contain sensitive transactions and must stay local.
+
+
+Excel consolidation imports all non-empty sheets by default, including hidden
+sheets. See [onboarding](docs/ONBOARDING.md) for explicit selection/exclusions and
+sheet mappings. The generated consolidation manifest records every sheet.
+Reconciliation filters rows to the financial year (FY26/FY2026 means
+1 April 2025 through 31 March 2026). Add CLI `--person-to-person` to restrict
+report output to transfers between entities.
+
+
+Run `python -m tax_automation.tools.audit_coverage --fy FY26` to inventory every
+source workbook sheet and compare it with the ledger. The local HTML/JSON report
+separates missing inputs, account aliases, non-monetary statements, parser errors
+and generic descriptions. Duplicate raw/aggregate workbooks are not added together.
+A source/ledger difference is a review finding, not proof of a missing transaction.
+
+Explicitly reviewed corrections are stored locally in
+`data/<entity>/<FY>/output/reviewed_corrections.json` and excluded from Git. They
+require approval plus account, date, amount, direction, payment reference and a
+narration fingerprint. Generation replays them after classification and fails on
+stale/duplicate matches. `update_existing_ledger` applies the same correction to
+bank/Tally/combined copies while preserving formulas and review notes, with a local
+application audit. Excel recalculates formula summaries on opening the workbook.
