@@ -20,3 +20,7 @@ dependencies = [
     "python-multipart>=0.0.9",
 ]
 
+
+[tool.black]
+target-version = ["py310"]
+required-version = "26.10.0"

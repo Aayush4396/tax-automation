@@ -1,6 +1,8 @@
 name: Test
 
 on: [push, pull_request]
+permissions:
+  contents: read
 
 jobs:
   test:
@@ -31,7 +33,7 @@ jobs:
           flake8 src --count --statistics --max-line-length=88
       - name: Check formatting with black
         run: |
-          pip install black
+          pip install black==26.10.0
           black --check src
 
   deploy:
