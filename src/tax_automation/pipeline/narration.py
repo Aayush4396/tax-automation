@@ -91,6 +91,7 @@ def classify_transaction(
     cr: float,
     entity_id: str,
     bank_key: str,
+    rule_chain: tuple | None = None,
 ) -> tuple[str, str, float]:
     """Classifies a transaction by running the dynamic rule chain.
 
@@ -113,8 +114,8 @@ def classify_transaction(
     cr_val = safe_float(cr)
 
     # Load assembled rules for this entity and bank
-    bank_rules, main_common_rules, fallback_rules = build_rule_chain(
-        entity_id, bank_key
+    bank_rules, main_common_rules, fallback_rules = (
+        rule_chain if rule_chain is not None else build_rule_chain(entity_id, bank_key)
     )
 
     # 1. Apply bank & dynamic entity rules (high priority)
@@ -123,8 +124,8 @@ def classify_transaction(
             label, head, fn, conf = rule
             if fn(p, dr_val, cr_val):
                 return label, head, conf
-        except Exception:
-            continue
+        except Exception as exc:
+            raise ValueError(f"Rule evaluation failed: {rule[0]}") from exc
 
     # 2. Apply main common rules (all non-fallback rules)
     for rule in main_common_rules:
@@ -132,8 +133,8 @@ def classify_transaction(
             label, head, fn, conf = rule
             if fn(p, dr_val, cr_val):
                 return label, head, conf
-        except Exception:
-            continue
+        except Exception as exc:
+            raise ValueError(f"Rule evaluation failed: {rule[0]}") from exc
 
     # 3. Merchant detection for UPI transactions (runs between main and fallback rules)
     if _UPI_PAT.search(p):
@@ -147,8 +148,8 @@ def classify_transaction(
             label, head, fn, conf = rule
             if fn(p, dr_val, cr_val):
                 return label, head, conf
-        except Exception:
-            continue
+        except Exception as exc:
+            raise ValueError(f"Rule evaluation failed: {rule[0]}") from exc
 
     # 5. Absolute fallback — no rule matched at all
     return "Unclassified - Pending Review", "Suspense A/c (Pending Review)", 0.0
@@ -254,12 +255,24 @@ def process_entity_narration(
         hdr_idx = find_header_row(sheet_rows)
         bank_key, _ = identify_bank(sheet_rows, hdr_idx, bank_registry, sheet_name)
         if bank_key == "unknown":
-            continue
+            raise ValueError(
+                f"Cannot resolve account for sheet {sheet_name!r}; check signals"
+            )
 
         bank_cfg = bank_registry.get(bank_key, {})
         header_vals = [
             str(c).strip() if c is not None else "" for c in sheet_rows[hdr_idx]
         ]
+
+        for field in ("col_date", "col_particulars", "col_dr", "col_cr"):
+            mapping = bank_cfg.get(field)
+            if mapping is None and field in ("col_dr", "col_cr"):
+                continue
+            choices = mapping if isinstance(mapping, list) else [mapping]
+            if not any(c in header_vals for c in choices):
+                raise ValueError(
+                    f"Sheet {sheet_name!r}: missing column {field}: {mapping}"
+                )
 
         # Extract data rows
         start_row_idx = hdr_idx + 1
@@ -269,6 +282,7 @@ def process_entity_narration(
         )
 
         # Apply classification to each row
+        rule_chain = build_rule_chain(entity_id, bank_key)
         records: list[dict[str, Any]] = []
         for _, row in df_sheet.iterrows():
             particulars = str(get_col_value(row, bank_cfg.get("col_particulars")) or "")
@@ -278,7 +292,7 @@ def process_entity_narration(
                 continue
 
             label, head, conf = classify_transaction(
-                particulars, dr_val, cr_val, entity_id, bank_key
+                particulars, dr_val, cr_val, entity_id, bank_key, rule_chain
             )
             records.append(
                 {

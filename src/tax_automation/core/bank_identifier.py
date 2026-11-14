@@ -77,6 +77,21 @@ def identify_bank(
         if c is not None and str(c).strip() not in ("", "nan", "none")
     )
 
+    # Explicit consolidation sheet names are authoritative account bindings.
+    exact = [key for key, cfg in bank_registry.items()
+             if sheet_name and
+             cfg.get("sheet_name", "").casefold() == sheet_name.casefold()]
+    if len(exact) == 1:
+        return exact[0], 1.0
+    if len(exact) > 1:
+        return "unknown", 0.0
+    specific = [key for key, cfg in bank_registry.items()
+                if any(str(sig).lower() in meta_text
+                       for sig in cfg.get("account_signals", []))]
+    if len(specific) == 1:
+        return specific[0], 1.0
+
+    tied = False
     best_key = "unknown"
     best_score = 0.0
 
@@ -112,11 +127,14 @@ def identify_bank(
             if header_score >= _BOOST_MIN_HEADER and meta_score >= _BOOST_MIN_META:
                 final_score = max(final_score, _BOOST_FLOOR)
 
+        if final_score == best_score and final_score > 0:
+            tied = True
         if final_score > best_score:
+            tied = False
             best_score = final_score
             best_key = bank_key
 
-    if best_score < _MIN_THRESHOLD:
+    if tied or best_score < _MIN_THRESHOLD:
         return "unknown", best_score
 
     return best_key, round(best_score, 3)

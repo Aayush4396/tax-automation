@@ -1,6 +1,6 @@
 # Tax Automation System
 
-**100% Config-Driven Financial Statement Consolidation, 8-Tier Transaction Classification, and Indian Taxation & Tally Ledger Engine.**
+**Config-driven financial statement consolidation, transaction classification, and Indian tax-preparation ledgers.**
 
 ---
 
@@ -8,7 +8,7 @@
 
 The **Tax Automation System** is an end-to-end accounting and Indian tax-preparation platform designed for taxpayers, family offices, and Chartered Accountants (CAs). It automates the ingestion of raw, multi-format bank and credit card statements (`.xlsx`, `.xls`, `.csv`, encrypted `.pdf`), resolves cryptic banking and UPI narrations into standardized Indian Income Tax & Tally accounting heads, reconciles inter-account self-transfers (`Contra`), isolates unclear transactions into a dedicated **`Suspense / Pending Human Review`** workflow, and generates formula-driven Excel workbooks ready for tax filing and Tally import.
 
-Built around a **100% zero-code, declarative JSON architecture**, adding or updating a taxpayer entity, bank, classification rule, merchant keyword, or Monthly Pivot category requires **zero changes to Python source code**.
+Taxpayer profiles, supported tabular bank layouts, narration rules, merchant keywords, and report categories are configured in JSON. New extraction structures and rules that need transaction history require parser or engine development. See [Onboarding and validation](docs/ONBOARDING.md) for supported formats and failure behavior.
 
 ---
 

@@ -10,23 +10,11 @@ from __future__ import annotations
 import re
 from tax_automation.config_loader import get_merchants_config
 
-# Load merchant configuration dynamically
-_raw_merchants = get_merchants_config()
-
-MERCHANT_MAP: list[tuple[str, tuple[str, str, float]]] = [
-    (item["keyword"], (item["label"], item["account_head"], float(item["confidence"])))
-    for item in _raw_merchants
-]
-
-_COMPILED: list[tuple[re.Pattern, tuple[str, str, float]]] = [
-    (re.compile(re.escape(kw), re.IGNORECASE), val) for kw, val in MERCHANT_MAP
-]
-
 
 def detect_merchant(particulars: str) -> tuple[str, str, float] | None:
     """Scan the particulars text for a known merchant keyword."""
     p = str(particulars)
-    for pattern, val in _COMPILED:
-        if pattern.search(p):
-            return val
+    for item in get_merchants_config():
+        if re.search(re.escape(item["keyword"]), p, re.IGNORECASE):
+            return item["label"], item["account_head"], float(item["confidence"])
     return None

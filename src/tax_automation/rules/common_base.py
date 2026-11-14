@@ -26,7 +26,13 @@ def _compile_declarative_rule(r_dict: dict) -> tuple:
     head = r_dict["account_head"]
     pat_str = r_dict.get("pattern")
     direction = r_dict.get("direction", "ANY").upper()
+    if direction not in ("DR", "CR", "ANY", "BOTH"):
+        raise ValueError(f"Invalid direction: {direction}")
+    if direction == "BOTH":
+        direction = "ANY"
     conf = float(r_dict.get("confidence", 0.90))
+    if not 0 <= conf <= 1:
+        raise ValueError("Confidence must be between 0 and 1")
     exact_amount = float(r_dict["exact_amount"]) if "exact_amount" in r_dict else None
     min_dr = float(r_dict["min_dr"]) if "min_dr" in r_dict else None
     max_dr = float(r_dict["max_dr"]) if "max_dr" in r_dict else None

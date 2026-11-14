@@ -20,14 +20,11 @@ from typing import Any
 from tax_automation.config_loader import (
     get_bank_schema,
     get_entity_config,
+    get_declarative_common_rules,
 )
 from tax_automation.rules.common_base import (
-    RULES_COMMON,
-    FALLBACK_RULES,
     _compile_declarative_rule,
 )
-
-_BANK_RULES_CACHE: dict[str, list[tuple]] = {}
 
 
 def _get_bank_alias_tokens(bank_key: str) -> list[str]:
@@ -59,8 +56,6 @@ def load_bank_rules(bank_key: str, rules_module: str | None = None) -> list[tupl
        in the JSON schema).
     """
     key = bank_key.lower()
-    if key in _BANK_RULES_CACHE and rules_module is None:
-        return _BANK_RULES_CACHE[key]
 
     schema = get_bank_schema(key)
     rules: list[tuple] = []
@@ -72,8 +67,8 @@ def load_bank_rules(bank_key: str, rules_module: str | None = None) -> list[tupl
         for r_dict in declarative_rules:
             try:
                 rules.append(_compile_declarative_rule(r_dict))
-            except Exception:
-                continue
+            except Exception as exc:
+                raise ValueError(f"Invalid rule in bank {key}: {r_dict}") from exc
 
     # 2. Load optional Python module rules if configured or no declarative key
     module_name = rules_module or schema.get("rules_module")
@@ -92,8 +87,6 @@ def load_bank_rules(bank_key: str, rules_module: str | None = None) -> list[tupl
         except (ImportError, AttributeError):
             pass
 
-    if rules_module is None:
-        _BANK_RULES_CACHE[key] = rules
     return rules
 
 
@@ -115,7 +108,7 @@ def build_dynamic_contra_rules(
 
     self_pats = entity_config.get("self_patterns", [])
     self_vpas = entity_config.get("self_vpas", [])
-    all_self_strs = list(self_pats) + list(self_vpas)
+    all_self_strs = list(self_pats) + [re.escape(v) for v in self_vpas]
 
     if not all_self_strs:
         name = entity_config.get("display_name", "")
@@ -171,6 +164,12 @@ def build_dynamic_contra_rules(
         for d in acc_digits:
             bank_tokens.append(re.escape(d))
 
+        same_bank = sum(
+            a.get("bank", a.get("account_key", "")).lower() == tgt_bank
+            for a in accounts
+        )
+        if same_bank > 1:
+            bank_tokens = [re.escape(d) for d in acc_digits]
         bank_regexes = [re.compile(t, re.IGNORECASE) for t in bank_tokens]
 
         # Optional per-account exclusions (e.g. "HDFC SECURITIES" must not be
@@ -313,8 +312,8 @@ def build_dynamic_custom_rules(
         try:
             compiled = _compile_declarative_rule(r_dict)
             rules.append(compiled)
-        except Exception:
-            continue
+        except Exception as exc:
+            raise ValueError(f"Invalid entity rule: {r_dict}") from exc
     return rules
 
 
@@ -341,11 +340,7 @@ def build_rule_chain(
     Layer 6: Entity custom rules, layer "common"
     Layer 7: Universal common rules (main, then fallback)
     """
-    entity_cfg = {}
-    try:
-        entity_cfg = get_entity_config(entity_id)
-    except Exception:
-        pass
+    entity_cfg = get_entity_config(entity_id)
 
     # Synthesize dynamic entity-specific rules
     custom_rules = build_dynamic_custom_rules(entity_cfg, layer="entity")
@@ -355,7 +350,12 @@ def build_rule_chain(
     entity_common_rules = build_dynamic_custom_rules(entity_cfg, layer="common")
 
     # Bank base rules
-    bank_base = load_bank_rules(bank_key)
+    account = next(
+        (a for a in entity_cfg.get("accounts", [])
+         if a["account_key"].lower() == bank_key.lower()), None
+    )
+    bank_type = account.get("bank", bank_key) if account else bank_key
+    bank_base = load_bank_rules(bank_type)
 
     # Assemble bank-level rules (evaluated before common rules)
     full_bank_rules = (
@@ -365,7 +365,12 @@ def build_rule_chain(
     # Universal common rules, preceded by entity common-layer rules.
     # FALLBACK_RULES (generic UPI / "What is this?") are returned separately
     # so the pipeline can insert merchant detection before them.
-    full_main_common = entity_common_rules + RULES_COMMON
-    full_fallback = FALLBACK_RULES
+    common = get_declarative_common_rules()
+    full_main_common = entity_common_rules + [
+        _compile_declarative_rule(r) for r in common if not r.get("is_fallback")
+    ]
+    full_fallback = [
+        _compile_declarative_rule(r) for r in common if r.get("is_fallback")
+    ]
 
     return full_bank_rules, full_main_common, full_fallback

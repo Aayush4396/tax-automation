@@ -8,12 +8,34 @@ and canonical directory path resolution.
 from __future__ import annotations
 import json
 import os
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
 # Find repository root directory
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 CONFIG_DIR = REPO_ROOT / "config"
+
+
+@lru_cache(maxsize=128)
+def _read_json_version(path: str, content: str) -> Any:
+    return json.loads(content)
+
+
+def read_config(path: Path) -> Any:
+    """Content-keyed cache: edits take effect without restarting the API."""
+    return _read_json_version(str(path), path.read_text(encoding="utf-8"))
+
+
+def validate_config(value: Any, schema_name: str, source: Path) -> None:
+    from jsonschema import Draft7Validator
+
+    schema = read_config(CONFIG_DIR / "schemas" / schema_name)
+    errors = sorted(Draft7Validator(schema).iter_errors(value), key=str)
+    if errors:
+        error = errors[0]
+        location = ".".join(map(str, error.absolute_path))
+        raise ValueError(f"{source}:{location}: {error.message}")
 
 
 def load_env_file(env_path: Path | None = None) -> dict[str, str]:
@@ -44,8 +66,8 @@ def get_entity_config(entity_id: str) -> dict[str, Any]:
             f"Entity configuration file not found at: {config_file}"
         )
 
-    with open(config_file, "r", encoding="utf-8") as f:
-        config = json.load(f)
+    config = read_config(config_file)
+    validate_config(config, "entity.json", config_file)
     return config
 
 
@@ -74,15 +96,16 @@ def get_bank_schema(bank_key: str) -> dict[str, Any]:
     """Loads base bank column schema and signals from config/banks/<bank_key>.json."""
     schema_file = CONFIG_DIR / "banks" / f"{bank_key.lower()}.json"
     if not schema_file.exists():
-        # Fallback to generic schema if available
-        generic_file = CONFIG_DIR / "banks" / "generic.json"
-        if generic_file.exists():
-            with open(generic_file, "r", encoding="utf-8") as f:
-                return json.load(f)
-        return {}
+        raise FileNotFoundError(f"Unknown bank configuration: {schema_file}")
 
-    with open(schema_file, "r", encoding="utf-8") as f:
-        return json.load(f)
+    schema = read_config(schema_file)
+    for field in ("col_date", "col_particulars"):
+        if not schema.get(field):
+            raise ValueError(f"{schema_file}: missing {field}")
+    if not (schema.get("col_dr") or schema.get("col_cr")):
+        raise ValueError(f"{schema_file}: missing debit/credit column mapping")
+    validate_config({"rules": schema.get("rules", [])}, "rules.json", schema_file)
+    return schema
 
 
 def resolve_entity_bank_registry(entity_id: str) -> dict[str, dict[str, Any]]:
@@ -98,7 +121,9 @@ def resolve_entity_bank_registry(entity_id: str) -> dict[str, dict[str, Any]]:
         for acc in config["accounts"]:
             acc_key = acc.get("account_key", "").lower()
             if not acc_key:
-                continue
+                raise ValueError("Every account requires an account_key")
+            if acc_key in registry:
+                raise ValueError(f"Duplicate account_key: {acc_key}")
             bank_type = acc.get("bank", acc_key).lower()
             base_schema = get_bank_schema(bank_type)
 
@@ -110,6 +135,7 @@ def resolve_entity_bank_registry(entity_id: str) -> dict[str, dict[str, Any]]:
             )
             merged["sheet_name"] = acc.get("sheet_name", acc_key.title())
             merged["bank_type"] = bank_type
+            merged["account_signals"] = acc.get("meta_signals_extra", [])
 
             # Extend metadata signals with account-specific branch/id signals
             extra_signals = acc.get("meta_signals_extra", [])
@@ -145,8 +171,7 @@ def get_merchants_config() -> list[dict[str, Any]]:
     m_file = CONFIG_DIR / "merchants.json"
     if not m_file.exists():
         return []
-    with open(m_file, "r", encoding="utf-8") as f:
-        return json.load(f)
+    return read_config(m_file)
 
 
 def get_cc_categories_config() -> dict[str, Any]:
@@ -181,8 +206,9 @@ def get_declarative_common_rules() -> list[dict[str, Any]]:
     r_file = CONFIG_DIR / "rules_common.json"
     if not r_file.exists():
         return []
-    with open(r_file, "r", encoding="utf-8") as f:
-        return json.load(f)
+    rules = read_config(r_file)
+    validate_config(rules, "rules.json", r_file)
+    return rules
 
 
 def get_scoring_config() -> dict[str, Any]:

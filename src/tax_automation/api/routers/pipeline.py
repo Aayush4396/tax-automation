@@ -37,6 +37,8 @@ def run_consolidate(entity_id: str, fy: str) -> ConsolidateResponse:
         output_path = consolidate_entity(eid, f)
     except FileNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -79,6 +81,8 @@ def run_process(
         output_path = process_entity_narration(eid, f, in_p, out_p)
     except FileNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -113,6 +117,8 @@ def run_all(entity_id: str, fy: str) -> RunAllResponse:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=f"Consolidation: {exc}"
         )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -134,6 +140,8 @@ def run_all(entity_id: str, fy: str) -> RunAllResponse:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=f"Processing: {exc}"
         )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
